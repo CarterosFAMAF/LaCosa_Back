@@ -1,0 +1,8 @@
+__pycache__
+.vscode
+lacosa_venv
+*.pyc
+*.pyo
+__pycache__/
+.pytest_cache/
+mydatabase.sqlite
