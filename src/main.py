@@ -32,7 +32,7 @@ async def root():
 
 # Crear partida
 @app.post("/partidas", response_model=PartidaOut, status_code=status.HTTP_201_CREATED)
-async def crear_partida(partida: PartidaIn) -> int:
+async def crear_partida(partida: PartidaIn):
     nueva_partida = Partida(
         partida.nombre_jugador,
         partida.nombre_partida,
