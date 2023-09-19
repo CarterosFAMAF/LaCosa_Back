@@ -1,7 +1,13 @@
 ### Archivos:
 schemas.py: validacion de pydantic de lo que entra y sale de los endpoints
+
+
 models.py: modelo base de datos.
+
+
 routes.py: endpoints
+
+
 constants.py: constantes
 
 
