@@ -1,14 +1,27 @@
+from fastapi import WebSocket
+from jugador import Jugador
+
+PARTIDAS = []
+
+
 class Partida:
-    def __init__(self, nombre, nro_jugadores, nro_min_jugadores):
-        self.nombre = nombre
-        self.nro_jugadores = nro_jugadores
+    def __init__(
+        self, nombre_jugador, nombre_partida, nro_max_jugadores, nro_min_jugadores
+    ):
+        self.id = len(PARTIDAS)
+        self.nombre = nombre_partida
+        self.nro_max_jugadores = nro_max_jugadores
         self.nro_min_jugadores = nro_min_jugadores
+        self.dueño = Jugador(nombre_jugador)
         self.empezada = False
         self.finalizada = False
-        self.turno = 0
-        self.jugadores = []
-        self.cartas_maso = []
-        self.cartas_descarte = []
+        self.turno = None
+        self.jugadores = None
+        self.cartas_maso = None
+        self.cartas_descarte = None
+
+        PARTIDAS.append(self)
+        print(PARTIDAS)
 
     def agregar_jugador(self, jugador):
         self.jugadores.append(jugador)
@@ -33,6 +46,7 @@ class Partida:
 
     def finalizar_partida(self):
         self.finalizada = True
+        self.empezada = False
 
     def siguiente_turno(self):
         self.turno = (self.turno + 1) % len(self.jugadores)
