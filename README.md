@@ -9,7 +9,7 @@ pip install -r requirements.txt
 
 ## Para levantar
 ~~~
-cd src
+cd app
 uvicorn main:app --reload
 ~~~
 
