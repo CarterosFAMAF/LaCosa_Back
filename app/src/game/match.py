@@ -1,0 +1,28 @@
+from fastapi import WebSocket
+from src.game.player import Player
+
+MATCHS = []
+
+
+class Match:
+    def __init__(self, player_name, match_name, max_players, min_players):
+        player = Player(player_name)
+
+        self.id = len(MATCHS)
+        self.name = match_name
+        self.max_players = max_players
+        self.min_players = min_players
+        self.owner = player
+        self.started = False
+        self.finished = False
+        self.turn = None
+        self.players = None
+        self.deck = None
+        self.discard_pile = None
+
+        self.add_player(player)
+        MATCHS.append(self)
+
+    def add_player(self, player: Player):
+        player.match = self
+        self.players.append(player)
