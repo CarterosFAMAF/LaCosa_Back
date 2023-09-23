@@ -1,8 +1,8 @@
 from fastapi import APIRouter, WebSocket, status
 
-from src.game.match import Match
+from ..game.match import Match
 
-from schemas import MatchIn, MatchOut
+from src.router.schemas import MatchIn, MatchOut
 
 router = APIRouter()
 
@@ -16,8 +16,8 @@ async def create_match(match: MatchIn):
         match.min_players,
     )
     return MatchOut(
-        id=new_match.id,
-        name=new_match.name,
-        owner=new_match.owner.id,
+        match_id=new_match.id,
+        match_name=new_match.name,
+        owner_id=new_match.owner.id,
         result="Match created",
     )

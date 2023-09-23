@@ -2,7 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from settings import origins
 
-from router.match_router import router as match_router
+from src.router import match_router
 
 
 app = FastAPI()
@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 
-app.include_router(match_router)
+app.include_router(match_router.router)
 
 if __name__ == "__main__":
     import uvicorn

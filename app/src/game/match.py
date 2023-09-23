@@ -16,13 +16,14 @@ class Match:
         self.started = False
         self.finished = False
         self.turn = None
-        self.players = None
         self.deck = None
         self.discard_pile = None
+        self.players = []
 
         self.add_player(player)
         MATCHS.append(self)
 
     def add_player(self, player: Player):
         player.match = self
+        player.id = len(self.players)
         self.players.append(player)

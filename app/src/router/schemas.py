@@ -15,7 +15,7 @@ class MatchIn(BaseModel):
 
 
 class MatchOut(BaseModel):
-    id: int
-    nombre: str
-    dueño: int
-    resultado: str
+    match_id: int
+    match_name: str
+    owner_id: int
+    result: str
