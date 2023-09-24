@@ -1,5 +1,5 @@
 from fastapi import WebSocket
-from src.game.player import Player
+from app.src.game.player import Player
 
 MATCHS = []
 

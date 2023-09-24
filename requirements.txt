@@ -3,3 +3,5 @@ uvicorn
 pony
 databases
 websockets
+pytest
+httpx

@@ -7,9 +7,12 @@ source ./lacosa_venv/bin/activate
 pip install -r requirements.txt
 ~~~
 
-## Para levantar
+## Para levantar el server
 ~~~
-cd app
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ~~~
 
+## Para ejecutar los tests
+~~~
+pytest
+~~~

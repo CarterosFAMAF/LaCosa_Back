@@ -1,8 +1,8 @@
 from fastapi import APIRouter, WebSocket, status
 
-from ..game.match import Match
+from app.src.game.match import Match
 
-from src.router.schemas import MatchIn, MatchOut
+from app.src.router.schemas import MatchIn, MatchOut
 
 router = APIRouter()
 

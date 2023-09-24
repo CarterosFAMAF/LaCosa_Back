@@ -1,8 +1,16 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
-from settings import origins
 
-from src.router import match_router
+
+from app.src.router import match_router
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:3000",
+]
 
 
 app = FastAPI()
