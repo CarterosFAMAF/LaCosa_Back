@@ -1,5 +1,9 @@
 from fastapi import FastAPI
+from app.src.models.base import define_database_and_entities, load_cards, get_lanzallamas
 
+define_database_and_entities()
+
+load_cards()
 
 app = FastAPI()
 
@@ -10,3 +14,4 @@ def read_root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
