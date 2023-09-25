@@ -1,17 +1,19 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class MatchIn(BaseModel):
     player_name: str
     match_name: str
-    max_players: int = Field(None, ge=4, le=12)
-    min_players: int = Field(None, ge=4, le=12)
+    min_players: int = Field(ge=4, le=12)
+    max_players: int = Field(ge=4, le=12)
 
-    @validator("min_players")
-    def less_equal(cls, v, values):
-        if v > values["max_players"]:
-            raise ValueError("max_players must be greater than or equal to min_players")
-        return v
+    @model_validator(mode="after")
+    def check_min_max_players(self) -> "MatchIn":
+        min_players = self.min_players
+        max_players = self.max_players
+        if min_players > max_players:
+            raise ValueError("min_players must be less than max_players")
+        return self
 
 
 class MatchOut(BaseModel):
