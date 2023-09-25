@@ -39,6 +39,7 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
     player = match.players[player_id]
     manager = match.match_connection_manager
 
+    # seteo websocket en el objeto jugador para a futuro poder mandarle algo privado
     player.websocket = websocket
 
     await manager.connect(websocket)
