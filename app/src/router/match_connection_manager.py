@@ -1,18 +1,21 @@
 from fastapi import WebSocket
-from src.game.player import Player
 
 
 class MatchConnectionManager:
     def __init__(self):
-        self.active_connections: list[Player] = []
+        self.active_connections: list[WebSocket] = []
 
-    """
-    async def difundir(self, mensaje: dict):
-        for jugador in self.jugadores:
-            await jugador.websocket.send_json(mensaje)
-
-    async def conectar_jugador(self, websocket: WebSocket, jugador_id: int):
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        self.jugadores[jugador_id].websocket = websocket
-        await self.difundir(self.dict())
-    """
+        self.active_connections.append(websocket)
+
+    async def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    # TODO: en vez de string mandar un json
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)

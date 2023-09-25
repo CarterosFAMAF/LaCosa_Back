@@ -1,8 +1,8 @@
-from fastapi import APIRouter, status, HTTPException
-
-from app.src.game.match import Match
+from fastapi import APIRouter, status, HTTPException, WebSocket, WebSocketDisconnect
+from app.src.game.match import Match, MATCHS
 
 from app.src.router.schemas import MatchIn, MatchOut
+
 
 router = APIRouter()
 
@@ -29,3 +29,24 @@ async def create_match(match: MatchIn):
         owner_id=new_match.owner.id,
         result="Match created",
     )
+
+
+# websocket endpoint
+@router.websocket("/ws/matchs/{match_id}/{player_id}")
+async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
+    # seteo variables para usar aca
+    match = MATCHS[match_id]
+    player = match.players[player_id]
+    manager = match.match_connection_manager
+
+    player.websocket = websocket
+
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await manager.broadcast(f"Client #{player.name} says: {data}")
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket)
+        await manager.broadcast(f"Client #{player.name} left the chat")
