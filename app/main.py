@@ -1,11 +1,14 @@
 from fastapi import FastAPI
-from app.src.models.base import define_database_and_entities, load_cards, get_lanzallamas
+from app.src.models.base import define_database_and_entities, load_cards
+from app.src.router import card
 
 define_database_and_entities()
 
 load_cards()
 
 app = FastAPI()
+
+app.include_router(card.router)
 
 @app.get("/")
 def read_root():
