@@ -21,7 +21,7 @@ class Card(db.Entity):
     """
     Tabla donde guardar las cartas
     """
-    id = Required(int, min=1 , max=110)
+    card_id = Required(int, min=1 , max=110)
     name = Required(str)
     image = Required(str, unique=True)
     
@@ -40,11 +40,9 @@ def load_cards():
         exists_card = db.exists("select * from Card where name=lanzallamas")
         if not exists_card:
             Card(
-                id = LANZALLAMAS,
+                card_id = LANZALLAMAS,
                 name = "lanzallamas",
                 image = "app/cards/lanzallamas.jpg"
             )
     except:
         pass
-    
-
