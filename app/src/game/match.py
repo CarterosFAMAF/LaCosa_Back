@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import WebSocket
-
+from src.game.card import Card
 from app.src.game.player import Player
 from app.src.router.match_connection_manager import MatchConnectionManager
 
@@ -18,9 +18,9 @@ class Match:
         self.finished = False
         self.turn = None
         self.deck = None
-        self.discard_pile = None
+        self.discard_pile : List[Card] = []
         self.players: List[Player] = []
-        self.match_connection_manager = MatchConnectionManager()
+        self.match_connection_manager = MatchConnectionManager()    #Esto es para manejar los connect,etc.
 
         self.add_player(player)
         MATCHS.append(self)
@@ -32,3 +32,5 @@ class Match:
 
 
 MATCHS: List[Match] = []
+
+

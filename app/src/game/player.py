@@ -1,25 +1,29 @@
-from fastapi import WebSocket
 from match import Match
+from app.src.game.card import Card
+from pony.orm import *
+from src.models.models import *
+from pydantic import BaseModel
+from app.src.router.match_connection_manager import MatchConnectionManager
 
-class Player:
-    id = None               #Por ahora podria asignar el id por orden de entrada.
+class Player (BaseModel):
+    id : None              #Por ahora podria asignar el id por orden de entrada.
     name : str
-    position : int
-    role : str
     match : Match
-    card : list[Card]
     websocket : WebSocket
 
-    def __init__(self, name):
-        self.id = None
+    def __init__(self, name , match_id):
+        player_db = Player_db(
+            nombre = name,
+            position = 0,
+            rol = None,
+            match = match_id,
+            cartas = None,
+            websocket = MatchConnectionManager()
+        )
+        commit()
+        
+        self.id = player_db.id
         self.name = name
-        self.position = None
-        self.role = None
-        self.match = None
-        self.cards : list[card] = []
-        self.websocket = None
-
-    def play_card(self,player_out:Player,match : Match,card):
-        apply_effect(self,player_out,match)         #aplica el efecto de carta
-        delete_card(self,card)                      #busca card y lo elimina del mazo de cartas del usuario
-        match.discard_pile.append(card)             #pone la carta utilizada en la pila de descartes
+        self.match = player_db.match
+        self.websocket = MatchConnectionManager()
+    

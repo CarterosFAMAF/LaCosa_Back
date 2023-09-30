@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, HTTPException, WebSocket, WebSocketDisconnect
 from app.src.game.match import Match, MATCHS
-
+from app.src.game.player import Player
 from app.src.router.schemas import MatchIn, MatchOut
-
+from src.models.models import *
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ async def create_match(match: MatchIn):
 
 
 # websocket endpoint
-@router.websocket("/ws/matchs/{match_id}/{player_id}")
+@router.websocket("/ws/matchs/{match_id}/{player_id}")                              #--> Que es un websocet endpoint ?
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     # seteo variables para usar aca
     match = MATCHS[match_id]
@@ -51,3 +51,14 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
         await manager.broadcast(f"Client #{player.name} left the chat")
+
+@router.post("/partidas/{match_id}/{player_name}/jugadores")
+def join_match_endpoint(match_id: Match , player_name : str):
+    
+    new_player = Player(new_player,player_name)     #deberia crear un modelo.
+    Match.add_player(match_id,new_player)
+
+    msg = {"msg" : "Se creo el jugador con éxito!", "Player id" : new_player.id}
+    return msg
+
+    #deberia unir al websocket , actualizar los datos de la partida, devolver el id de la partida.
