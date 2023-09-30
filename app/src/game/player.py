@@ -5,9 +5,9 @@ from pony.orm import *
 
 class Player:
     def __init__(self, name):
-        self._name = name
-        self._position = None
-        self._role = None
-        self._match = None
-        self._cards = None
-        self._websocket = None
+        self.WebSocket: WebSocket = None
+
+        with db_session:
+            player_db = PlayerDB(name=name)
+            flush()
+            self._id = player_db.id
