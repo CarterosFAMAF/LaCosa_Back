@@ -1,6 +1,6 @@
-from fastapi import APIRouter, status, HTTPException, WebSocket, WebSocketDisconnect
-from app.src.game.match import Match, MATCHS
+from fastapi import APIRouter, status
 
+from app.src.game.match import Match, MATCHS
 from app.src.router.schemas import MatchIn, MatchOut
 
 
@@ -9,34 +9,27 @@ router = APIRouter()
 
 @router.post("/matchs", response_model=MatchOut, status_code=status.HTTP_201_CREATED)
 async def create_match(match: MatchIn):
-    try:
-        new_match = Match(
-            match.player_name,
-            match.match_name,
-            match.max_players,
-            match.min_players,
-        )
-    except ValueError as e:
-        raise HTTPException(
-            {
-                "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "detail": str(e),
-            }
-        )
+    new_match = Match(
+        match.player_name,
+        match.match_name,
+        match.max_players,
+        match.min_players,
+    )
+
     return MatchOut(
-        match_id=new_match.id,
-        match_name=new_match.name,
-        owner_id=new_match.owner.id,
+        match_id=new_match._id,
+        owner_id=new_match._player_owner_id,
         result="Match created",
     )
 
 
 # websocket endpoint
+"""
 @router.websocket("/ws/matchs/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     # seteo variables para usar aca
     match = MATCHS[match_id]
-    player = match.players[player_id]
+    player = match._players[player_id]
     manager = match.match_connection_manager
 
     # seteo websocket en el objeto jugador para a futuro poder mandarle algo privado
@@ -51,3 +44,5 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
         await manager.broadcast(f"Client #{player.name} left the chat")
+
+"""

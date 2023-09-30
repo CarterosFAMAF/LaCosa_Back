@@ -1,34 +1,50 @@
 from typing import List
 from fastapi import WebSocket
+from pony.orm import *
 
 from app.src.game.player import Player
 from app.src.router.match_connection_manager import MatchConnectionManager
+from app.src.models.base import Match as MatchDB
+from app.src.models.base import Player as PlayerDB
 
 
+# match tiene si o si owner, y si o si tiene 1 player
 class Match:
-    def __init__(self, player_name, match_name, max_players, min_players):
+    def __init__(
+        self, player_name: str, match_name: str, max_players: int, min_players: int
+    ):
+        self._match_connection_manager = MatchConnectionManager()
+
+        # create player in db
         player = Player(player_name)
 
-        self.id = len(MATCHS)
-        self.name = match_name
-        self.max_players = max_players
-        self.min_players = min_players
-        self.owner = player
-        self.started = False
-        self.finished = False
-        self.turn = None
-        self.deck = None
-        self.discard_pile = None
-        self.players: List[Player] = []
-        self.match_connection_manager = MatchConnectionManager()
+        # set player owner id to return to client
+        self._player_owner_id = player._id
 
-        self.add_player(player)
+        with db_session:
+            player_db = PlayerDB.get(id=player._id)
+
+            match_db = MatchDB(
+                name=match_name,
+                number_players=1,
+                max_players=max_players,
+                min_players=min_players,
+                started=False,
+                finalized=False,
+                turn=None,
+                player_owner=player_db,
+                players=[player_db],
+            )
+            flush()
+
+            # set match id to return to client
+            self._id = match_db.id
+
+            # now that match is in db, update match player field
+            player_db.match = match_db
+            flush()
+
         MATCHS.append(self)
-
-    def add_player(self, player: Player):
-        player.match = self
-        player.id = len(self.players)
-        self.players.append(player)
 
 
 MATCHS: List[Match] = []

@@ -1,12 +1,13 @@
 from fastapi import WebSocket
+from app.src.models.base import Player as PlayerDB
+from pony.orm import *
 
 
 class Player:
     def __init__(self, name):
-        self.id = None
-        self.name = name
-        self.position = None
-        self.role = None
-        self.match = None
-        self.cards = None
-        self.websocket = None
+        self.WebSocket: WebSocket = None
+
+        with db_session:
+            player_db = PlayerDB(name=name)
+            flush()
+            self._id = player_db.id
