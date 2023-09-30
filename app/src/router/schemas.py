@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from pydantic import BaseModel, Field, model_validator
 
 
@@ -12,12 +13,16 @@ class MatchIn(BaseModel):
         min_players = self.min_players
         max_players = self.max_players
         if min_players > max_players:
-            raise ValueError("min_players must be less than max_players")
+            raise HTTPException(
+                {
+                    "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    "detail": "min_players must be less than max_players",
+                }
+            )
         return self
 
 
 class MatchOut(BaseModel):
     match_id: int
-    match_name: str
     owner_id: int
     result: str
