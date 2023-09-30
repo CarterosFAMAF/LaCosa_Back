@@ -37,6 +37,7 @@ class Match:
             )
             flush()
 
+
             # set match id to return to client
             self._id = match_db.id
 
@@ -55,6 +56,8 @@ class Match:
             match_db.players.add(player_db)
             match_db.number_players += 1
             flush()
+
+
 
         return {"player_id": player_db.id,"match_name": match_db.name}
     

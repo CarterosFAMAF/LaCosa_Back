@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status
 
+
 from app.src.game.match import Match, MATCHS
 from app.src.router.schemas import MatchIn, MatchOut , JoinMatchOut
 from app.src.game.match import Match
@@ -19,6 +20,7 @@ async def create_match(match: MatchIn):
     return MatchOut(
         match_id=new_match._id,
         owner_id=new_match._player_owner_id,
+        match_name=match.match_name,
         result="Match created",
     )
 

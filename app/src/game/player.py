@@ -13,4 +13,4 @@ class Player:
             player_db = PlayerDB(name=name)
             flush()
             self._id = player_db.id
-            
+
