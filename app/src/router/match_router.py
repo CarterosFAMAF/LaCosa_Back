@@ -19,6 +19,7 @@ async def create_match(match: MatchIn):
     return MatchOut(
         match_id=new_match._id,
         owner_id=new_match._player_owner_id,
+        match_name=match.match_name,
         result="Match created",
     )
 
