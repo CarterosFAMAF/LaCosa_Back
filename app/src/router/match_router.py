@@ -1,42 +1,46 @@
-from fastapi import APIRouter, status, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, status
+
 from app.src.game.match import Match, MATCHS
-from app.src.game.player import Player
-from app.src.router.schemas import MatchIn, MatchOut
-from src.models.models import *
+from app.src.router.schemas import MatchIn, MatchOut , JoinMatchOut
+from app.src.game.match import Match
 
 router = APIRouter()
 
 
 @router.post("/matchs", response_model=MatchOut, status_code=status.HTTP_201_CREATED)
 async def create_match(match: MatchIn):
-    try:
-        new_match = Match(
-            match.player_name,
-            match.match_name,
-            match.max_players,
-            match.min_players,
-        )
-    except ValueError as e:
-        raise HTTPException(
-            {
-                "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "detail": str(e),
-            }
-        )
+    new_match = Match(
+        match.player_name,
+        match.match_name,
+        match.max_players,
+        match.min_players,
+    )
+
     return MatchOut(
-        match_id=new_match.id,
-        match_name=new_match.name,
-        owner_id=new_match.owner.id,
+        match_id=new_match._id,
+        owner_id=new_match._player_owner_id,
         result="Match created",
     )
 
+@router.post("/matches/{match_id}/join")
+async def join_match_endpoint(player_name: str,match_id : int):
+    #necesito traer la clase match.
+    match_out = Match.join_match(player_name,match_id)
+    
+
+    #tiene que devolver el id del jugador y del match al que se unio
+
+    return JoinMatchOut ( 
+        player_id = match_out["player_id"],
+        match_name = match_out["match_name"] )
 
 # websocket endpoint
-@router.websocket("/ws/matchs/{match_id}/{player_id}")                              #--> Que es un websocet endpoint ?
+"""
+@router.websocket("/ws/matchs/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     # seteo variables para usar aca
     match = MATCHS[match_id]
-    player = match.players[player_id]
+    player = match._players[player_id]
     manager = match.match_connection_manager
 
     # seteo websocket en el objeto jugador para a futuro poder mandarle algo privado
@@ -52,13 +56,4 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
         await manager.disconnect(websocket)
         await manager.broadcast(f"Client #{player.name} left the chat")
 
-@router.post("/partidas/{match_id}/{player_name}/jugadores")
-def join_match_endpoint(match_id: Match , player_name : str):
-    
-    new_player = Player(new_player,player_name)     #deberia crear un modelo.
-    Match.add_player(match_id,new_player)
-
-    msg = {"msg" : "Se creo el jugador con éxito!", "Player id" : new_player.id}
-    return msg
-
-    #deberia unir al websocket , actualizar los datos de la partida, devolver el id de la partida.
+"""

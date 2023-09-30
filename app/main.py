@@ -1,16 +1,12 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
-
+from app.constants import origins
+from app.src.models.base import define_database_and_entities
 from app.src.router import match_router
 
-origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
-    "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:3000",
-]
+
+define_database_and_entities()
 
 
 app = FastAPI()
@@ -31,4 +27,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
