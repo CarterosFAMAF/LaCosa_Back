@@ -26,3 +26,7 @@ class MatchOut(BaseModel):
     match_id: int
     owner_id: int
     result: str
+
+class JoinMatchOut(BaseModel):
+    player_id : int 
+    match_name : str

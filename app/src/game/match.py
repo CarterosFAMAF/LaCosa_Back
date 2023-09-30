@@ -37,14 +37,29 @@ class Match:
             )
             flush()
 
+
             # set match id to return to client
             self._id = match_db.id
 
             # now that match is in db, update match player field
             player_db.match = match_db
             flush()
-
         MATCHS.append(self)
+        
+    def join_match(player_name : str,match_id : int):
+        #create model player in the db
+        player = Player(player_name)
+
+        with db_session:
+            player_db = PlayerDB.get(id = player._id)
+            match_db = MatchDB.get(id = match_id) 
+            match_db.players.add(player_db)
+            match_db.number_players += 1
+            flush()
 
 
+
+        return {"player_id": player_db.id,"match_name": match_db.name}
+    
+   
 MATCHS: List[Match] = []

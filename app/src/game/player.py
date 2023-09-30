@@ -4,6 +4,8 @@ from pony.orm import *
 
 
 class Player:
+    _id : None
+
     def __init__(self, name):
         self.WebSocket: WebSocket = None
 
@@ -11,3 +13,4 @@ class Player:
             player_db = PlayerDB(name=name)
             flush()
             self._id = player_db.id
+
