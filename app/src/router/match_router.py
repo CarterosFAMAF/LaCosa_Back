@@ -7,7 +7,7 @@ from app.src.game.match import Match
 router = APIRouter()
 
 
-@router.post("/matchs", response_model=MatchOut, status_code=status.HTTP_201_CREATED)
+@router.post("/matches", response_model=MatchOut, status_code=status.HTTP_201_CREATED)
 async def create_match(match: MatchIn):
     new_match = Match(
         match.player_name,
@@ -26,9 +26,6 @@ async def create_match(match: MatchIn):
 async def join_match_endpoint(player_name: str,match_id : int):
     #necesito traer la clase match.
     match_out = Match.join_match(player_name,match_id)
-    
-
-    #tiene que devolver el id del jugador y del match al que se unio
 
     return JoinMatchOut ( 
         player_id = match_out["player_id"],
