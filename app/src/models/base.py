@@ -12,20 +12,29 @@ class Match(db.Entity):
     turn = Required(int)
     max_players = Required(int)
     min_players = Required(int)
-    players = Set("Player")
-    deck = Set("Card", reverse="match")
-    discard_pile = Set("Card", reverse="match_discard")
+    players = Set("Player", reverse="match")
+    deck = Set("Card", reverse="deck")
+    discard_pile = Set("Card", reverse="discard_deck")
+
+
+class Player(db.Entity):
+    id = PrimaryKey(int, auto=True)
+    name = Required(str)
+    match_own = Optional("Match", reverse="owner")
+    match = Set(Match)
 
 
 class Card(db.Entity):
     """
     Tabla donde guardar las cartas
     """
-    card_id = Required(int, min=1 , max=110)
+    id = PrimaryKey(int, auto=True)
+    card_id = Required(int, unique=True)
     name = Required(str)
     image = Required(str, unique=True)
-    
-    
+    deck = Set(Match, reverse="deck")
+    discard_deck = Set(Match, reverse="discard_pile")
+
 
 def define_database_and_entities():
     global db
