@@ -47,18 +47,13 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
     try:
         player = Player.get_player_by_id(player_id)
     except:
-        raise "Player not found"
+        raise ValueError("Player not found")
     if player == None:
-        raise "Player not found"
+        raise ValueError("Player not found")
 
-    try:
-        lobby_id = Match.get_match_lobby_id(match_id)
-    except:
-        raise "Match not found"
-    if lobby_id == None:
-        raise "Match not found"
-
-    match = MATCHES[lobby_id]
+    match = Match.get_live_match_by_id(match_id)
+    if match == None:
+        raise ValueError("Match not found")
 
     manager = match._match_connection_manager
 

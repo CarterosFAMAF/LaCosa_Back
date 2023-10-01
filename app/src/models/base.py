@@ -6,7 +6,6 @@ db = Database()
 
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
-    lobby_id = Optional(int)
     name = Required(str)
     number_players = Required(int)
     max_players = Required(int)

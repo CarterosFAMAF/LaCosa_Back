@@ -12,6 +12,7 @@ from app.src.models.base import Player as PlayerDB
 
 class Match:
     _id: int
+    _lobby_id: int
     _match_connection_manager: MatchConnectionManager
     _player_owner_id: int
 
@@ -31,7 +32,6 @@ class Match:
 
             match_db = MatchDB(
                 name=match_name,
-                lobby_id=len(MATCHES),
                 number_players=1,
                 max_players=max_players,
                 min_players=min_players,
@@ -49,6 +49,8 @@ class Match:
             # now that match is in db, update match player field
             player_db.match = match_db
             flush()
+
+        self._lobby_id = len(MATCHES)
         MATCHES.append(self)
 
     def join_match(player_name: str, match_id: int):
@@ -64,11 +66,12 @@ class Match:
 
         return {"player_id": player_db.id, "match_name": match_db.name}
 
-    def get_match_lobby_id(match_id: int):
-        print(match_id)
-        with db_session:
-            match_db = MatchDB.get(id=match_id)
-            return match_db.lobby_id
+    def get_live_match_by_id(match_id: int):
+        for match in MATCHES:
+            if match._id == match_id:
+                return match
+            else:
+                return None
 
 
 MATCHES: List[Match] = []
