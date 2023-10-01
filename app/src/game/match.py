@@ -59,6 +59,16 @@ class Match:
 
         return {"player_id": player_db.id,"match_name": match_db.name}
     
-   
-   
+    def end_turn(match_id):
+        with db_session:
+            match_db = MatchDB.get(id = match_id)
+
+            if (match_db.turn <= match_db.players_alive):
+                match_db.turn += 1
+            else:
+                match_db.turn = 1
+
+            flush()
+        return{"next turn": match_db.turn }
+    
 MATCHS: List[Match] = []

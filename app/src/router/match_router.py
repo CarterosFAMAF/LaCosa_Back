@@ -33,10 +33,20 @@ async def join_match_endpoint(player_name: str,match_id : int):
         player_id = match_out["player_id"],
         match_name = match_out["match_name"] )
 
-@router.post("/matches/{player_out}/{match_id}/{card_id}/play_card")
-def play_card(player_out,match_id):
+@router.put("/matches/{player_out}/{match_id}/play_card")
+def play_card_endpoint(player_out,match_id):
+
     card = Card("lanzallamas")
+    
     return card.lanzallamas(player_out,match_id)
+# no se si esto esta perfecto, falta lo de restar la posicion de cada jugador
+
+
+@router.put("/matches/{match_id}/end_turn")  #se deberia cambiar
+def end_turn_endpoint(match_id):
+    return Match.end_turn(match_id)
+
+#Tampoco se si esta perfecto
 
 # websocket endpoint
 """

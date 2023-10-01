@@ -16,6 +16,6 @@ class Card:
             player_db.alive = False
             flush()
             match = MatchDB.get(id = match_id)
-            match.player_alive -= 1
+            match.players_alive -= 1
             flush()
         return {"player": player_db.id, "status": "is dead"}
