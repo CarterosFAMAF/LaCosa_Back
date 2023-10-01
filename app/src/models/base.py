@@ -10,6 +10,7 @@ class Match(db.Entity):
     number_players = Required(int)
     max_players = Required(int)
     min_players = Required(int)
+    players_alive = Optional(int)
     started = Optional(bool)
     finalized = Optional(bool)
     turn = Optional(int)
@@ -20,6 +21,7 @@ class Match(db.Entity):
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
+    alive = Optional(bool)
     position = Optional(int)
     role = Optional(str)
     match = Optional(Match, reverse="players")

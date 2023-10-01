@@ -7,7 +7,7 @@ client = TestClient(app=app)
 
 def test_create_invalid_match_all_0():
     response = client.post(
-        "/matchs",
+        "/matches",
         json={
             "player_name": "string",
             "match_name": "string",
@@ -20,7 +20,7 @@ def test_create_invalid_match_all_0():
 
 def test_create_invalid_match_not_fields():
     response = client.post(
-        "/matchs",
+        "/matches",
         json={},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -28,7 +28,7 @@ def test_create_invalid_match_not_fields():
 
 def test_create_invalid_match_min_players():
     response = client.post(
-        "/matchs",
+        "/matches",
         json={
             "player_name": "string",
             "match_name": "string",
@@ -41,7 +41,7 @@ def test_create_invalid_match_min_players():
 
 def test_create_invalid_match_max_players():
     response = client.post(
-        "/matchs",
+        "/matches",
         json={
             "player_name": "string",
             "match_name": "string",
@@ -54,7 +54,7 @@ def test_create_invalid_match_max_players():
 
 def test_create_invalid_match_max_min_players():
     response = client.post(
-        "/matchs",
+        "/matches",
         json={
             "player_name": "string",
             "match_name": "string",
@@ -67,7 +67,7 @@ def test_create_invalid_match_max_min_players():
 
 def test_create_valid_match():
     response = client.post(
-        "/matchs",
+        "/matches",
         json={
             "player_name": "string",
             "match_name": "string",
@@ -76,3 +76,11 @@ def test_create_valid_match():
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
+
+def test_join_match_():
+    response = client.post(
+        "/matches/{match_id}/join",
+        json = {},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+

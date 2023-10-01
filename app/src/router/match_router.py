@@ -4,7 +4,7 @@ from fastapi import APIRouter, status
 from app.src.game.match import Match, MATCHS
 from app.src.router.schemas import MatchIn, MatchOut , JoinMatchOut
 from app.src.game.match import Match
-
+from app.src.game.card import Card
 router = APIRouter()
 
 
@@ -32,6 +32,11 @@ async def join_match_endpoint(player_name: str,match_id : int):
     return JoinMatchOut ( 
         player_id = match_out["player_id"],
         match_name = match_out["match_name"] )
+
+@router.post("/matches/{player_out}/{match_id}/{card_id}/play_card")
+def play_card(player_out,match_id):
+    card = Card("lanzallamas")
+    return card.lanzallamas(player_out,match_id)
 
 # websocket endpoint
 """

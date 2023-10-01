@@ -57,9 +57,8 @@ class Match:
             match_db.number_players += 1
             flush()
 
-
-
         return {"player_id": player_db.id,"match_name": match_db.name}
     
+   
    
 MATCHS: List[Match] = []
