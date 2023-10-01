@@ -4,13 +4,15 @@ from pony.orm import *
 
 
 class Player:
-    _id : None
+    _id: None
 
     def __init__(self, name):
-        self.WebSocket: WebSocket = None
-
         with db_session:
             player_db = PlayerDB(name=name)
             flush()
             self._id = player_db.id
 
+    def get_player_by_id(player_id):
+        with db_session:
+            player = PlayerDB.get(id=player_id)
+            return player
