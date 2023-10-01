@@ -25,11 +25,11 @@ class MatchConnectionManager:
                 break
 
     async def broadcast_json(self, status: int, msg: str, match_data):
+        data = json.dumps({"status": status, "message": msg, "match_data": match_data})
+
         for conn in self.active_connections:
             try:
-                await conn[1].send_json(
-                    {"status": status, "message": msg, "match_data": match_data}
-                )
+                await conn[1].send_json(data)
             except:
                 self.active_connections.remove(conn)
 

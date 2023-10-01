@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
 
 from app.src.game.player import Player
@@ -41,7 +43,6 @@ async def join_match_endpoint(player_name: str, match_id: int):
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     # TODO: move validation to a function in schemas.py?
-    print(f"{match_id} {match_id} {match_id} {match_id} {match_id}")
 
     try:
         player = Player.get_player_by_id(player_id)
@@ -65,7 +66,9 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
 
     try:
         while True:
-            await websocket.receive()
+            msg = await websocket.receive_text()
 
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        await manager.disconnect(websocket)
+
+        await manager.broadcast_json(1, "Alguno abandono la partida", {})
