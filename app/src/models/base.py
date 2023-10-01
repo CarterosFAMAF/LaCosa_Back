@@ -3,16 +3,18 @@ from app.src.game.constants import *
 
 db = Database()
 
+
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    owner = Required("Player")
-    started = Required(bool)
-    finished = Required(bool)
-    turn = Required(int)
+    number_players = Required(int)
     max_players = Required(int)
     min_players = Required(int)
+    started = Optional(bool)
+    finalized = Optional(bool)
+    turn = Optional(int)
     players = Set("Player", reverse="match")
+    player_owner = Required("Player", reverse="match_owner")
     deck = Set("Card", reverse="deck")
     discard_pile = Set("Card", reverse="discard_deck")
 
@@ -20,8 +22,10 @@ class Match(db.Entity):
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    match_own = Optional("Match", reverse="owner")
-    match = Set(Match)
+    position = Optional(int)
+    role = Optional(str)
+    match = Optional(Match, reverse="players")
+    match_owner = Optional(Match, reverse="player_owner")
 
 
 class Card(db.Entity):
@@ -34,7 +38,7 @@ class Card(db.Entity):
     image = Required(str, unique=True)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
-
+  
 
 def define_database_and_entities():
     global db
@@ -55,3 +59,4 @@ def load_cards():
             )
     except:
         pass
+

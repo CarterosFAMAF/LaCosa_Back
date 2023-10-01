@@ -7,3 +7,6 @@ __pycache__/
 .pytest_cache/
 mydatabase.sqlite
 *.sqlite
+database.sqlite
+the_thing-db.sqlite
+```
