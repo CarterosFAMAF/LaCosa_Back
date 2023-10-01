@@ -4,7 +4,7 @@ from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
 
 from app.src.game.player import Player
 from app.src.game.match import Match, MATCHES
-from app.src.models.schemas import MatchIn, MatchOut, JoinMatchOut
+from app.src.models.schemas import *
 
 
 router = APIRouter()
@@ -27,17 +27,18 @@ async def create_match(match: MatchIn):
     )
 
 
-@router.post("/matches/{match_id}/join")
-async def join_match_endpoint(player_name: str, match_id: int):
+@router.post(
+    "/matches/{match_id}/join",
+    response_model=JoinMatchOut,
+    status_code=status.HTTP_200_OK,
+)
+async def join_match_endpoint(input: JoinMatchIn):
     # necesito traer la clase match.
-    match_out = Match.join_match(player_name, match_id)
+    match_out = Match.join_match(input.player_name, input.match_id)
 
     return JoinMatchOut(
         player_id=match_out["player_id"], match_name=match_out["match_name"]
     )
-
-
-# websocket endpoint
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
