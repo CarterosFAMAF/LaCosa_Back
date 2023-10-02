@@ -29,7 +29,7 @@ class MatchOut(BaseModel):
 
 class JoinMatchIn(BaseModel):
     player_name: constr(min_length=3, max_length=20)
-    match_id: int = Field(ge=1,le=3)
+    match_id: int = Field(ge=1)
 
 
 class JoinMatchOut(BaseModel):
