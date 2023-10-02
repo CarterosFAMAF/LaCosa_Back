@@ -1,7 +1,7 @@
 import json
 
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
-
+from pony.orm import *
 from app.src.game.player import Player
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
@@ -40,6 +40,28 @@ async def join_match_endpoint(input: JoinMatchIn):
     return JoinMatchOut(
         player_id=match_out["player_id"], match_name=match_out["match_name"]
     )
+
+
+
+
+@router.put("/matches/{match_id}/start", status_code=status.HTTP_200_OK)
+@db_session
+async def start_match(match_id: int, player_id:int):
+    """
+    try:
+        player = Player.get_player_by_id(player_id)
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Player not found")
+    try:
+        match = Match.get_db_match_by_id(match_id)
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Match not found")
+    if player.id != match.owner.id:
+        raise HTTPException(status_code=403, detail= "Only the owner can start the match")
+    """
+    msg = {"message": "The match has been started"}
+    return msg
+
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")

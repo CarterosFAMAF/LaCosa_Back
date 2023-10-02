@@ -138,4 +138,20 @@ def get_live_match_by_id(match_id: int):
             return None
 
 
+def get_db_match_by_id(match_id: int):
+    """
+    Get a match from de database by id
+    
+    Args:
+        match_id (int)
+
+    Returns:
+        match (MatchDB)
+    """
+
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        return match
+
+
 MATCHES: List[Match] = []
