@@ -20,7 +20,7 @@ class Match(db.Entity):
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    position = Optional(int)
+    turn = Optional(int)
     role = Optional(str)
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
