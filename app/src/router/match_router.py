@@ -44,7 +44,7 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 
 
-@router.put("/matches/{match_id}/start", status_code=status.HTTP_200_OK)
+@router.put("/partidas/{partida_id}/iniciar", status_code=status.HTTP_200_OK)
 @db_session
 async def start_match(match_id: int, player_id:int):
     """
