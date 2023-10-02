@@ -28,5 +28,4 @@ def test_add_cards_to_deck():
     )
     flush()
     add_cards_to_deck(match.id, match.number_players)
-    
-    assert match.deck.count() > 0
+    assert match.deck.count() == 35

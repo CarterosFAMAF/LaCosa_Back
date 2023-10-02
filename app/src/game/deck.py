@@ -38,14 +38,11 @@ def add_cards_to_deck(match_id : int, player_amount: int):
     if match.max_players >= player_amount and match.min_players <= player_amount:
         deck = create_deck(player_amount)
         for id in deck:
-            card = CardDB.get(card_id=id)
-            """
-            card = select(c for c in CardDB if c.card_id == id)
+            card = select(c for c in CardDB if c.card_id == id)[:]
             card_copy = CardDB(
                 card_id = card[0].card_id,
                 name = card[0].name,
                 image = card[0].image
             )
-            """
-            match.deck.add(card)        
+            match.deck.add(card_copy)
             flush()

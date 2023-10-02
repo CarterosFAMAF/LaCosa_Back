@@ -53,7 +53,6 @@ def load_cards():
         exists_card = db.exists("select * from Card where name='lanzallamas'")
         if not exists_card:
             Card(
-                id = LANZALLAMAS,
                 card_id = LANZALLAMAS,
                 name = "lanzallamas",
                 image = "app/cards/lanzallamas.jpg"
