@@ -1,13 +1,13 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.constants import origins
-from app.src.models.base import define_database_and_entities
+from app.src.models.base import define_database_and_entities, load_cards
 from app.src.router import match_router
 
 
 define_database_and_entities()
 
+load_cards()
 
 app = FastAPI()
 
@@ -20,8 +20,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.include_router(match_router.router)
+
 
 if __name__ == "__main__":
     import uvicorn
