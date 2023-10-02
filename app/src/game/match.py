@@ -131,11 +131,12 @@ def get_live_match_by_id(match_id: int):
     Returns:
         match (Match)
     """
+    return_match = None
     for match in MATCHES:
         if match._id == match_id:
-            return match
-        else:
-            return None
+            return_match = match
+            break
+    return return_match
 
 
 MATCHES: List[Match] = []
