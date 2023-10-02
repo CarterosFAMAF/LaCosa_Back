@@ -76,3 +76,29 @@ def test_create_valid_match():
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
+def test_join_match_empty():
+    response = client.post(
+        "/matches/{match_id}/join",
+        json = {},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+def test_join_match_invalid():
+    response = client.post(
+        "/matches/{match_id}/join",
+        json = {
+            "player_name": "",
+            "match_id": ""
+        },
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+def test_join_match_valid():
+    response = client.post(
+        "/matches/{match_id}/join",
+        json = {
+            "player_name": "agu",
+            "match_id": "1"
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK

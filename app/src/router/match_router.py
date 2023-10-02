@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 
 
 from app.src.game.match import Match, MATCHS
-from app.src.router.schemas import MatchIn, MatchOut , JoinMatchOut
+from app.src.router.schemas import MatchIn, MatchOut , JoinMatchOut , JointMatchIn
 from app.src.game.match import Match
 
 router = APIRouter()
@@ -25,9 +25,9 @@ async def create_match(match: MatchIn):
     )
 
 @router.post("/matches/{match_id}/join")
-async def join_match_endpoint(player_name: str,match_id : int):
-    #necesito traer la clase match.
-    match_out = Match.join_match(player_name,match_id)
+async def join_match_endpoint(join : JointMatchIn):
+    
+    match_out = Match.join_match(join.player_name,join.match_id)
 
     return JoinMatchOut ( 
         player_id = match_out["player_id"],
