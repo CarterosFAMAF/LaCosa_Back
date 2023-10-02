@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator , constr
 
 
 class MatchIn(BaseModel):
@@ -27,10 +27,9 @@ class MatchOut(BaseModel):
     owner_id: int
     result: str
 
-
 class JoinMatchIn(BaseModel):
-    match_id: int
-    player_name: str
+    player_name: constr(min_length=3, max_length=20)
+    match_id: int = Field(ge=1)
 
 
 class JoinMatchOut(BaseModel):
