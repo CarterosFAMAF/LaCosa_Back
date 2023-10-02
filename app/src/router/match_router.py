@@ -3,7 +3,9 @@ import json
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
 
 from app.src.game.player import Player
-from app.src.game.match import Match, MATCHES
+from app.src.game.match import *
+from app.src.game.match_connection_manager import create_ws_message
+
 from app.src.models.schemas import *
 
 
@@ -33,8 +35,7 @@ async def create_match(match: MatchIn):
     status_code=status.HTTP_200_OK,
 )
 async def join_match_endpoint(input: JoinMatchIn):
-    # necesito traer la clase match.
-    match_out = Match.join_match(input.player_name, input.match_id)
+    match_out = await join_match(input.player_name, input.match_id)
 
     return JoinMatchOut(
         player_id=match_out["player_id"], match_name=match_out["match_name"]
@@ -43,8 +44,6 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
-    # TODO: move validation to a function in schemas.py?
-
     try:
         player = Player.get_player_by_id(player_id)
     except:
@@ -52,19 +51,20 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
     if player == None:
         raise ValueError("Player not found")
 
-    match = Match.get_live_match_by_id(match_id)
+    match = get_live_match_by_id(match_id)
     if match == None:
         raise ValueError("Match not found")
 
     manager = match._match_connection_manager
 
-    await manager.connect(websocket, player_id)
-
+    print(f"Player {player.name} connected to match {match._id}")
+    await manager.connect(websocket, player_id, match._id)
     try:
         while True:
             msg = await websocket.receive_text()
 
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
-
-        await manager.broadcast_json(1, "Alguno abandono la partida", {})
+        remove_player_from_match(player_id, match._id)
+        data_ws = create_ws_message(match_id, 6, f"{player.name} se desconecto")
+        await manager.broadcast_json(data_ws)
