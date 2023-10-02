@@ -28,8 +28,8 @@ class MatchOut(BaseModel):
     result: str
 
 class JointMatchIn(BaseModel):
-    player_name: constr(min_length=1, max_length=20)
-    match_id: int
+    player_name: constr(min_length=3, max_length=20)
+    match_id: int = Field(ge=1,le=3)
 
 
 class JoinMatchOut(BaseModel):
