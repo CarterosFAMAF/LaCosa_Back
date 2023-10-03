@@ -34,8 +34,8 @@ async def join_match_endpoint(join : JointMatchIn):
         match_name = match_out["match_name"] )
 
 @router.put("/matches/{player_out}/{match_id}/play_card")
-def play_card_endpoint(player_out,match_id):
-
+def play_card_endpoint(player_out,match_id,card_id):
+    #Deberia... recibir carta , aplicar efecto , descartarla
     card = Card("lanzallamas")
     
     return card.lanzallamas(player_out,match_id)
