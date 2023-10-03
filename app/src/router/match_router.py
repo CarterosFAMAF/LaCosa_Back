@@ -1,10 +1,14 @@
-from fastapi import APIRouter, status
+import json
+
+from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
+
+from app.src.game.player import Player
+from app.src.game.match import *
+from app.src.game.match_connection_manager import create_ws_message
+
+from app.src.models.schemas import *
 
 
-from app.src.game.match import Match, MATCHS
-from app.src.router.schemas import MatchIn, MatchOut , JoinMatchOut , JointMatchIn
-from app.src.game.match import Match
-from app.src.game.card import Card
 router = APIRouter()
 
 
@@ -24,50 +28,59 @@ async def create_match(match: MatchIn):
         result="Match created",
     )
 
-@router.post("/matches/{match_id}/join")
-async def join_match_endpoint(join : JointMatchIn):
-    #necesito traer la clase match.
-    match_out = Match.join_match(join.player_name,join.match_id)
 
-    return JoinMatchOut ( 
-        player_id = match_out["player_id"],
-        match_name = match_out["match_name"] )
+@router.post(
+    "/matches/{match_id}/join",
+    response_model=JoinMatchOut,
+    status_code=status.HTTP_200_OK,
+)
+async def join_match_endpoint(input: JoinMatchIn):
+    match_out = await join_match(input.player_name, input.match_id)
 
-@router.put("/matches/{player_out}/{match_id}/play_card")
-def play_card_endpoint(player_out,match_id,card_id):
-    #Deberia... recibir carta , aplicar efecto , descartarla
-    card = Card("lanzallamas")
-    
-    return card.lanzallamas(player_out,match_id)
-# no se si esto esta perfecto, falta lo de restar la posicion de cada jugador
+    return JoinMatchOut(
+        player_id=match_out["player_id"], match_name=match_out["match_name"]
+    )
 
+@router.put("matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
+def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
+    play_card(card_id,player_in_id,player_out_id)
+    discard_card_of_player(card_id,player_in_id)
+    #se podria crear un mensaje donde diga que carta se uso, usuario y objetivo.
 
-@router.put("/matches/{match_id}/end_turn")  #se deberia cambiar
-def end_turn_endpoint(match_id):
-    return Match.end_turn(match_id)
-
-#Tampoco se si esta perfecto
-
-# websocket endpoint
 """
-@router.websocket("/ws/matchs/{match_id}/{player_id}")
+@router.put("matches/{match_id}/{player_id}/end_turn")
+async def end_turn_endpoint(match_id,player_id):
+    msg = Match.end_turn(match_id)
+    match = get_live_match_by_id(match_id)
+    manager = match._match_connection_manager
+    #texto de que se termino el turno.
+    msg_ws = create_ws_message(match_id,status,msg)
+    await manager.broadcast_json(msg_ws)
+
+"""
+@router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
-    # seteo variables para usar aca
-    match = MATCHS[match_id]
-    player = match._players[player_id]
-    manager = match.match_connection_manager
+    try:
+        player = Player.get_player_by_id(player_id)
+    except:
+        raise ValueError("Player not found")
+    if player == None:
+        raise ValueError("Player not found")
 
-    # seteo websocket en el objeto jugador para a futuro poder mandarle algo privado
-    player.websocket = websocket
+    match = get_live_match_by_id(match_id)
+    if match == None:
+        raise ValueError("Match not found")
 
-    await manager.connect(websocket)
+    manager = match._match_connection_manager
+
+    print(f"Player {player.name} connected to match {match._id}")
+    await manager.connect(websocket, player_id, match._id)
     try:
         while True:
-            data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{player.name} says: {data}")
+            msg = await websocket.receive_text()
+
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{player.name} left the chat")
-
-"""
+        remove_player_from_match(player_id, match._id)
+        data_ws = create_ws_message(match_id, 6, f"{player.name} se desconecto")
+        await manager.broadcast_json(data_ws)
