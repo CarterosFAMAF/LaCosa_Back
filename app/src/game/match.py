@@ -4,7 +4,7 @@ from typing import List
 from fastapi import WebSocket
 from pony.orm import *
 
-from app.src.game.player import Player
+from app.src.game.player import *
 from app.src.game.match_connection_manager import (
     MatchConnectionManager,
     create_ws_message,
@@ -137,10 +137,23 @@ def get_live_match_by_id(match_id: int):
         else:
             return None
 
-def next_turn(match_id : int):
+async def next_turn(match_id: int):
     with db_session:
         match = MatchDB.get(match_id)
-        match.turn += 1
+        while True:
+            match.turn += 1
+            match.player_turn = match.turn % match.number_players
+            player = PlayerDB.get(turn = match.player_turn)
+            if not check_dead(player.id):
+                break
+        manager = match._match_connection_manager
+        msg_ws = create_ws_message(match_id,7,f"terminó el turno de: {player.name}")
+        await manager.broadcast_json(msg_ws)
         flush()
 
+#Se puede mejorar ya que no se si puedo pasar un modelo en la base de datos
+def check_dead(player_id):
+    player = get_player_by_id(player_id)
+    return player.role == "dead"
+    
 MATCHES: List[Match] = []

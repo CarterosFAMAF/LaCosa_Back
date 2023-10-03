@@ -17,7 +17,7 @@ class Match(db.Entity):
     player_owner = Required("Player", reverse="match_owner")
     deck = Set("Card", reverse="deck")
     discard_pile = Set("Card", reverse="discard_deck")
-    players_alive = Optional(int)
+    player_turn = Optional(int)
 
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)

@@ -2,7 +2,8 @@ import json
 
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
 
-from app.src.game.player import Player
+from app.src.game.player import *
+from app.src.game.card import *
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
 
@@ -43,21 +44,8 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 @router.put("matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
 def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
-    play_card(card_id,player_in_id,player_out_id)
-    discard_card_of_player(card_id,player_in_id)
-    #se podria crear un mensaje donde diga que carta se uso, usuario y objetivo.
+    play_card(card_id,player_in_id,player_out_id) #por ahora apenas se juega la carta termina el turno.
 
-"""
-@router.put("matches/{match_id}/{player_id}/end_turn")
-async def end_turn_endpoint(match_id,player_id):
-    msg = Match.end_turn(match_id)
-    match = get_live_match_by_id(match_id)
-    manager = match._match_connection_manager
-    #texto de que se termino el turno.
-    msg_ws = create_ws_message(match_id,status,msg)
-    await manager.broadcast_json(msg_ws)
-
-"""
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:
