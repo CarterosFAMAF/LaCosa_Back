@@ -14,8 +14,6 @@ def play_card(player_in,player_out,match_id,card_id)
         msg_to_action(player_in,player_out,match_id,"LANZALLAMAS")
     else:
         pass
-    match = get_live_match_by_id(match_id)
-    match.next_turn()
     discard_card_of_player(player_in)
 
 def play_lanzallamas(player_target_id):
