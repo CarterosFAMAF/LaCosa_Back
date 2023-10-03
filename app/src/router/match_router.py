@@ -44,7 +44,7 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 @router.put("matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
 def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
-    play_card(card_id,player_in_id,player_out_id) #por ahora apenas se juega la carta termina el turno.
+    play_card(card_id,player_in_id,player_out_id)
     next_turn(match_id)
     
 @router.websocket("/ws/matches/{match_id}/{player_id}")

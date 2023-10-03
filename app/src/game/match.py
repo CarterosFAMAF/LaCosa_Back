@@ -140,10 +140,9 @@ def get_live_match_by_id(match_id: int):
 async def next_turn(match_id: int):
     with db_session:
         match = MatchDB.get(match_id)
+        player = PlayerDB.get(turn = match.turn)
         while True:
-            match.turn += 1
-            match.player_turn = match.turn % match.number_players
-            player = PlayerDB.get(turn = match.player_turn)
+            match.turn = match.turn % match.number_players + 1
             if not check_dead(player.id):
                 break
         manager = match._match_connection_manager
@@ -155,5 +154,16 @@ async def next_turn(match_id: int):
 def check_dead(player_id):
     player = get_player_by_id(player_id)
     return player.role == "dead"
-    
+
+#se fija si queda mas de un jugador con vida.
+def check_finish(match_id):
+    match = get_live_match_by_id(match_id)
+    with db_session:
+        alive_count = 0
+        for player in select(p for p in PlayerDB if p.match == match):
+            if player.role == "alive":
+                alive_count += 1
+        if alive_count == 1:
+            match.finalized = True
+        flush()
 MATCHES: List[Match] = []
