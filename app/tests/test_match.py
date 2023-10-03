@@ -1,8 +1,8 @@
 from fastapi import status
 from fastapi.testclient import TestClient
-from app.main import app
+from app.tests.test_main import test_app
 
-client = TestClient(app=app)
+client = TestClient(app=test_app)
 
 
 def test_create_invalid_match_all_0():
@@ -76,29 +76,36 @@ def test_create_valid_match():
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
+
+
 def test_join_match_empty():
     response = client.post(
         "/matches/{match_id}/join",
-        json = {},
+        json={},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
 
 def test_join_match_invalid():
     response = client.post(
         "/matches/{match_id}/join",
-        json = {
-            "player_name": "",
-            "match_id": ""
-        },
+        json={"player_name": "", "match_id": ""},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
+
 def test_join_match_valid():
+    res_match_created = client.post(
+        "/matches",
+        json={
+            "player_name": "string",
+            "match_name": "string",
+            "max_players": 12,
+            "min_players": 4,
+        },
+    )
     response = client.post(
         "/matches/{match_id}/join",
-        json = {
-            "player_name": "agu",
-            "match_id": "1"
-        },
+        json={"player_name": "agu", "match_id": res_match_created.json()["match_id"]},
     )
     assert response.status_code == status.HTTP_200_OK

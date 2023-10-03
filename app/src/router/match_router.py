@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPException
 
 from app.src.game.player import Player
 from app.src.game.match import *
@@ -35,6 +35,30 @@ async def create_match(match: MatchIn):
     status_code=status.HTTP_200_OK,
 )
 async def join_match_endpoint(input: JoinMatchIn):
+    live_match = get_live_match_by_id(input.match_id)
+    match_db = get_match_by_id(input.match_id)
+
+    # check if match exists and if it is not finalized
+    if live_match == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found",
+        )
+
+    # check if match is started
+    if match_db.started:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Match already started",
+        )
+
+    # check if match is full
+    if match_db.number_players >= match_db.max_players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Match is full",
+        )
+
     match_out = await join_match(input.player_name, input.match_id)
 
     return JoinMatchOut(
