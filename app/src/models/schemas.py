@@ -28,6 +28,7 @@ class MatchOut(BaseModel):
     owner_id: int
     result: str
 
+
 class JoinMatchIn(BaseModel):
     player_name: constr(min_length=3, max_length=20)
     match_id: int = Field(ge=1)

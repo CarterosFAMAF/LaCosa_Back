@@ -2,7 +2,7 @@ import json
 
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPException
 
-from app.src.game.player import Player
+from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
 
@@ -64,6 +64,15 @@ async def join_match_endpoint(input: JoinMatchIn):
     return JoinMatchOut(
         player_id=match_out["player_id"], match_name=match_out["match_name"]
     )
+
+
+@router.get(
+    "/matches/{match_id}/players/{player_id}/get_card",
+    status_code=status.HTTP_200_OK
+)
+async def get_card_enpoint(match_id: int, player_id: int):
+    card = get_card(match_id,player_id)
+    return card
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")

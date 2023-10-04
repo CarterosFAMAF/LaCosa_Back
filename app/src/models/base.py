@@ -24,6 +24,7 @@ class Player(db.Entity):
     name = Required(str)
     turn = Optional(int)
     role = Optional(str)
+    hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
 
@@ -32,11 +33,11 @@ class Card(db.Entity):
     """
     Tabla donde guardar las cartas
     """
-
     id = PrimaryKey(int, auto=True)
     card_id = Required(int)
     name = Required(str)
     image = Required(str)
+    player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
 
