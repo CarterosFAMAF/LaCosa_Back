@@ -71,7 +71,20 @@ async def join_match_endpoint(input: JoinMatchIn):
     status_code=status.HTTP_200_OK
 )
 async def get_card_enpoint(match_id: int, player_id: int):
-    card = get_card(match_id,player_id)
+    match = MatchDB.get(id=match_id)
+    player = PlayerDB.get(id=player_id)
+    if player == []:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found",
+        )
+    elif match == []:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found",
+        )
+    else
+        card = get_card(match_id,player_id)
     return card
 
 
