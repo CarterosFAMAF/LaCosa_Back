@@ -7,6 +7,9 @@ from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
 from app.main import app
 from app.src.models.base import load_cards
+from app.src.game.player import *
+from app.src.game.match import *
+from app.src.game.card import *
 
 client = TestClient(app=app)
 load_cards()
@@ -28,4 +31,7 @@ def test_add_cards_to_deck():
     )
     flush()
     add_cards_to_deck(match.id, match.number_players)
+    
     assert match.deck.count() == 35
+
+

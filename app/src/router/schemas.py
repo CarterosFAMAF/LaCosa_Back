@@ -27,7 +27,7 @@ class MatchOut(BaseModel):
     owner_id: int
     result: str
 
-class JointMatchIn(BaseModel):
+class JoinMatchIn(BaseModel):
     player_name: constr(min_length=3, max_length=20)
     match_id: int = Field(ge=1,le=3)
 
@@ -35,3 +35,9 @@ class JointMatchIn(BaseModel):
 class JoinMatchOut(BaseModel):
     player_id : int 
     match_name : str
+
+class PlayCardIn(BaseModel):
+    match_id : int
+    player_in_id : int
+    player_out_id : int
+    card_id : int

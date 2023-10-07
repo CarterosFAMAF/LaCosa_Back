@@ -64,7 +64,6 @@ def test_create_invalid_match_max_min_players():
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-
 def test_create_valid_match():
     response = client.post(
         "/matches",
@@ -76,3 +75,6 @@ def test_create_valid_match():
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
+
+def play_card_test():
+    
