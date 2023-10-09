@@ -1,16 +1,17 @@
 from fastapi import status
 from pony.orm import *
 from fastapi.testclient import TestClient
-from app.src.models.base import db
-from app.main import app
-from app.src.models.base import load_cards
-from app.src.game.player import *
-from app.src.game.match import *
-from app.src.game.card import *
+from src.models.base import Player as PlayerDB
+from src.models.base import Match as MatchDB
+from main import app
+from src.models.base import load_cards
+from src.game.player import *
+from src.game.match import *
+from src.game.card import *
 client = TestClient(app=app)
 
 @db_session
-def test_valid_play_card():
+def test_valid_effect_LANZALLAMAS():
     with db_session:
         player = PlayerDB(name = 'player_in')
         flush()
@@ -29,7 +30,7 @@ def test_valid_play_card():
         )
         flush()
 
-    play_card(player.id,player_target.id,match.id,3)
+    play_lanzallamas(player_target.id)
     flush()
     player_target = get_player_by_id(2)
     assert player_target.role != "dead"
