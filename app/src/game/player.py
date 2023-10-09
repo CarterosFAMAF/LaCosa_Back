@@ -1,6 +1,7 @@
 from fastapi import WebSocket
 from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Match as MatchDB
+from app.src.models.schemas import *
 from pony.orm import *
 import base64
 
@@ -31,17 +32,20 @@ def get_card_image(path:str):
 @db_session
 def get_card(match_id: int,player_id:int):
     match = MatchDB.get(id=match_id)
-    player = PlayerDB.get(id=player_id)
-    card_out= {}
-    if player != None and match != None:
-        card = select(c for c in match.deck).random(1)
-        if card != []:
-            player.hand.add(card)
-            match.deck.remove(card)
-            card_image = get_card_image(card.image)
-            card_out={
-                "card_id": card.card_id,
-                "name": card.name,
-                "image": card_image,
-            }
-    return card_out
+    player = PlayerDB.get(id=player_id) 
+    """if not match.started:
+        card_out=CardModel()
+    elif match.deck == None and match.discard_pile == None:
+        card_out=CardModel()
+    else:
+    """
+    if match.deck == None and match.discard_pile != None:
+        deck = match.discard_pile.copy()
+        match.discard_pile.clear()
+        match.deck.add(deck)
+
+    card = select(c for c in match.deck).random(1)
+    card_image = get_card_image(card.image)
+    player.hand.add(card)
+    match.deck.remove(card)
+    return {"card_id": card.card_id, "name": card.name, "image": card_image}

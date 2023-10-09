@@ -1,5 +1,6 @@
 from fastapi import status
 from fastapi.testclient import TestClient
+from pony.orm import *
 from app.tests.test_main import test_app
 from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Match as MatchDB
@@ -10,8 +11,8 @@ client = TestClient(app=test_app)
 
 
 def test_get_card_invalid_match():
-    response = client.get_card_enpoint(
-            "/matches/12321321/players/1281231239/get_card",
+    response = client.get(
+            "/matches/312321/players/213123/get_card",
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -31,19 +32,19 @@ def test_get_card_invalid_player():
         )
         flush()
         match_id = match.id
-    response = client.get_card_enpoint(
-            "/matches/{match_id}/players/1289/get_card",
+    response = client.get(
+            "/matches/"+match_id+"/players/1289/get_card",
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-@db_session:
+@db_session
 def test_get_card():
     card = CardDB.get(card_id=LANZALLAMAS)
     player = PlayerDB(
         name= "test_player"
-        hand=[card] 
     )
+    player.hand.add(card)
     match = MatchDB(
         name="match_name",
         number_players=1,
@@ -55,7 +56,6 @@ def test_get_card():
         player_owner=player,
         players=[player],
         deck=[card]
-        discard_pile=[]
     )
     flush()
     get_card(match.id,player.id)
