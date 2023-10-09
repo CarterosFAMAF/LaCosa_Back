@@ -33,4 +33,4 @@ def test_valid_effect_LANZALLAMAS():
     play_lanzallamas(player_target.id)
     flush()
     player_target = get_player_by_id(2)
-    assert player_target.role != "dead"
+    assert player_target.role == "dead"
