@@ -78,5 +78,6 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
 
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
-
-        await manager.broadcast_json(1, "Alguno abandono la partida", {})
+        remove_player_from_match(player_id, match._id)
+        data_ws = create_ws_message(match_id, 6, f"{player.name} se desconecto")
+        await manager.broadcast_json(data_ws)

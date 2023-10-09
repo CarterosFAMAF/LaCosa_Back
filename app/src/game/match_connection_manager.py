@@ -78,6 +78,3 @@ def create_ws_message(match_id: int, status: int, msg: str):
             "players": players,
         }
     return match_ws
-
-
-    

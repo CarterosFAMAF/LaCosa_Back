@@ -22,6 +22,18 @@ class Match:
     def __init__(
         self, player_name: str, match_name: str, max_players: int, min_players: int
     ):
+        """
+        Create a match in DB to store match state. A match object in memory is created too, that will be used to manage the websocket connections.
+
+        Args:
+            player_name (str)
+            match_name (str)
+            max_players (int)
+            min_players (int)
+
+        Returns:
+            match (Match)
+        """
         self._match_connection_manager = MatchConnectionManager()
 
         # create player in db
