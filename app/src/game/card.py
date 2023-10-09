@@ -31,9 +31,9 @@ async def msg_to_action(player_in_id,player_out_id,match_id,effect):
     player_out = get_player_by_id(player_out_id)
 
     if effect == "LANZALLAMAS":
-        status = 8
+        status = WS_STATUS_PLAYER_BURNED
     else:
         pass
     #aca va a ir todo los mensajes que tengan que ver con los efectos de cartas.
-    msg_ws = create_ws_message(match_id,status)
+    msg_ws = create_ws_message(match_id,status,player_in.id,player_out.id)
     await manager.broadcast_json(msg_ws)

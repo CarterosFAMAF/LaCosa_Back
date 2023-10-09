@@ -2,7 +2,7 @@ from pony.orm import *
 from app.src.game.constants import DECK
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Card as CardDB
-from app.src.game.player import Player
+
 
 
 def create_deck(player_amount: int):
@@ -46,4 +46,3 @@ def add_cards_to_deck(match_id : int, player_amount: int):
             )
             match.deck.add(card_copy)
             flush()
-

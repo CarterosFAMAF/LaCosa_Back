@@ -15,10 +15,10 @@ class Player:
             self._id = player_db.id
 
 def get_player_by_id(player_id):
-    with db_session:
-        player = PlayerDB.get(id=player_id)
-        return player
-        
+        with db_session:
+            player = PlayerDB.get(id=player_id)
+            return player
+
 def discard_card_of_player(card_id,match_id,player_id):
     with db_session:
         player = get_player_by_id(player_id)
