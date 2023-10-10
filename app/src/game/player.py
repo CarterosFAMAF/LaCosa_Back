@@ -33,18 +33,12 @@ def get_card_image(path:str):
 def get_card(match_id: int,player_id:int):
     match = MatchDB.get(id=match_id)
     player = PlayerDB.get(id=player_id) 
-    """if not match.started:
-        card_out=CardModel()
-    elif match.deck == None and match.discard_pile == None:
-        card_out=CardModel()
-    else:
-    """
-    if match.deck == None and match.discard_pile != None:
+    if match.deck == [] and match.discard_pile != []:
         deck = match.discard_pile.copy()
         match.discard_pile.clear()
         match.deck.add(deck)
-
-    card = select(c for c in match.deck).random(1)
+ 
+    card = select(c for c in match.deck).random(1)[0]
     card_image = get_card_image(card.image)
     player.hand.add(card)
     match.deck.remove(card)

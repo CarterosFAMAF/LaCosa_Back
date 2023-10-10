@@ -60,7 +60,7 @@ def load_cards():
             Card(
                 card_id=LANZALLAMAS,
                 name="lanzallamas",
-                image="app/cards/lanzallamas.jpg",
+                image="app/cards/lanzallamas.png",
             )
     except:
         pass
