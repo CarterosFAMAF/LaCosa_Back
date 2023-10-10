@@ -9,4 +9,4 @@ mydatabase.sqlite
 *.sqlite
 database.sqlite
 the_thing-db.sqlite
-```
+.coverage
