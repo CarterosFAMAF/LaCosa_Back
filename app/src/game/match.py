@@ -87,6 +87,7 @@ async def join_match(player_name: str, match_id: int):
     # create model player in the db
     player = Player(player_name)
 
+    player_db = None
     # add player to match
     with db_session:
         player_db = PlayerDB.get(id=player._id)
@@ -96,8 +97,8 @@ async def join_match(player_name: str, match_id: int):
         flush()
 
     # send message to all players in the match
-    msg = f"{player_name} se unio a la partida"
-    ws_msg = create_ws_message(match_id, 0, msg)
+    ws_msg = create_ws_message(match_id, WS_STATUS_PLAYER_JOINED, player_db.id)
+
     match = get_live_match_by_id(match_id)
     await match._match_connection_manager.broadcast_json(ws_msg)
 
@@ -106,8 +107,7 @@ async def join_match(player_name: str, match_id: int):
 
 def remove_player_from_match(player_id: int, match_id: int):
     """
-    Remove a player from a match
-
+    Remove a player from a match.
     Args:
         player_id (int)
         match_id (int)

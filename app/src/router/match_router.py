@@ -5,6 +5,7 @@ from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPExcep
 from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
+from app.src.game.constants import *
 
 from app.src.models.schemas import *
 
@@ -114,7 +115,6 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             msg = await websocket.receive_text()
 
     except WebSocketDisconnect:
-        await manager.disconnect(websocket)
+        await manager.disconnect(websocket, player_id, match._id)
         remove_player_from_match(player_id, match._id)
-        data_ws = create_ws_message(match_id, 6, f"{player.name} se desconecto")
-        await manager.broadcast_json(data_ws)
+        print(f"Player {player.name} disconnected from match {match._id}")
