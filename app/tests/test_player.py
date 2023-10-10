@@ -1,19 +1,14 @@
-from fastapi import status
 from pony.orm import *
-from fastapi.testclient import TestClient
 from app.src.models.base import db
-from app.src.game.deck import add_cards_to_deck
+from app.src.game.constants import *
+from app.src.game.player import *
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
-from app.tests.test_main import test_app
-from app.src.models.base import load_cards
-
-client = TestClient(app=test_app)
-load_cards()
-
+from app.src.game.deck import add_cards_to_deck
+from app.src.game.match import deal_cards
 
 @db_session
-def test_add_cards_to_deck():
+def test_get_player_hand():
     player = PlayerDB(name="test_player")
     flush()
     match = MatchDB(
@@ -29,4 +24,7 @@ def test_add_cards_to_deck():
     )
     flush()
     add_cards_to_deck(match.id, match.number_players)
-    assert match.deck.count() == 35
+    deal_cards(match.id)
+    hand = get_player_hand(match.id, player.id)
+    assert len(hand) == 4
+

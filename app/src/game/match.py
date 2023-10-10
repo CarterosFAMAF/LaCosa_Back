@@ -9,8 +9,10 @@ from app.src.game.match_connection_manager import (
     MatchConnectionManager,
     create_ws_message,
 )
+from app.src.game.constants import *
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
+from app.src.models.base import Card as CardDB
 
 
 class Match:
@@ -85,6 +87,7 @@ async def join_match(player_name: str, match_id: int):
     # create model player in the db
     player = Player(player_name)
 
+    player_db = None
     # add player to match
     with db_session:
         player_db = PlayerDB.get(id=player._id)
@@ -94,8 +97,8 @@ async def join_match(player_name: str, match_id: int):
         flush()
 
     # send message to all players in the match
-    msg = f"{player_name} se unio a la partida"
-    ws_msg = create_ws_message(match_id, 0, msg)
+    ws_msg = create_ws_message(match_id, WS_STATUS_PLAYER_JOINED, player_db.id)
+
     match = get_live_match_by_id(match_id)
     await match._match_connection_manager.broadcast_json(ws_msg)
 
@@ -104,8 +107,7 @@ async def join_match(player_name: str, match_id: int):
 
 def remove_player_from_match(player_id: int, match_id: int):
     """
-    Remove a player from a match
-
+    Remove a player from a match.
     Args:
         player_id (int)
         match_id (int)
@@ -131,11 +133,44 @@ def get_live_match_by_id(match_id: int):
     Returns:
         match (Match)
     """
+    return_match = None
     for match in MATCHES:
         if match._id == match_id:
-            return match
-        else:
-            return None
+            return_match = match
+            break
+    return return_match
+
+
+def get_match_by_id(match_id: int):
+    """
+    Get a match from db by id
+
+    Args:
+        match_id (int)
+
+    Returns:
+        match (Match)
+    """
+    match_db = None
+    with db_session:
+        match_db = MatchDB.get(id=match_id)
+    return match_db
+
+
+
+@db_session
+def deal_cards(match_id: int):
+    match = MatchDB.get(id=match_id)
+    players_list = select(p for p in match.players)[:]
+    for player in players_list:
+        cards = select(c for c in match.deck).random(4)
+        player.hand.add(cards)
+    the_thing_player = select(p for p in match.players).random(1)[0]
+    card = select(p for p in the_thing_player.hand).random(1)
+    the_thing_player.hand.remove(card)
+    match.deck.add(card)
+    card_the_thing = CardDB.get(card_id = LA_COSA)
+    the_thing_player.hand.add(card_the_thing)
 
 
 def get_db_match_by_id(match_id: int):

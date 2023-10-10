@@ -24,6 +24,7 @@ class Player(db.Entity):
     name = Required(str)
     turn = Optional(int)
     role = Optional(str)
+    hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
 
@@ -36,14 +37,18 @@ class Card(db.Entity):
     card_id = Required(int)
     name = Required(str)
     image = Required(str)
+    player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
-  
 
-def define_database_and_entities():
+
+def define_database_and_entities(test: bool):
     global db
 
-    db.bind(provider='sqlite', filename='the_thing-db.sqlite', create_db=True)
+    if test:
+        db.bind(provider="sqlite", filename="test-the_thing-db.sqlite", create_db=True)
+    else:
+        db.bind(provider="sqlite", filename="the_thing-db.sqlite", create_db=True)
     db.generate_mapping(create_tables=True)
 
 
@@ -53,10 +58,15 @@ def load_cards():
         exists_card = db.exists("select * from Card where name='lanzallamas'")
         if not exists_card:
             Card(
-                card_id = LANZALLAMAS,
-                name = "lanzallamas",
-                image = "app/cards/lanzallamas.jpg"
+                card_id=LANZALLAMAS,
+                name="lanzallamas",
+                image="app/cards/lanzallamas.png",
             )
+            Card(
+                card_id=LA_COSA,
+                name="La_Cosa",
+                image="app/cards/LaCosa.png",
+            )
+            flush()
     except:
         pass
-

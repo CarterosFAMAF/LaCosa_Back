@@ -5,14 +5,14 @@ from app.src.models.base import define_database_and_entities, load_cards
 from app.src.router import match_router
 
 
-define_database_and_entities(test=False)
+define_database_and_entities(test=True)
 
 load_cards()
 
-app = FastAPI()
+test_app = FastAPI()
 
 
-app.add_middleware(
+test_app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
@@ -20,10 +20,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(match_router.router)
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+test_app.include_router(match_router.router)

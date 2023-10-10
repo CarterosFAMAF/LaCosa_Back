@@ -1,10 +1,11 @@
 import json
 
-from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect
-from pony.orm import *
-from app.src.game.player import Player
+from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPException
+
+from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
+from app.src.game.constants import *
 
 from app.src.models.schemas import *
 
@@ -35,6 +36,30 @@ async def create_match(match: MatchIn):
     status_code=status.HTTP_200_OK,
 )
 async def join_match_endpoint(input: JoinMatchIn):
+    live_match = get_live_match_by_id(input.match_id)
+    match_db = get_match_by_id(input.match_id)
+
+    # check if match exists and if it is not finalized
+    if live_match == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found",
+        )
+
+    # check if match is started
+    if match_db.started:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Match already started",
+        )
+
+    # check if match is full
+    if match_db.number_players >= match_db.max_players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Match is full",
+        )
+
     match_out = await join_match(input.player_name, input.match_id)
 
     return JoinMatchOut(
@@ -86,7 +111,6 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             msg = await websocket.receive_text()
 
     except WebSocketDisconnect:
-        await manager.disconnect(websocket)
+        await manager.disconnect(websocket, player_id, match._id)
         remove_player_from_match(player_id, match._id)
-        data_ws = create_ws_message(match_id, 6, f"{player.name} se desconecto")
-        await manager.broadcast_json(data_ws)
+        print(f"Player {player.name} disconnected from match {match._id}")
