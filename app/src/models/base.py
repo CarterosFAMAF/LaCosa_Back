@@ -62,5 +62,11 @@ def load_cards():
                 name="lanzallamas",
                 image="app/cards/lanzallamas.png",
             )
+            Card(
+                card_id=LA_COSA,
+                name="La_Cosa",
+                image="app/cards/LaCosa.png",
+            )
+            flush()
     except:
         pass
