@@ -22,7 +22,7 @@ class Match(db.Entity):
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    turn = Optional(int)
+    position = Optional(int)
     role = Optional(str)
     hand = Set("Card")
     match = Optional(Match, reverse="players")
@@ -33,6 +33,7 @@ class Card(db.Entity):
     """
     Tabla donde guardar las cartas
     """
+
     id = PrimaryKey(int, auto=True)
     card_id = Required(int)
     name = Required(str)

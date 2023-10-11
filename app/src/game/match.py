@@ -92,6 +92,7 @@ async def join_match(player_name: str, match_id: int):
     # add player to match
     with db_session:
         player_db = PlayerDB.get(id=player._id)
+        player_db.role = PLAYER_ROLE_LOBBY
         match_db = MatchDB.get(id=match_id)
         match_db.players.add(player_db)
         match_db.number_players += 1
@@ -135,10 +136,15 @@ def get_live_match_by_id(match_id: int):
         match (Match)
     """
     return_match = None
+
     for match in MATCHES:
+        print("DEBUG: match._id: " + str(match._id) + " match_id: " + str(match_id))
+        print(match._id == match_id)
         if match._id == match_id:
+            print("DEBUG: match found")
             return_match = match
             break
+    print(return_match)
     return return_match
 
 
@@ -157,44 +163,43 @@ def get_match_by_id(match_id: int):
         match_db = MatchDB.get(id=match_id)
     return match_db
 
+
 def next_turn(match_id: int):
+    """
+    Set the next turn in a match
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
     with db_session:
         match = get_match_by_id(match_id)
         while True:
             match.turn = (match.turn % match.number_players) + 1
-            player = PlayerDB.get(lambda p: p.turn == match.turn and p.match == match)
-            if check_alive(player.id):
+            # get the player with the current turn
+            player = select(
+                p for p in PlayerDB if p.match == match and p.position == match.turn
+            ).first()
+            # if it is not dead, break the loop, else, continue
+            if player.role != "dead":
                 break
         flush()
-        #select(p for p in match.players if p.turn == match.turn)
-
-#Se puede mejorar ya que no se si puedo pasar un modelo en la base de datos
-def check_alive(player_id):
-    player = get_player_by_id(player_id)
-    return player.role == "alive"
-
-#se fija si queda mas de un jugador con vida.
-def set_finish(match_id):
-    with db_session:
-        match = get_match_by_id(match_id)
-        alive_count = 0
-        for player in select(p for p in PlayerDB if p.match == match):
-            if player.role == "alive":
-                alive_count += 1
-        if alive_count == 1:
-            match.finalized = True
-        flush()
-        
-def check_finish(match_id):
-    with db_session:
-        match = get_match_by_id(match_id)
-        return match.finalized == True
-        
-
 
 
 @db_session
 def deal_cards(match_id: int):
+    """
+    Deal cards to players in a match
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
+
     match = MatchDB.get(id=match_id)
     players_list = select(p for p in match.players)[:]
     for player in players_list:
@@ -205,16 +210,16 @@ def deal_cards(match_id: int):
     card = select(p for p in the_thing_player.hand).random(1)
     the_thing_player.hand.remove(card)
     match.deck.add(card)
-    card_the_thing = CardDB.get(card_id = LA_COSA)
+    card_the_thing = CardDB.get(card_id=LA_COSA)
     the_thing_player.hand.add(card_the_thing)
-    the_thing_player.roll = "la cosa"
+    the_thing_player.role = PLAYER_ROLE_THE_THING
     flush()
 
 
 def get_db_match_by_id(match_id: int):
     """
     Get a match from de database by id
-    
+
     Args:
         match_id (int)
 
@@ -229,16 +234,28 @@ def get_db_match_by_id(match_id: int):
 
 @db_session
 def start_game(match_id: int):
+    """
+    Start a match
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
     match = MatchDB.get(id=match_id)
     add_cards_to_deck(match_id, match.number_players)
     match.started = True
-    match.turn= 0
+    match.turn = 0
     deal_cards(match_id)
     players = select(p for p in match.players).random(match.number_players)
-    turn = 0
+    position = 0
     for player in players:
-        player.turn = turn
-        turn +=1
+        player.position = position
+        if player.role != PLAYER_ROLE_THE_THING:
+            player.role = PLAYER_ROLE_HUMAN
+        position += 1
     flush()
-    
+
+
 MATCHES: List[Match] = []

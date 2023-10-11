@@ -51,7 +51,7 @@ class MatchConnectionManager:
                 await self.broadcast_json(data_ws)
 
                 break
-   
+
     async def broadcast_json(self, data: dict):
         """
         Send a json message to all clients connected to a match
@@ -128,7 +128,7 @@ def create_ws_message(
                 {
                     "id": player.id,
                     "name": player.name,
-                    "turn": player.turn,
+                    "turn": player.position,
                     "alive": True if player.role != "dead" else False,
                 }
             )

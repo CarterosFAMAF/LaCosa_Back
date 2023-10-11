@@ -66,21 +66,57 @@ async def join_match_endpoint(input: JoinMatchIn):
         player_id=match_out["player_id"], match_name=match_out["match_name"]
     )
 
-@router.put("/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
-async def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
-    play_card(player_in_id,player_out_id,match_id,card_id)
-    
-    next_turn(match_id)
-    
+
+@router.put(
+    "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card",
+    status_code=status.HTTP_200_OK,
+)
+async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
+    # convert all the fields to int
+    match_id = int(match_id)
+    player_in_id = int(player_in_id)
+    player_out_id = int(player_out_id)
+    card_id = int(card_id)
+
+    # check if match exists and if it is not finalized
     match = get_match_by_id(match_id)
-    manager = match._match_connection_manager
-    msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
-    await manager.broadcast_json(msg_ws)
+    if match == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found",
+        )
+    elif match.started == False:
+        raise HTTPException(
+            status_code=status.HTTP_412_PRECONDITION_FAILED,
+            detail="Match has not started",
+        )
+
+    # check if player in exists
+    player_in = get_player_by_id(player_in_id)
+    if player_in == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found",
+        )
+
+    # check if player out exists
+    player_out = get_player_by_id(player_out_id)
+    if player_out == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found",
+        )
+
+    await play_card(player_in, player_out, match_id, card_id)
+    next_turn(match_id)
+
+    return {"message": "Card played"}
+
 
 @router.get(
     "/matches/{match_id}/players/{player_id}/get_card",
     response_model=CardModel,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 async def get_card_endpoint(match_id: int, player_id: int):
     with db_session:
@@ -96,22 +132,17 @@ async def get_card_endpoint(match_id: int, player_id: int):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Player not found",
             )
-        elif  not match.started:
+        elif not match.started:
             raise HTTPException(
-                status_code=status.HTTP_412_PRECONDITION_FAILED ,
+                status_code=status.HTTP_412_PRECONDITION_FAILED,
                 detail="Match has not started",
             )
-    card = get_card(match_id,player_id)
-    return CardModel(
-        id= card["id"],
-        name= card["name"],
-        image= card["image"]
-        )
-    
+    card = get_card(match_id, player_id)
+    return CardModel(id=card["id"], name=card["name"], image=card["image"])
+
 
 @router.get(
-    "/matches/{match_id}/players/{player_id}/get_hand",
-    status_code=status.HTTP_200_OK
+    "/matches/{match_id}/players/{player_id}/get_hand", status_code=status.HTTP_200_OK
 )
 async def get_hand(match_id: int, player_id: int):
     with db_session:
@@ -127,14 +158,13 @@ async def get_hand(match_id: int, player_id: int):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Player not found",
             )
-        elif  not match.started:
+        elif not match.started:
             raise HTTPException(
-                status_code=status.HTTP_412_PRECONDITION_FAILED ,
+                status_code=status.HTTP_412_PRECONDITION_FAILED,
                 detail="Match has not started",
             )
-    hand = get_player_hand(match_id,player_id)
+    hand = get_player_hand(match_id, player_id)
     return hand
-    
 
 
 @router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
@@ -154,27 +184,24 @@ async def start_match(input: StartMatchIn):
             )
         elif player.id != match.player_owner.id:
             raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only the owner can start the match",
-                )
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only the owner can start the match",
+            )
         elif match.number_players < match.min_players:
             raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="There are not enough players",
-                )
-    
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="There are not enough players",
+            )
+
     start_game(input.match_id)
-    
+
     ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED)
 
     match = get_live_match_by_id(match.id)
     await match._match_connection_manager.broadcast_json(ws_msg)
-    
+
     msg = {"message": "The match has been started"}
     return msg
-
-
-
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
