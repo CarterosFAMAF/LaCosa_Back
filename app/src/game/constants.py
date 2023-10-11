@@ -110,6 +110,7 @@ DECK = [
 ]
 
 LANZALLAMAS = 3
+LA_COSA = 1
 
 """
 DECK = [
