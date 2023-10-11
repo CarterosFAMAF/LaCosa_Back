@@ -33,11 +33,11 @@ class Card(db.Entity):
     """
     Tabla donde guardar las cartas
     """
-
     id = PrimaryKey(int, auto=True)
     card_id = Required(int)
     name = Required(str)
     image = Required(str)
+    player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     player_hand = Set(Player)
     discard_deck = Set(Match, reverse="discard_pile")
@@ -61,7 +61,13 @@ def load_cards():
             Card(
                 card_id=LANZALLAMAS,
                 name="lanzallamas",
-                image="app/cards/lanzallamas.jpg",
+                image="app/cards/lanzallamas.png",
             )
+            Card(
+                card_id=LA_COSA,
+                name="La_Cosa",
+                image="app/cards/LaCosa.png",
+            )
+            flush()
     except:
         pass

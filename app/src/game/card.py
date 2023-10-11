@@ -16,9 +16,10 @@ def play_card(player_in,player_out,match_id,card_id):
     if card.card_id == LANZALLAMAS:
         play_lanzallamas(player_out)
         msg_to_action(player_in,player_out,match_id,"LANZALLAMAS")
-        check_finish(match_id)
+        set_finish(match_id)
     else:
         pass
+    
     discard_card_of_player(card.id,match_id,player_in)
 
 def play_lanzallamas(player_target_id):

@@ -12,6 +12,7 @@ from app.src.game.match_connection_manager import (
 from app.src.game.constants import *
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
+from app.src.models.base import Card as CardDB
 
 
 class Match:
@@ -157,13 +158,14 @@ def get_match_by_id(match_id: int):
 
 def next_turn(match_id: int):
     with db_session:
-        match = MatchDB.get(id = match_id)
-        while not match.finalized:
+        match = get_match_by_id(match_id)
+        while True:
             match.turn = (match.turn % match.number_players) + 1
             player = PlayerDB.get(lambda p: p.turn == match.turn and p.match == match)
             if check_alive(player.id):
                 break
         flush()
+        #select(p for p in match.players if p.turn == match.turn)
 
 #Se puede mejorar ya que no se si puedo pasar un modelo en la base de datos
 def check_alive(player_id):
@@ -171,9 +173,9 @@ def check_alive(player_id):
     return player.role == "alive"
 
 #se fija si queda mas de un jugador con vida.
-def check_finish(match_id):
-    match = get_live_match_by_id(match_id)
+def set_finish(match_id):
     with db_session:
+        match = get_match_by_id(match_id)
         alive_count = 0
         for player in select(p for p in PlayerDB if p.match == match):
             if player.role == "alive":
@@ -181,6 +183,28 @@ def check_finish(match_id):
         if alive_count == 1:
             match.finalized = True
         flush()
+        
+def check_finish(match_id):
+    with db_session:
+        match = get_match_by_id(match_id)
+        return match.finalized == True
+        
+
+
+
+@db_session
+def deal_cards(match_id: int):
+    match = MatchDB.get(id=match_id)
+    players_list = select(p for p in match.players)[:]
+    for player in players_list:
+        cards = select(c for c in match.deck).random(4)
+        player.hand.add(cards)
+    the_thing_player = select(p for p in match.players).random(1)[0]
+    card = select(p for p in the_thing_player.hand).random(1)
+    the_thing_player.hand.remove(card)
+    match.deck.add(card)
+    card_the_thing = CardDB.get(card_id = LA_COSA)
+    the_thing_player.hand.add(card_the_thing)
 
 
 MATCHES: List[Match] = []

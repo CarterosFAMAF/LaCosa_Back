@@ -2,13 +2,12 @@ import json
 
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPException
 
-from app.src.game.player import Player
+from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
 from app.src.game.constants import *
 from app.src.game.card import *
 from app.src.models.schemas import *
-
 
 router = APIRouter()
 
@@ -69,6 +68,7 @@ async def join_match_endpoint(input: JoinMatchIn):
 @router.put("/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
 async def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
     play_card(player_in_id,player_out_id,match_id,card_id)
+    
     next_turn(match_id)
     
     match = get_match_by_id(match_id)
@@ -76,6 +76,64 @@ async def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
     msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
     await manager.broadcast_json(msg_ws)
 
+@router.get(
+    "/matches/{match_id}/players/{player_id}/get_card",
+    response_model=CardModel,
+    status_code=status.HTTP_200_OK
+)
+async def get_card_endpoint(match_id: int, player_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif player == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
+        elif  not match.started:
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED ,
+                detail="Match has not started",
+            )
+    card = get_card(match_id,player_id)
+    return CardModel(
+        card_id= card["card_id"],
+        name= card["name"],
+        image= card["card_image"]
+        )
+    
+
+@router.get(
+    "/matches/{match_id}/players/{player_id}/get_hand",
+    status_code=status.HTTP_200_OK
+)
+async def get_hand(match_id: int, player_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif player == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
+        elif  not match.started:
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED ,
+                detail="Match has not started",
+            )
+    hand = get_player_hand(match_id,player_id)
+    return hand
+    
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:
