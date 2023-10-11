@@ -43,7 +43,7 @@ def get_card_image(path:str):
     with open(path, 'rb') as f:
         card_img = base64.b64encode(f.read())
         f.close()
-    return str(card_img)
+    return card_img
 
 
 @db_session
@@ -56,10 +56,10 @@ def get_card(match_id: int,player_id:int):
         match.deck.add(deck)
  
     card = select(c for c in match.deck).random(1)[0]
-    card_image = get_card_image(card.image)
+    card_image = get_card_image(card.image) 
     player.hand.add(card)
     match.deck.remove(card)
-    return {"card_id": card.card_id, "name": card.name, "image": card_image}
+    return {"id": card.id, "name": card.name, "image": card_image}
 
 
 @db_session
@@ -71,5 +71,5 @@ def get_player_hand(match_id: int,player_id:int):
     cards = select(c for c in player.hand)[:]
     for card in cards:
         card_image = get_card_image(card.image)
-        hand.append({"card_id": card.card_id, "name": card.name, "image": card_image})
+        hand.append({"id": card.id, "name": card.name, "image": card_image})
     return hand

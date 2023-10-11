@@ -9,6 +9,7 @@ from app.src.game.constants import *
 from app.src.game.card import *
 from app.src.models.schemas import *
 
+
 router = APIRouter()
 
 
@@ -102,9 +103,9 @@ async def get_card_endpoint(match_id: int, player_id: int):
             )
     card = get_card(match_id,player_id)
     return CardModel(
-        card_id= card["card_id"],
+        id= card["id"],
         name= card["name"],
-        image= card["card_image"]
+        image= card["image"]
         )
     
 
@@ -134,6 +135,48 @@ async def get_hand(match_id: int, player_id: int):
     hand = get_player_hand(match_id,player_id)
     return hand
     
+
+
+@router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
+async def start_match(input: StartMatchIn):
+    with db_session:
+        match = MatchDB.get(id=input.match_id)
+        player = PlayerDB.get(id=input.player_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif player == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
+        elif player.id != match.player_owner.id:
+            raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only the owner can start the match",
+                )
+        elif match.number_players < match.min_players:
+            raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="There are not enough players",
+                )
+    
+    start_game(input.match_id)
+    
+    ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED)
+
+    match = get_live_match_by_id(match.id)
+    await match._match_connection_manager.broadcast_json(ws_msg)
+    
+    msg = {"message": "The match has been started"}
+    return msg
+
+
+
+
+
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:

@@ -13,6 +13,7 @@ from app.src.game.constants import *
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Card as CardDB
+from app.src.game.deck import *
 
 
 class Match:
@@ -199,12 +200,45 @@ def deal_cards(match_id: int):
     for player in players_list:
         cards = select(c for c in match.deck).random(4)
         player.hand.add(cards)
+        match.deck.remove(cards)
     the_thing_player = select(p for p in match.players).random(1)[0]
     card = select(p for p in the_thing_player.hand).random(1)
     the_thing_player.hand.remove(card)
     match.deck.add(card)
     card_the_thing = CardDB.get(card_id = LA_COSA)
     the_thing_player.hand.add(card_the_thing)
+    the_thing_player.roll = "la cosa"
+    flush()
 
 
+def get_db_match_by_id(match_id: int):
+    """
+    Get a match from de database by id
+    
+    Args:
+        match_id (int)
+
+    Returns:
+        match (MatchDB)
+    """
+
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        return match
+
+
+@db_session
+def start_game(match_id: int):
+    match = MatchDB.get(id=match_id)
+    add_cards_to_deck(match_id, match.number_players)
+    match.started = True
+    match.turn= 0
+    deal_cards(match_id)
+    players = select(p for p in match.players).random(match.number_players)
+    turn = 0
+    for player in players:
+        player.turn = turn
+        turn +=1
+    flush()
+    
 MATCHES: List[Match] = []
