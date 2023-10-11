@@ -154,7 +154,12 @@ async def start_match(input: StartMatchIn):
                 )
     
     start_game(input.match_id)
+    
+    ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED)
 
+    match = get_live_match_by_id(match.id)
+    await match._match_connection_manager.broadcast_json(ws_msg)
+    
     msg = {"message": "The match has been started"}
     return msg
 

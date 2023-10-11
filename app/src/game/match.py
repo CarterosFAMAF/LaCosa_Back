@@ -192,7 +192,7 @@ def get_db_match_by_id(match_id: int):
 
 
 @db_session
-async def start_game(match_id: int):
+def start_game(match_id: int):
     match = MatchDB.get(id=match_id)
    
     match.started = True
@@ -204,10 +204,5 @@ async def start_game(match_id: int):
         player.turn = turn
         turn +=1
     flush()
-    
-    ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED, player.id)
-
-    match = get_live_match_by_id(match.id)
-    await match._match_connection_manager.broadcast_json(ws_msg)
     
 MATCHES: List[Match] = []
