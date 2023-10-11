@@ -18,13 +18,17 @@ def get_player_by_id(player_id):
         with db_session:
             player = PlayerDB.get(id=player_id)
             return player
+        
+def get_card_by_id(card_id):
+    with db_session:
+        card = CardDB.get(id = card_id)
+    return card
 
 def discard_card_of_player(card_id,match_id,player_id):
     with db_session:
         player = get_player_by_id(player_id)
-        cards = list(select (p for p in player.hand if p.card_id == card_id))
-        if cards:
-            card = cards[0]
+        card = get_card_by_id(card_id)
+        if card != None:
             player.hand.remove(card)
         else:
              pass

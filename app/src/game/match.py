@@ -160,7 +160,7 @@ def next_turn(match_id: int):
         match = MatchDB.get(id = match_id)
         while not match.finalized:
             match.turn = (match.turn % match.number_players) + 1
-            player = PlayerDB.get(turn = match.turn)
+            player = PlayerDB.get(lambda p: p.turn == match.turn and p.match == match)
             if check_alive(player.id):
                 break
         flush()
