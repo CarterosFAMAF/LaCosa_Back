@@ -69,23 +69,38 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 
 
-@router.put("/partidas/{partida_id}/iniciar", status_code=status.HTTP_200_OK)
-@db_session
-async def start_match(match_id: int, player_id:int):
-    """
-    try:
-        player = Player.get_player_by_id(player_id)
-    except:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Player not found")
-    try:
-        match = Match.get_db_match_by_id(match_id)
-    except:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Match not found")
-    if player.id != match.owner.id:
-        raise HTTPException(status_code=403, detail= "Only the owner can start the match")
-    """
+@router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
+async def start_match(input: StartMatchIn):
+    with db_session:
+        match = MatchDB.get(id=input.match_id)
+        player = PlayerDB.get(id=input.player_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif player == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
+        elif player.id != match.owner.id:
+            raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only the owner can start the match",
+                )
+        elif match.number_players < match.min_players:
+            raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="There are not enough players",
+                )
+    
+    start_game(input.match_id)
+    
     msg = {"message": "The match has been started"}
     return msg
+
+
 
 
 

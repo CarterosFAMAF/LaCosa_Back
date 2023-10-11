@@ -171,6 +171,8 @@ def deal_cards(match_id: int):
     match.deck.add(card)
     card_the_thing = CardDB.get(card_id = LA_COSA)
     the_thing_player.hand.add(card_the_thing)
+    the_thing_player.roll = "la cosa"
+    flush()
 
 
 def get_db_match_by_id(match_id: int):
@@ -189,4 +191,18 @@ def get_db_match_by_id(match_id: int):
         return match
 
 
+@db_session
+def start_game(match_id: int):
+    match = MatchDB.get(id=match_id)
+   
+    match.started = True
+    match.turn= 0
+    deal_cards(match_id)
+    players = select(p for p in match.players).random(match.number_players)
+    turn = 0
+    for player in players:
+        player.turn = turn
+        turn +=1
+    flush()
+    
 MATCHES: List[Match] = []
