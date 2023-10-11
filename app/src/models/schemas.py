@@ -39,7 +39,7 @@ class JoinMatchOut(BaseModel):
     match_name: str
 
 class CardModel(BaseModel):
-    card_id: int
+    id: int
     name: str
     image: str
     
