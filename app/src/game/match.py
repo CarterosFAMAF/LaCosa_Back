@@ -155,23 +155,24 @@ def get_match_by_id(match_id: int):
         match_db = MatchDB.get(id=match_id)
     return match_db
 
-async def next_turn(match_id: int):
+def next_turn(match_id: int):
     with db_session:
-        match = MatchDB.get(match_id)
-        player = PlayerDB.get(turn = match.turn)
-        while True:
-            match.turn = match.turn % match.number_players + 1
-            if not check_dead(player.id):
+        match = MatchDB.get(id = match_id)
+        while not match.finalized:
+            match.turn = (match.turn % match.number_players) + 1
+            player = PlayerDB.get(turn = match.turn)
+            if check_alive(player.id):
                 break
-        manager = match._match_connection_manager
-        msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
-        await manager.broadcast_json(msg_ws)
         flush()
+    #manager = match._match_connection_manager
+    #msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
+    #await manager.broadcast_json(msg_ws)
+    #flush()
 
 #Se puede mejorar ya que no se si puedo pasar un modelo en la base de datos
-def check_dead(player_id):
+def check_alive(player_id):
     player = get_player_by_id(player_id)
-    return player.role == "dead"
+    return player.role == "alive"
 
 #se fija si queda mas de un jugador con vida.
 def check_finish(match_id):
