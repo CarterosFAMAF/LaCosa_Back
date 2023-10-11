@@ -6,7 +6,7 @@ from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.match_connection_manager import create_ws_message
 from app.src.game.constants import *
-
+from app.src.game.card import *
 from app.src.models.schemas import *
 
 
@@ -66,6 +66,16 @@ async def join_match_endpoint(input: JoinMatchIn):
         player_id=match_out["player_id"], match_name=match_out["match_name"]
     )
 
+@router.put("/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
+async def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
+    play_card(player_in_id,player_out_id,match_id,card_id)
+    
+    next_turn(match_id)
+    
+    match = get_match_by_id(match_id)
+    manager = match._match_connection_manager
+    msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
+    await manager.broadcast_json(msg_ws)
 
 @router.get(
     "/matches/{match_id}/players/{player_id}/get_card",
