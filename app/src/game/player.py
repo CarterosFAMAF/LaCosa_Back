@@ -28,6 +28,7 @@ def discard_card_of_player(card_id,match_id,player_id):
     with db_session:
         player = get_player_by_id(player_id)
         card = get_card_by_id(card_id)
+
         if card != None:
             player.hand.remove(card)
         else:

@@ -67,10 +67,15 @@ async def join_match_endpoint(input: JoinMatchIn):
     )
 
 @router.put("/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card")
-def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
+async def play_card_endpoint(match_id,player_in_id,player_out_id,card_id):
     play_card(player_in_id,player_out_id,match_id,card_id)
     next_turn(match_id)
     
+    match = get_match_by_id(match_id)
+    manager = match._match_connection_manager
+    msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
+    await manager.broadcast_json(msg_ws)
+
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:

@@ -164,10 +164,6 @@ def next_turn(match_id: int):
             if check_alive(player.id):
                 break
         flush()
-    #manager = match._match_connection_manager
-    #msg_ws = create_ws_message(match_id,WS_STATUS_PLAYER_WELCOME)
-    #await manager.broadcast_json(msg_ws)
-    #flush()
 
 #Se puede mejorar ya que no se si puedo pasar un modelo en la base de datos
 def check_alive(player_id):
