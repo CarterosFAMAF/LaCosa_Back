@@ -93,9 +93,9 @@ async def get_card_endpoint(match_id: int, player_id: int):
             )
     card = get_card(match_id,player_id)
     return CardModel(
-        card_id= card["card_id"],
+        card_id= card["id"],
         name= card["name"],
-        image= card["card_image"]
+        image= card["image"]
         )
     
 
