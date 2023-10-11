@@ -166,6 +166,7 @@ def deal_cards(match_id: int):
     for player in players_list:
         cards = select(c for c in match.deck).random(4)
         player.hand.add(cards)
+        match.deck.remove(cards)
     the_thing_player = select(p for p in match.players).random(1)[0]
     card = select(p for p in the_thing_player.hand).random(1)
     the_thing_player.hand.remove(card)
