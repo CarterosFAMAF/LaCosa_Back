@@ -4,7 +4,7 @@ from typing import List
 from fastapi import WebSocket
 from pony.orm import *
 
-from app.src.game.player import Player
+from app.src.game.player import *
 from app.src.game.match_connection_manager import (
     MatchConnectionManager,
     create_ws_message,
@@ -155,6 +155,40 @@ def get_match_by_id(match_id: int):
     with db_session:
         match_db = MatchDB.get(id=match_id)
     return match_db
+
+def next_turn(match_id: int):
+    with db_session:
+        match = get_match_by_id(match_id)
+        while True:
+            match.turn = (match.turn % match.number_players) + 1
+            player = PlayerDB.get(lambda p: p.turn == match.turn and p.match == match)
+            if check_alive(player.id):
+                break
+        flush()
+        #select(p for p in match.players if p.turn == match.turn)
+
+#Se puede mejorar ya que no se si puedo pasar un modelo en la base de datos
+def check_alive(player_id):
+    player = get_player_by_id(player_id)
+    return player.role == "alive"
+
+#se fija si queda mas de un jugador con vida.
+def set_finish(match_id):
+    with db_session:
+        match = get_match_by_id(match_id)
+        alive_count = 0
+        for player in select(p for p in PlayerDB if p.match == match):
+            if player.role == "alive":
+                alive_count += 1
+        if alive_count == 1:
+            match.finalized = True
+        flush()
+        
+def check_finish(match_id):
+    with db_session:
+        match = get_match_by_id(match_id)
+        return match.finalized == True
+        
 
 
 

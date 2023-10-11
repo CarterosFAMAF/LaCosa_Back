@@ -39,6 +39,7 @@ class Card(db.Entity):
     image = Required(str)
     player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
+    player_hand = Set(Player)
     discard_deck = Set(Match, reverse="discard_pile")
 
 
