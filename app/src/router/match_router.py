@@ -154,7 +154,7 @@ async def start_match(input: StartMatchIn):
                 )
     
     start_game(input.match_id)
-    
+
     msg = {"message": "The match has been started"}
     return msg
 
