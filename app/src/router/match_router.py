@@ -67,6 +67,64 @@ async def join_match_endpoint(input: JoinMatchIn):
     )
 
 
+@router.get(
+    "/matches/{match_id}/players/{player_id}/get_card",
+    response_model=CardModel,
+    status_code=status.HTTP_200_OK
+)
+async def get_card_endpoint(match_id: int, player_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif player == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
+        elif  not match.started:
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED ,
+                detail="Match has not started",
+            )
+    card = get_card(match_id,player_id)
+    return CardModel(
+        card_id= card["card_id"],
+        name= card["name"],
+        image= card["card_image"]
+        )
+    
+
+@router.get(
+    "/matches/{match_id}/players/{player_id}/get_hand",
+    status_code=status.HTTP_200_OK
+)
+async def get_hand(match_id: int, player_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif player == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
+        elif  not match.started:
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED ,
+                detail="Match has not started",
+            )
+    hand = get_player_hand(match_id,player_id)
+    return hand
+    
 
 
 @router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
@@ -84,7 +142,7 @@ async def start_match(input: StartMatchIn):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Player not found",
             )
-        elif player.id != match.owner.id:
+        elif player.id != match.player_owner.id:
             raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Only the owner can start the match",
