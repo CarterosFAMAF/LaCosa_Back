@@ -166,7 +166,7 @@ def get_match_by_id(match_id: int):
 
 def next_turn(match_id: int):
     """
-    Set the next turn in a match
+    Set the next turn in a match. Broadcast a message to all players in the match.
 
     Args:
         match_id (int)
@@ -176,6 +176,8 @@ def next_turn(match_id: int):
     """
     with db_session:
         match = get_match_by_id(match_id)
+        player = None
+
         while True:
             match.turn = (match.turn % match.number_players) + 1
             # get the player with the current turn
@@ -186,6 +188,11 @@ def next_turn(match_id: int):
             if player.role != "dead":
                 break
         flush()
+
+    # send message to all players in the match
+    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
+    live_match = get_live_match_by_id(match_id)
+    live_match._match_connection_manager.broadcast_json(ws_msg)
 
 
 @db_session
