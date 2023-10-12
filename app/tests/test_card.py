@@ -98,19 +98,23 @@ def test_get_card_empty_deck():
 
 def test_valid_effect_LANZALLAMAS():
     with db_session:
+        
         player = PlayerDB(name = 'player_in')
         flush()
         player_id = player.id
-        player.turn = 1
+        player.position = 1
         player.role = "alive"
+        
         player_target = PlayerDB(name = 'player_target')
         flush()
         player_target_id = player_target.id
-        player.turn = 2
+        player.position = 2
         player_target.role = "alive"
+        
         card = select (p for p in CardDB if p.card_id == LANZALLAMAS).random(1)[0]
         card_id = card.id
         player.hand.add(card)
+        
         flush()
         match = MatchDB(
             name="test_match",
@@ -126,16 +130,15 @@ def test_valid_effect_LANZALLAMAS():
         flush()
         match_id = match.id
         add_cards_to_deck(match_id,4)
-    
-    play_card(player_id,player_target_id,match_id,card_id)
 
     with db_session:
         player = get_player_by_id(player_id)
         player_target = get_player_by_id(player_target_id)
+        play_card(player,player_target,match_id,card_id)
         assert player_target.role == "dead"
         assert player.hand == []
         next_turn(match_id)
         match_rec = get_match_by_id(match_id)
-        assert match_rec.discard_pile.count() == 1
+        assert match_rec.discard_pile.count() == 2
         assert match_rec.turn == 2
         

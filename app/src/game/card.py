@@ -12,7 +12,7 @@ class Card:
     name: str
 
 
-async def play_card(player_in, player_out, match_id: int, card_id: int):
+def play_card(player_in, player_out, match_id: int, card_id: int):
     """
     Play a card from a player to another player, changes the state of the game, and send a message to all players
 
@@ -25,20 +25,12 @@ async def play_card(player_in, player_out, match_id: int, card_id: int):
     Returns:
         None
     """
-
     card = get_card_by_id(card_id)
     assert card is not None
 
-    if card.card_id == LANZALLAMAS:
+    if card.card_id == LANZALLAMAS:   
+        
         play_lanzallamas(player_out.id)
-
-        # send message to all players
-        live_match = get_live_match_by_id(match_id)
-
-        print(live_match)
-        status = WS_STATUS_PLAYER_BURNED
-        msg_ws = create_ws_message(match_id, status, player_in.id, player_out.id)
-        await live_match._match_connection_manager.broadcast_json(msg_ws)
 
     else:
         pass

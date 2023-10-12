@@ -175,7 +175,7 @@ def next_turn(match_id: int):
         None
     """
     with db_session:
-        match = get_match_by_id(match_id)
+        match = get_db_match_by_id(match_id)
         player = None
 
         while True:
@@ -190,9 +190,9 @@ def next_turn(match_id: int):
         flush()
 
     # send message to all players in the match
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
-    live_match = get_live_match_by_id(match_id)
-    live_match._match_connection_manager.broadcast_json(ws_msg)
+    #ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
+    #live_match = get_live_match_by_id(match_id)
+    #live_match._match_connection_manager.broadcast_json(ws_msg)
 
 
 @db_session

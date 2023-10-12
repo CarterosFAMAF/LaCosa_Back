@@ -107,9 +107,16 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
             detail="Player not found",
         )
 
-    await play_card(player_in, player_out, match_id, card_id)
+    play_card(player_in, player_out, match_id, card_id)
     next_turn(match_id)
 
+     # send message to all players
+    live_match = get_live_match_by_id(match_id)
+    print(live_match)
+    status = WS_STATUS_PLAYER_BURNED
+    msg_ws = create_ws_message(match_id, status, player_in.id, player_out.id)
+    await live_match._match_connection_manager.broadcast_json(msg_ws)
+    
     return {"message": "Card played"}
 
 
@@ -207,7 +214,7 @@ async def start_match(input: StartMatchIn):
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:
-        player = Player.get_player_by_id(player_id)
+        player = get_player_by_id(player_id)
     except:
         raise ValueError("Player not found")
     if player == None:
