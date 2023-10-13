@@ -4,7 +4,7 @@ from fastapi import WebSocket
 from pony.orm import *
 
 from app.src.models.base import Match as MatchDB
-from app.src.game.constants import *
+from app.src.websocket.constants import *
 
 
 class MatchConnectionManager:

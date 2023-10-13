@@ -4,9 +4,11 @@ from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPExcep
 
 from app.src.game.player import *
 from app.src.game.match import *
-from app.src.game.match_connection_manager import create_ws_message
 from app.src.game.constants import *
 from app.src.game.card import *
+
+from app.src.websocket.constants import *
+
 from app.src.models.schemas import *
 
 
@@ -60,7 +62,12 @@ async def join_match_endpoint(input: JoinMatchIn):
             detail="Match is full",
         )
 
-    match_out = await join_match(input.player_name, input.match_id)
+    match_out = join_match(input.player_name, input.match_id)
+
+    # send message to all players in the match
+    ws_msg = create_ws_message(match_id, WS_STATUS_PLAYER_JOINED, player_db.id)
+    match = get_live_match_by_id(match_id)
+    await match._match_connection_manager.broadcast_json(ws_msg)
 
     return JoinMatchOut(
         player_id=match_out["player_id"], match_name=match_out["match_name"]
@@ -108,15 +115,21 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
         )
 
     play_card(player_in, player_out, match_id, card_id)
-    next_turn(match_id)
 
-     # send message to all players
+    # send lanzallamas message to all players
     live_match = get_live_match_by_id(match_id)
     print(live_match)
     status = WS_STATUS_PLAYER_BURNED
     msg_ws = create_ws_message(match_id, status, player_in.id, player_out.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
-    
+
+    next_turn(match_id)
+
+    # send next turn message to all players in the match
+    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
+    live_match = get_live_match_by_id(match_id)
+    live_match._match_connection_manager.broadcast_json(ws_msg)
+
     return {"message": "Card played"}
 
 

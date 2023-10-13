@@ -5,15 +5,14 @@ from fastapi import WebSocket
 from pony.orm import *
 
 from app.src.game.player import *
-from app.src.game.match_connection_manager import (
-    MatchConnectionManager,
-    create_ws_message,
-)
 from app.src.game.constants import *
+from app.src.game.deck import *
+
+from app.src.websocket.match_connection_manager import MatchConnectionManager
+
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Card as CardDB
-from app.src.game.deck import *
 
 
 class Match:
@@ -72,7 +71,7 @@ class Match:
         MATCHES.append(self)
 
 
-async def join_match(player_name: str, match_id: int):
+def join_match(player_name: str, match_id: int):
     """
     Join a player to a match
 
@@ -97,12 +96,6 @@ async def join_match(player_name: str, match_id: int):
         match_db.players.add(player_db)
         match_db.number_players += 1
         flush()
-
-    # send message to all players in the match
-    ws_msg = create_ws_message(match_id, WS_STATUS_PLAYER_JOINED, player_db.id)
-
-    match = get_live_match_by_id(match_id)
-    await match._match_connection_manager.broadcast_json(ws_msg)
 
     return {"player_id": player_db.id, "match_name": match_db.name}
 
@@ -166,7 +159,7 @@ def get_match_by_id(match_id: int):
 
 def next_turn(match_id: int):
     """
-    Set the next turn in a match. Broadcast a message to all players in the match.
+    Set the next turn in a match
 
     Args:
         match_id (int)
@@ -188,11 +181,6 @@ def next_turn(match_id: int):
             if player.role != "dead":
                 break
         flush()
-
-    # send message to all players in the match
-    #ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
-    #live_match = get_live_match_by_id(match_id)
-    #live_match._match_connection_manager.broadcast_json(ws_msg)
 
 
 @db_session
