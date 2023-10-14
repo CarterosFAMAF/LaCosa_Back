@@ -8,6 +8,7 @@ from app.src.game.constants import *
 from app.src.game.card import *
 
 from app.src.websocket.constants import *
+from app.src.websocket.match_connection_manager import *
 
 from app.src.models.schemas import *
 
@@ -65,8 +66,10 @@ async def join_match_endpoint(input: JoinMatchIn):
     match_out = join_match(input.player_name, input.match_id)
 
     # send message to all players in the match
-    ws_msg = create_ws_message(match_id, WS_STATUS_PLAYER_JOINED, player_db.id)
-    match = get_live_match_by_id(match_id)
+    ws_msg = create_ws_message(
+        input.match_id, WS_STATUS_PLAYER_JOINED, match_out["player_id"]
+    )
+    match = get_live_match_by_id(input.match_id)
     await match._match_connection_manager.broadcast_json(ws_msg)
 
     return JoinMatchOut(

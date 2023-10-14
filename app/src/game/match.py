@@ -8,7 +8,7 @@ from app.src.game.player import *
 from app.src.game.constants import *
 from app.src.game.deck import *
 
-from app.src.websocket.match_connection_manager import MatchConnectionManager
+from app.src.websocket.match_connection_manager import *
 
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
