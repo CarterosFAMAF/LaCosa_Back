@@ -110,6 +110,7 @@ DECK = [
 ]
 
 LANZALLAMAS = 3
+SOSPECHA = 2
 LA_COSA = 1
 
 """
