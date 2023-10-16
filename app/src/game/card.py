@@ -29,9 +29,9 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     assert card is not None
 
     if card.card_id == LANZALLAMAS:   
-        
         play_lanzallamas(player_out.id)
-
+    if card.card_id == SOSPECHA:
+        play_sospecha(player_out.id)
     else:
         pass
 
@@ -53,3 +53,11 @@ def play_lanzallamas(player_target_id):
         player_target = get_player_by_id(player_target_id)
         player_target.role = "dead"
         flush()
+        
+def play_sospecha(player_target_id):
+    #esta funcion deberia devolver alguna carta random del player target
+    with db_session:
+        player_target = get_player_by_id(player_target_id)
+        card_rm = player_target.hand.random(1).first()
+        
+        return card_rm.name
