@@ -32,6 +32,10 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
         play_lanzallamas(player_out.id)
     if card.card_id == SOSPECHA:
         play_sospecha(player_out.id)
+    if card.card_id == MAS_VALE_QUE_CORRAS:
+        play_mas_vale_que_corras(player_in.id,player_out.id)
+    if card.card_id == VIGILA_TUS_ESPALDAS:
+        play_vigila_tus_espaldas(match_id)
     else:
         pass
 
@@ -61,3 +65,25 @@ def play_sospecha(player_target_id):
         card_rm = player_target.hand.random(1).first()
         
         return card_rm.name
+    
+def play_mas_vale_que_corras(player_main_id,player_target_id):
+    # Deberia haber intercambio antes de el cambio de posicion.
+    # Cambia el position del player_main y player_target
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+        player_target = get_player_by_id(player_target_id)
+        pos_tmp = player_main.position
+        player_main.position = player_target.position 
+        player_target.position = pos_tmp
+        flush()
+    
+def play_vigila_tus_espaldas(match_id):
+    # Invierte todas las posiciones de los jugadores en la partida
+    with db_session:
+        match = get_match_by_id(match_id)
+        num_players = match.number_players - 1
+        
+        for player in match.players:
+            player.position = num_players
+            num_players -= 1
+    flush()
