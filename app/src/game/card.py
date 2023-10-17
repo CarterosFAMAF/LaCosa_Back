@@ -94,9 +94,12 @@ def play_vigila_tus_espaldas(match_id):
     with db_session:
         match = get_match_by_id(match_id)
         num_players = match.number_players - 1
+        init = 0
         for player in match.players:
-            player.position = num_players
+            player_in = select(c for c in match.players if c.position == init )
+            player_in.position = num_players
             num_players -= 1
+            init += 1
             flush()
     status = WS_STATUS_REVERSE_POSITION
     return status
