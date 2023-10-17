@@ -170,17 +170,18 @@ def next_turn(match_id: int):
     with db_session:
         match = get_db_match_by_id(match_id)
         player = None
-
+        
         while True:
-            match.turn = (match.turn % match.number_players) + 1
+            match.turn = ((match.turn + 1) % match.number_players)
             # get the player with the current turn
             player = select(
-                p for p in PlayerDB if p.match == match and p.position == match.turn
+                p for p in match.players if p.position == match.turn
             ).first()
             # if it is not dead, break the loop, else, continue
-            if player.role != "dead":
+            if player.role != PLAYER_ROLE_DEAD:
                 break
-        flush()
+            flush()
+
 
 
 @db_session
