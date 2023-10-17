@@ -167,7 +167,7 @@ async def discard(discard: DiscardIn):
         )
 
     # check if player in exists
-    player = get_player_by_id(discard.player_in)
+    player = get_player_by_id(discard.player_id)
     if player== None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -182,6 +182,7 @@ async def discard(discard: DiscardIn):
         )
         
     discard_card_of_player(card.id, match.id, player.id)
+    
     status = WS_STATUS_DISCARD
     live_match = get_live_match_by_id(discard.match_id)
     print(live_match)
