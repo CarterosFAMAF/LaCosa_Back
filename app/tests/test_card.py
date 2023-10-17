@@ -77,6 +77,7 @@ def test_get_card_empty_deck():
         number_players=1,
         max_players=4,
         min_players=12,
+
         started=False,
         finalized=False,
         turn=None,
@@ -94,12 +95,12 @@ def test_get_card_empty_deck():
 def test_valid_effect():
     with db_session:
         player = PlayerDB(name="player_in")
+
         flush()
         player_id = player.id
         player.position = 1
         player.role = "alive"
         flush()
-
         
         player_target = PlayerDB(name = 'player_target')
 
@@ -108,15 +109,15 @@ def test_valid_effect():
         player_target.position = 2
         player_target.role = "alive"
         flush()
+        
 
         player_dead = PlayerDB(name = 'player_dead')
-
         flush()
         player_dead_id = player_dead.id
         player_dead.position = 3
         player_dead.role = "alive"
         flush()
-
+        
 
         card = select (p for p in CardDB if p.card_id == LANZALLAMAS).random(1)[0]
 
@@ -133,27 +134,21 @@ def test_valid_effect():
             finalized=False,
             turn=1,
             player_owner=player,
-
-            players=[player, player_target, player_dead],
-
+            players=[player,player_target,player_dead],
         )
         flush()
         match_id = match.id
         flush()
-
-        add_cards_to_deck(match_id, 4)
-
+        add_cards_to_deck(match_id,4)
 
     with db_session:
         player = get_player_by_id(player_id)
         player_target = get_player_by_id(player_target_id)
-
-        play_card(player, player_target, match_id, card_id)
-
+        play_card(player,player_target,match_id,card_id)
         assert player_target.role == PLAYER_ROLE_DEAD
         assert player.hand == []
         next_turn(match_id)
         match_rec = get_match_by_id(match_id)
         assert match_rec.discard_pile.count() == 2
         assert match_rec.turn == 3
-
+        

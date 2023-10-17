@@ -73,7 +73,7 @@ def play_sospecha(player_target_id):
     with db_session:
         player_target = get_player_by_id(player_target_id)
         card_rm = player_target.hand.random(1).first()
-        
+        #usar ws para personal message. 
         return card_rm.id
     
 def play_mas_vale_que_corras(player_main_id,player_target_id):
