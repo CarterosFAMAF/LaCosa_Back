@@ -190,6 +190,8 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
         message = f"se han inviertido las posiciones"
+    elif status == WS_STATUS_DISCARD:
+        message = f"{player_name} ha descartado una carta"
     else:
         message = "Status desconocido"  # Handle unknown status values
 
