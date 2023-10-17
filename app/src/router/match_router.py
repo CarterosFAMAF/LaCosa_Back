@@ -140,7 +140,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
 
     return {"message": "Card played"}
 
-@router.get(
+@router.put(
     "/matches/{match_id}/players/{player_id}/discard",
     response_model=DiscardIn,
     status_code=status.HTTP_200_OK,
