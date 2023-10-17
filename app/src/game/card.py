@@ -98,5 +98,5 @@ def play_vigila_tus_espaldas(match_id):
             player.position = num_players
             num_players -= 1
             flush()
-    status = WS_STATUS_CHANGED_OF_PLACES
+    status = WS_STATUS_REVERSE_POSITION
     return status
