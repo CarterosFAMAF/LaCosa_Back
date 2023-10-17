@@ -27,20 +27,21 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     """
     card = get_card_by_id(card_id)
     assert card is not None
-
+    status = None
+    
     if card.card_id == LANZALLAMAS:   
-        play_lanzallamas(player_out.id)
+        status = play_lanzallamas(player_out.id)
     if card.card_id == SOSPECHA:
-        play_sospecha(player_out.id)
+        status = play_sospecha(player_out.id)
     if card.card_id == MAS_VALE_QUE_CORRAS:
-        play_mas_vale_que_corras(player_in.id,player_out.id)
+        status = play_mas_vale_que_corras(player_in.id,player_out.id)
     if card.card_id == VIGILA_TUS_ESPALDAS:
-        play_vigila_tus_espaldas(match_id)
+        status = play_vigila_tus_espaldas(match_id)
     else:
         pass
 
     discard_card_of_player(card.id, match_id, player_in.id)
-
+    return status
 
 def play_lanzallamas(player_target_id):
     """
@@ -52,19 +53,28 @@ def play_lanzallamas(player_target_id):
     Returns:
         None
     """
-
     with db_session:
         player_target = get_player_by_id(player_target_id)
         player_target.role = "dead"
         flush()
-        
+    status = WS_STATUS_PLAYER_BURNED
+    return status
+    
 def play_sospecha(player_target_id):
-    #esta funcion deberia devolver alguna carta random del player target
+    """
+    return name of card random of player target
+
+    Args:
+        player_target_id (int)
+
+    Returns:
+        name of card
+    """
     with db_session:
         player_target = get_player_by_id(player_target_id)
         card_rm = player_target.hand.random(1).first()
         
-        return card_rm.name
+        return card_rm.id
     
 def play_mas_vale_que_corras(player_main_id,player_target_id):
     # Deberia haber intercambio antes de el cambio de posicion.
@@ -76,14 +86,17 @@ def play_mas_vale_que_corras(player_main_id,player_target_id):
         player_main.position = player_target.position 
         player_target.position = pos_tmp
         flush()
-    
+    status = WS_STATUS_CHANGED_OF_PLACES
+    return status
+
 def play_vigila_tus_espaldas(match_id):
     # Invierte todas las posiciones de los jugadores en la partida
     with db_session:
         match = get_match_by_id(match_id)
         num_players = match.number_players - 1
-        
         for player in match.players:
             player.position = num_players
             num_players -= 1
-    flush()
+            flush()
+    status = WS_STATUS_CHANGED_OF_PLACES
+    return status
