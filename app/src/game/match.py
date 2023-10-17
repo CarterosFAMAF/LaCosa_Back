@@ -172,15 +172,15 @@ def next_turn(match_id: int):
         player = None
 
         while True:
-            match.turn = (match.turn % match.number_players) + 1
+            match.turn = (match.turn + 1) % match.number_players
             # get the player with the current turn
             player = select(
-                p for p in PlayerDB if p.match == match and p.position == match.turn
+                p for p in match.players if p.position == match.turn
             ).first()
             # if it is not dead, break the loop, else, continue
-            if player.role != "dead":
+            if player.role != PLAYER_ROLE_DEAD:
                 break
-        flush()
+            flush()
 
 
 @db_session
@@ -251,6 +251,38 @@ def start_game(match_id: int):
             player.role = PLAYER_ROLE_HUMAN
         position += 1
     flush()
+
+
+def end_match(match_id):
+    """
+    Set match to finalized in db
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        match.finalized = True
+        flush()
+
+
+def delete_match(match_id):
+    """
+    Delete match from db
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        match.delete()
+        flush()
 
 
 MATCHES: List[Match] = []

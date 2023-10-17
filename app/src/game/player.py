@@ -19,18 +19,47 @@ class Player:
 
 
 def get_player_by_id(player_id):
+    """
+    Get player from db
+
+    Args:
+        player_id (int)
+
+    Returns:
+        player (Player)
+    """
     with db_session:
         player = PlayerDB.get(id=player_id)
         return player
 
 
 def get_card_by_id(card_id):
+    """
+    Get card from db
+
+    Args:
+        card_id (int)
+
+    Returns:
+        card (Card)
+    """
     with db_session:
         card = CardDB.get(id=card_id)
     return card
 
 
 def discard_card_of_player(card_id, match_id, player_id):
+    """
+    Discard a card from a player hand and add it to the discard pile
+
+    Args:
+        card_id (int)
+        match_id (int)
+        player_id (int)
+
+    Returns:
+        None
+    """
     with db_session:
         player = get_player_by_id(player_id)
         card = get_card_by_id(card_id)
@@ -53,6 +82,16 @@ def get_card_image(path: str):
 
 @db_session
 def get_card(match_id: int, player_id: int):
+    """
+    Get a card from the deck and add it to the player hand
+
+    Args:
+        match_id (int)
+        player_id (int)
+
+    Returns:
+        card (Card)
+    """
     match = MatchDB.get(id=match_id)
     player = PlayerDB.get(id=player_id)
     if match.deck == [] and match.discard_pile != []:
@@ -69,6 +108,16 @@ def get_card(match_id: int, player_id: int):
 
 @db_session
 def get_player_hand(match_id: int, player_id: int):
+    """
+    Get the cards of a player
+
+    Args:
+        match_id (int)
+        player_id (int)
+
+    Returns:
+        hand (list of Card)
+    """
     match = MatchDB.get(id=match_id)
     player = PlayerDB.get(id=player_id)
     hand = []
@@ -78,3 +127,21 @@ def get_player_hand(match_id: int, player_id: int):
         card_image = get_card_image(card.image)
         hand.append({"id": card.id, "name": card.name, "image": card_image})
     return hand
+
+
+def delete_player(player_id: int, match_id: int):
+    """
+    Delete a player from the match
+
+    Args:
+        player_id (int)
+        match_id (int)
+
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        match.players.remove(player)
+        flush()

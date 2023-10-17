@@ -239,6 +239,8 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
     if match == None:
         raise ValueError("Match not found")
 
+    match_db = get_match_by_id(match_id)
+
     manager = match._match_connection_manager
 
     print(f"Player {player.name} connected to match {match._id}")
@@ -249,5 +251,25 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
 
     except WebSocketDisconnect:
         await manager.disconnect(websocket, player_id, match._id)
-        remove_player_from_match(player_id, match._id)
+
+        # if the match has started end match.
+        if match.started:
+            end_match(match_id)
+            ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
+            await manager.broadcast_json(ws_msg)
+            print(f"Match {match._id} ended")
+
+        # if the match has not started and host disconnects, delete match.
+        elif player_id == match_db.player_owner.id:
+            delete_match(match_id)
+            ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
+            await manager.broadcast_json(ws_msg)
+            print(f"Match {match._id} deleted")
+
+        # if the match has not started and player disconnects, delete player.
+        else:
+            delete_player(player_id, match_id)
+            ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
+            await manager.broadcast_json(ws_msg)
+
         print(f"Player {player.name} disconnected from match {match._id}")
