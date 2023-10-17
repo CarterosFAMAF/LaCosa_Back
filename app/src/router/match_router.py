@@ -116,7 +116,13 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Player not found",
         )
-
+        
+    card = get_card_by_id(card_id)
+    if card == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found",
+        )
     status = play_card(player_in, player_out, match_id, card_id)
 
     # send lanzallamas message to all players
@@ -134,6 +140,48 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
 
     return {"message": "Card played"}
 
+@router.get(
+    "/matches/{match_id}/players/{player_id}/discard",
+    response_model=DiscardIn,
+    status_code=status.HTTP_200_OK,
+)
+async def discard(discard: DiscardIn):
+    
+    match = get_match_by_id(discard.match_id)
+    if match == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found",
+        )
+    elif match.started == False:
+        raise HTTPException(
+            status_code=status.HTTP_412_PRECONDITION_FAILED,
+            detail="Match has not started",
+        )
+
+    # check if player in exists
+    player = get_player_by_id(discard.player_in)
+    if player== None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found",
+        )
+    
+    card = get_card_by_id(discard.card_id)
+    if card == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found",
+        )
+        
+    discard_card_of_player(card.id, match.id, player.id)
+    status = WS_STATUS_DISCARD
+    live_match = get_live_match_by_id(discard.match_id)
+    print(live_match)
+    msg_ws = create_ws_message(discard.match_id, status, player.id)
+    await live_match._match_connection_manager.broadcast_json(msg_ws)
+    
+    return {"message" : "Card discard"}
 
 @router.get(
     "/matches/{match_id}/players/{player_id}/get_card",
