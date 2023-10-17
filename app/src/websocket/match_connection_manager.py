@@ -175,6 +175,10 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
         message = f"Turno nuevo de {player_name}"
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
+    elif status == WS_STATUS_CHANGED_OF_PLACES:
+        message = f"{player_name} intercambio lugar con {player_target_name}"
+    elif status == WS_STATUS_REVERSE_POSITION:
+        message = f"se han inviertido las posiciones"
     else:
         message = "Status desconocido"  # Handle unknown status values
 

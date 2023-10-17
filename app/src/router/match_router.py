@@ -117,12 +117,11 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
             detail="Player not found",
         )
 
-    play_card(player_in, player_out, match_id, card_id)
+    status = play_card(player_in, player_out, match_id, card_id)
 
     # send lanzallamas message to all players
     live_match = get_live_match_by_id(match_id)
     print(live_match)
-    status = WS_STATUS_PLAYER_BURNED
     msg_ws = create_ws_message(match_id, status, player_in.id, player_out.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
 
