@@ -132,6 +132,12 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     ws_msg = create_ws_message(match_id, status_ws, player_in.id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
+    # check if match has ended
+    if check_and_set_match_end(match_id):
+        end_match(match_id)
+        ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+
     return {"message": "Card played"}
 
 
@@ -248,6 +254,33 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             msg = await websocket.receive_text()
 
     except WebSocketDisconnect:
-        await manager.disconnect(websocket, player_id, match._id)
-        remove_player_from_match(player_id, match._id)
+        # if the match has started end match.
+        match_db = get_match_by_id(match_id)
+
+        if match_db != None and match_db.started == True:
+            await manager.disconnect(websocket, player_id, match._id)
+            end_match(match_id)
+            print("if the match has started end match.")
+            ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
+            await manager.broadcast_json(ws_msg)
+
+        # if the match has not started and host disconnects, delete match.
+        elif match_db != None and player_id == match_db.player_owner.id:
+            await manager.disconnect(websocket, player_id, match._id)
+
+            print("if the match has not started and host disconnects, delete match.")
+            ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
+            await manager.broadcast_json(ws_msg)
+
+            delete_match(match_id)
+
+        # if the match has not started and player disconnects, delete player.
+        elif match_db != None:
+            print("if the match has not started and player disconnects, delete player")
+            delete_player(player_id, match_id)
+            await manager.disconnect(websocket, player_id, match._id)
+
+        else:
+            await manager.disconnect(websocket, player_id, match_id)
+
         print(f"Player {player.name} disconnected from match {match._id}")

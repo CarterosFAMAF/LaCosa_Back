@@ -172,7 +172,9 @@ def next_turn(match_id: int):
         player = None
         
         while True:
+
             match.turn = ((match.turn + 1) % match.number_players)
+
             # get the player with the current turn
             player = select(
                 p for p in match.players if p.position == match.turn
@@ -252,6 +254,70 @@ def start_game(match_id: int):
             player.role = PLAYER_ROLE_HUMAN
         position += 1
     flush()
+
+
+def end_match(match_id):
+    """
+    Set match to finalized in db, remove from live matches
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        match.finalized = True
+        flush()
+    MATCHES.remove(get_live_match_by_id(match_id))
+
+
+def delete_match(match_id):
+    """
+    Delete match from db
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        match.delete()
+        flush()
+
+
+def check_and_set_match_end(match_id):
+    """
+    Check if match has ended
+    Iterate over players and check if there is only one human player alive
+
+    Args:
+        match_id (int)
+
+    Returns:
+        ended (bool)
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        players = select(p for p in match.players)[:]
+        humans_alive = 0
+        ended = False
+
+        for player in players:
+            if player.role == PLAYER_ROLE_HUMAN:
+                humans_alive += 1
+
+        if humans_alive == 1:
+            ended = True
+            end_match(match_id)
+
+        else:
+            ended = False
+
+        return ended
 
 
 MATCHES: List[Match] = []
