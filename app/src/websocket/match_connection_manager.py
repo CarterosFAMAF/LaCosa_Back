@@ -94,7 +94,7 @@ class MatchConnectionManager:
 
 
 def create_ws_message(
-    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0,card_id: int = 0
+    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0, card_name: str = ""
 ):
     """
     Create a dictionary to then send as a json message to the client. Utilizes the state of the match in the db
@@ -114,7 +114,6 @@ def create_ws_message(
         players = []
         player_name = ""
         player_target_name = ""
-        card_name = ""
         
         for player in match_db.players:
             # get player names to make the msg, if there isn't player_id or player_target_id, set to None
@@ -123,10 +122,6 @@ def create_ws_message(
 
             if player_target_id > 0 and player.id == player_target_id:
                 player_target_name = player.name
-    
-            for card in player.hand:
-                    if card_id > 0 and card_id == card.id:
-                        card_name = card.name
                         
             # add player to the list of players
             players.append(

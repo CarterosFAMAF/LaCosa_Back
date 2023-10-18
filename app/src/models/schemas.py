@@ -44,6 +44,11 @@ class CardModel(BaseModel):
     name: str
     image: str
     
+class PlayCardModel(BaseModel):
+    match_id : int
+    player_in_id : int
+    player_out_id : int 
+    card_id : int
     
 class StartMatchIn(BaseModel):
     player_id: int

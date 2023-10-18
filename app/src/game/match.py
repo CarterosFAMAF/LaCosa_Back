@@ -233,6 +233,7 @@ def get_db_match_by_id(match_id: int):
 def start_game(match_id: int):
     """
     Start a match
+    anade las cartas al deck ,reparte las cartas , asigna posiciones
 
     Args:
         match_id (int)
@@ -240,6 +241,7 @@ def start_game(match_id: int):
     Returns:
         None
     """
+    
     match = MatchDB.get(id=match_id)
     add_cards_to_deck(match_id, match.number_players)
     match.started = True
