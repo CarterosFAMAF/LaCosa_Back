@@ -180,7 +180,10 @@ def next_turn(match_id: int):
             if player.role != PLAYER_ROLE_DEAD:
                 break
             flush()
-
+        
+            
+        
+            
 
 @db_session
 def deal_cards(match_id: int):
