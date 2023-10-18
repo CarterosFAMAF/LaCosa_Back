@@ -99,7 +99,7 @@ class MatchConnectionManager:
 
 
 def create_ws_message(
-    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0 , card_id: int = 0
+    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0,card_id: int = 0
 ):
     """
     Create a dictionary to then send as a json message to the client. Utilizes the state of the match in the db
@@ -119,7 +119,8 @@ def create_ws_message(
         players = []
         player_name = ""
         player_target_name = ""
-
+        card_name = ""
+        
         for player in match_db.players:
             # get player names to make the msg, if there isn't player_id or player_target_id, set to None
             if player_id > 0 and player.id == player_id:
@@ -127,8 +128,9 @@ def create_ws_message(
 
             if player_target_id > 0 and player.id == player_target_id:
                 player_target_name = player.name
-                for card in player.hand:
-                    if card_id == card.id:
+    
+            for card in player.hand:
+                    if card_id > 0 and card_id == card.id:
                         card_name = card.name
                         
             # add player to the list of players
@@ -192,15 +194,15 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
     elif status == WS_STATUS_CHANGED_OF_PLACES:
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
-        message = f"se han inviertido las posiciones"
+        message = f"se han inviertido todas las posiciones"
     elif status == WS_STATUS_DISCARD:
         message = f"{player_name} ha descartado una carta"
     elif status == WS_STATUS_SUSPECT:
         message = f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
+    elif status == WS_STATUS_CARD_DISCOVER:
+        message = f"se descubrió que {player_target_name} tenia una carta {card_name}"
+    elif status == WS_STATUS_CARD_SHOWN:
+        message = f"tu carta {card_name} ha sido vista por {player_name}"
     else:
         message = "Status desconocido"  # Handle unknown status values
-
     return message
-
-def get_ws_message_with_card_name(card_name,player_name):
-    message = f"se descubrió que {player_name} tenia una carta {card_name}"

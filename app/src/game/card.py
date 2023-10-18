@@ -73,20 +73,34 @@ def play_sospecha(player_id,player_target_id,match_id):
     with db_session:
         match = get_live_match_by_id(match_id)
         player_target = get_player_by_id(player_target_id)
-        card_rm = player_target.hand.random(1).first()
-        #usar ws para personal message. 
-        msg_ws = create_ws_message() #deberia crear el mensaje
-        #al player target deberia mandarle que mostró tal carta.
-        match._match_connection_manager.send_personal_json(msg_ws,player_target_id)
-        msg_ws = create_ws_message()
-        #al player deberia mandarle que corto tiene el jugador objetivo
+        card_random = player_target.hand.random(1).first()
+        
+        #al player deberia mandarle que carto tiene el jugador objetivo
+        status = WS_STATUS_CARD_DISCOVER
+        msg_ws = create_ws_message(match_id,status,player_id,player_target_id,card_random.id)
         match._match_connection_manager.send_personal_json(msg_ws,player_id)
+        
+        #al player afectado por la carta le manda un msj de que han visto su carta y cual
+        status = WS_STATUS_CARD_SHOWN
+        msg_ws = create_ws_message(match_id,status,player_id,player_target_id,card_random.id) 
+        match._match_connection_manager.send_personal_json(msg_ws,player_target_id)
+        
         status = WS_STATUS_SUSPECT
         return status
     
 def play_mas_vale_que_corras(player_main_id,player_target_id):
     # Deberia haber intercambio antes de el cambio de posicion.
     # Cambia el position del player_main y player_target
+    """
+    reverse the roles of player in turn and player target
+
+    Args:
+        player_main_id (int)
+        player_target_id (int)
+
+    Returns:
+        message of players that change position
+    """
     with db_session:
         player_main = get_player_by_id(player_main_id)
         player_target = get_player_by_id(player_target_id)
@@ -98,6 +112,15 @@ def play_mas_vale_que_corras(player_main_id,player_target_id):
     return status
 
 def play_vigila_tus_espaldas(match_id):
+    """
+    reverse all positions of the players
+
+    Args:
+        match_id(int)
+
+    Returns:
+        message that all positions were reversed
+    """
     # Invierte todas las posiciones de los jugadores en la partida
     with db_session:
         match = get_match_by_id(match_id)

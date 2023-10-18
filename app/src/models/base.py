@@ -68,16 +68,19 @@ def load_cards():
                 name="La_Cosa",
                 image="app/cards/LaCosa.png",
             )
-            Card(card_id = MAS_VALE_QUE_CORRAS,
+            Card(
+                card_id = MAS_VALE_QUE_CORRAS,
                 name="Mas_Vale_Que_Corras",
                 image="app/cards/Mas_vale_que_corras.png",
             )
-            Card(card_id = SOSPECHA,
-                name="Mas_Vale_Que_Corras",
+            Card(
+                card_id = SOSPECHA,
+                name="Sospecha",
                 image="app/cards/sospecha.png",
             )
-            Card(card_id = VIGILA_TUS_ESPALDAS,
-                name="Mas_Vale_Que_Corras",
+            Card(
+                card_id = VIGILA_TUS_ESPALDAS,
+                name="Vigila_Tus_Espaldas",
                 image="app/cards/Vigila_tus_espaldas.png",
             )
             flush()
