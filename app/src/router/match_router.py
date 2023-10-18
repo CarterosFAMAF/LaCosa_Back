@@ -150,11 +150,10 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
 @router.put(
     "/matches/{match_id}/players/{player_id}/discard",
     response_model=DiscardIn,
-    status_code=status.HTTP_200_OK,
 )
-async def discard(discard: DiscardIn):
-    
-    match = get_match_by_id(discard.match_id)
+async def discard(match_id,player_id,card_id):
+
+    match = get_match_by_id(match_id)
     if match == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -167,27 +166,27 @@ async def discard(discard: DiscardIn):
         )
 
     # check if player in exists
-    player = get_player_by_id(discard.player_id)
+    player = get_player_by_id(player_id)
     if player== None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Player not found",
         )
     
-    card = get_card_by_id(discard.card_id)
+    card = get_card_by_id(card_id)
     if card == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
         
-    discard_card_of_player(card.id, match.id, player.id)
+    discard_card_of_player(card_id, match_id, player_id)
     
     status = WS_STATUS_DISCARD
-    live_match = get_live_match_by_id(discard.match_id)
+    live_match = get_live_match_by_id(match_id)
     print(live_match)
-    msg_ws = create_ws_message(discard.match_id, status, player.id)
-    await live_match._match_connection_manager.broadcast_json(msg_ws)
+    msg_ws = create_ws_message(match_id, status, player.id)
+    live_match._match_connection_manager.broadcast_json(msg_ws)
     
     return {"message" : "Card discard"}
 
