@@ -1,7 +1,7 @@
 import json
 
 from fastapi import APIRouter, status, WebSocket, WebSocketDisconnect, HTTPException
-
+import random
 from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.constants import *
@@ -279,6 +279,63 @@ async def start_match(input: StartMatchIn):
     await match._match_connection_manager.broadcast_json(ws_msg)
 
     msg = {"message": "The match has been started"}
+    return msg
+
+@router.put(
+    "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card_suspect",
+    status_code=status.HTTP_200_OK,
+)
+async def play_card_suspect(match_id,player_id,player_target_id,card_id):
+    
+    match = get_match_by_id(match_id)
+    if match == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found",
+        )
+    elif match.started == False:
+        raise HTTPException(
+            status_code=status.HTTP_412_PRECONDITION_FAILED,
+            detail="Match has not started",
+        )
+
+    # check if player in exists
+    player = get_player_by_id(player_id)
+    if player== None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found",
+        )
+    
+    card = get_card_by_id(card_id)
+    if card == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found",
+        )
+    
+    
+    with db_session:
+        match_live = get_live_match_by_id(match.id)
+        print(match_live)
+        player_target = get_player_by_id(player_target_id)
+        card_random = select(c for c in player_target.hand).random(1)[0]
+        
+        #al player deberia mandarle que carto tiene el jugador objetivo
+        status = WS_STATUS_CARD_DISCOVER
+        msg_ws = create_ws_message(match.id,status,player.id,player_target.id,card_random.name)
+        await match_live._match_connection_manager.send_personal_json(msg_ws,player_id)
+        
+        #al player afectado por la carta le manda un msj de que han visto su carta y cual
+        status = WS_STATUS_CARD_SHOWN
+        msg_ws = create_ws_message(match_id,status,player_id,player_target_id,card_random.id) 
+        await match_live._match_connection_manager.send_personal_json(msg_ws,player_target_id)
+        
+        status = WS_STATUS_SUSPECT
+        msg_ws = create_ws_message(match_id,status,player_id,player_target_id)
+        await match_live._match_connection_manager.broadcast_json(msg_ws)
+        
+    msg = {"msg" : "card suspect played"}
     return msg
 
 
