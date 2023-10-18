@@ -314,7 +314,6 @@ async def play_card_suspect(match_id,player_id,player_target_id,card_id):
             detail="Card not found",
         )
     
-    
     with db_session:
         match_live = get_live_match_by_id(match.id)
         print(match_live)
