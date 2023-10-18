@@ -45,4 +45,4 @@ def add_cards_to_deck(match_id : int, player_amount: int):
                 image = card[0].image
             )
             match.deck.add(card_copy)
-            flush()
+        flush()
