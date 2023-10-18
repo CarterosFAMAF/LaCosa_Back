@@ -32,7 +32,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     if card.card_id == LANZALLAMAS:   
         status = play_lanzallamas(player_out.id)
     if card.card_id == SOSPECHA:
-        status = play_sospecha(player_out.id)
+        status = play_sospecha(player_out.id,match_id)
     if card.card_id == MAS_VALE_QUE_CORRAS:
         status = play_mas_vale_que_corras(player_in.id,player_out.id)
     if card.card_id == VIGILA_TUS_ESPALDAS:
@@ -60,7 +60,7 @@ def play_lanzallamas(player_target_id):
     status = WS_STATUS_PLAYER_BURNED
     return status
     
-def play_sospecha(player_target_id):
+def play_sospecha(player_id,player_target_id,match_id):
     """
     return name of card random of player target
 
@@ -71,10 +71,18 @@ def play_sospecha(player_target_id):
         name of card
     """
     with db_session:
+        match = get_live_match_by_id(match_id)
         player_target = get_player_by_id(player_target_id)
         card_rm = player_target.hand.random(1).first()
         #usar ws para personal message. 
-        return card_rm.id
+        msg_ws = create_ws_message() #deberia crear el mensaje
+        #al player target deberia mandarle que mostró tal carta.
+        match._match_connection_manager.send_personal_json(msg_ws,player_target_id)
+        msg_ws = create_ws_message()
+        #al player deberia mandarle que corto tiene el jugador objetivo
+        match._match_connection_manager.send_personal_json(msg_ws,player_id)
+        status = WS_STATUS_SUSPECT
+        return status
     
 def play_mas_vale_que_corras(player_main_id,player_target_id):
     # Deberia haber intercambio antes de el cambio de posicion.
@@ -96,10 +104,10 @@ def play_vigila_tus_espaldas(match_id):
         num_players = match.number_players - 1
         init = 0
         for player in match.players:
-            player_in = select(c for c in match.players if c.position == init )
+            player_in = select(c for c in match.players if c.position == init).first()
             player_in.position = num_players
+            flush()
             num_players -= 1
             init += 1
-            flush()
     status = WS_STATUS_REVERSE_POSITION
     return status

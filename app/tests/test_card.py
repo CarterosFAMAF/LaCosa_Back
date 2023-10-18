@@ -96,7 +96,7 @@ def test_get_card_empty_deck():
     assert player.hand.count() == 1
     assert match.deck.count() == 1
 
-def test_valid_effect():
+def test_valid_effect_LANZALLAMAS():
     with db_session:
         
         player = PlayerDB(name = 'player_in')
@@ -153,4 +153,71 @@ def test_valid_effect():
         match_rec = get_match_by_id(match_id)
         assert match_rec.discard_pile.count() == 2
         assert match_rec.turn == 3
+
+    
+def test_valid_effect_MAS_VALE_QUE_CORRAS():
+    with db_session:
         
+        player = PlayerDB(name = 'player')
+        flush()
+        player_id = player.id
+        player.position = 0
+        player.role = "alive"
+        flush()
+        
+        player_target = PlayerDB(name = 'player_target')
+        flush()
+        player_target_id = player_target.id
+        player_target.position = 2
+        player_target.role = "alive"
+        flush()
+        
+        player_dead = PlayerDB(name = 'player_dead')
+        flush()
+        player_dead_id = player_dead.id
+        player_dead.position = 1
+        player_dead.role = "alive"
+        flush()
+
+        player_manolito = PlayerDB(name = 'manolito')
+        flush()
+        player_manolito_id = player_manolito.id
+        player_manolito.position = 3
+        player_manolito.role = "alive"
+        flush()
+
+        card_mas_vale_que_corras = select (p for p in CardDB if p.card_id == MAS_VALE_QUE_CORRAS).random(1)[0]
+        card_mas_vale_que_corras_id = card_mas_vale_que_corras.id
+        player.hand.add(card_mas_vale_que_corras)
+        flush()
+
+        card_vigila_tus_espaldas = select (p for p in CardDB if p.card_id == VIGILA_TUS_ESPALDAS).random(1)[0]
+        card_vigila_tus_espaldas_id = card_vigila_tus_espaldas.id
+        player.hand.add(card_vigila_tus_espaldas)
+        flush()
+
+        match = MatchDB(
+            name="test_match",
+            number_players=4,
+            max_players=12,
+            min_players=4,
+            started=False,
+            finalized=False,
+            turn=0,
+            player_owner=player,
+            players=[player,player_target,player_manolito,player_dead],
+        )
+        flush()
+        match_id = match.id
+        add_cards_to_deck(match_id,4)
+
+    with db_session:
+        player = get_player_by_id(player_id)
+        player_target = get_player_by_id(player_target_id)
+        play_card(player,player_target,match_id,card_mas_vale_que_corras_id)
+        assert player.position == 2 
+        assert player_target.position == 0
+
+        play_card(player,player_target,match_id,card_vigila_tus_espaldas_id)
+        assert player.position == 0
+

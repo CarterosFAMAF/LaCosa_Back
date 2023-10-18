@@ -94,7 +94,7 @@ class MatchConnectionManager:
 
 
 def create_ws_message(
-    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0
+    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0 , card_id: int = 0
 ):
     """
     Create a dictionary to then send as a json message to the client. Utilizes the state of the match in the db
@@ -122,7 +122,10 @@ def create_ws_message(
 
             if player_target_id > 0 and player.id == player_target_id:
                 player_target_name = player.name
-
+                for card in player.hand:
+                    if card_id == card.id:
+                        card_name = card.name
+                        
             # add player to the list of players
             players.append(
                 {
@@ -132,7 +135,7 @@ def create_ws_message(
                     "alive": True if player.role != "dead" else False,
                 }
             )
-        msg = get_ws_message_with_status(status, player_name, player_target_name)
+        msg = get_ws_message_with_status(status, player_name, player_target_name,card_name)
 
         match_ws = {
             "player_id": player_id,
@@ -146,7 +149,7 @@ def create_ws_message(
     return match_ws
 
 
-def get_ws_message_with_status(status: int, player_name: str, player_target_name: str):
+def get_ws_message_with_status(status: int, player_name: str, player_target_name: str, card_name: str):
     """
     Returns the message associated with a status code
 
@@ -181,7 +184,12 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
         message = f"se han inviertido las posiciones"
     elif status == WS_STATUS_DISCARD:
         message = f"{player_name} ha descartado una carta"
+    elif status == WS_STATUS_SUSPECT:
+        message = f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
     else:
         message = "Status desconocido"  # Handle unknown status values
 
     return message
+
+def get_ws_message_with_card_name(card_name,player_name):
+    message = f"se descubrió que {player_name} tenia una carta {card_name}"
