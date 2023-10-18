@@ -31,8 +31,6 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     
     if card.card_id == LANZALLAMAS:   
         status = play_lanzallamas(player_out.id)
-    if card.card_id == SOSPECHA:
-        status = play_sospecha(player_out.id,match_id)
     if card.card_id == MAS_VALE_QUE_CORRAS:
         status = play_mas_vale_que_corras(player_in.id,player_out.id)
     if card.card_id == VIGILA_TUS_ESPALDAS:
@@ -124,13 +122,22 @@ def play_vigila_tus_espaldas(match_id):
     # Invierte todas las posiciones de los jugadores en la partida
     with db_session:
         match = get_match_by_id(match_id)
-        num_players = match.number_players - 1
-        init = 0
+        turn = match.turn
+        all_players = match.number_players
+        
         for player in match.players:
-            player_in = select(c for c in match.players if c.position == init).first()
-            player_in.position = num_players
+            player.position = ((2 * turn) - player.position) % all_players
             flush()
-            num_players -= 1
-            init += 1
+            
     status = WS_STATUS_REVERSE_POSITION
     return status
+
+def play_card_investigation(player_target,card):
+    names = ""
+    
+    if card.card_id == SOSPECHA:
+        card_random = select(c for c in player_target.hand).random(1)[0]
+        names = card_random.name
+        
+    return names
+    

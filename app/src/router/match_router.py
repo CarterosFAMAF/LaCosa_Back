@@ -150,7 +150,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     return {"message": "Card played"}
 
 @router.put(
-    "/matches/{match_id}/players/{player_id}/discard",
+    "/matches/{match_id}/players/{player_id}/{card_id}/discard",
 )
 async def discard(match_id,player_id,card_id):
 
@@ -182,6 +182,8 @@ async def discard(match_id,player_id,card_id):
         )
         
     discard_card_of_player(card_id, match_id, player_id)
+    
+    next_turn(match_id)
     
     live_match = get_live_match_by_id(match.id)
     print(live_match)
@@ -282,10 +284,10 @@ async def start_match(input: StartMatchIn):
     return msg
 
 @router.put(
-    "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card_suspect",
+    "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card_investigation",
     status_code=status.HTTP_200_OK,
 )
-async def play_card_suspect(match_id,player_id,player_target_id,card_id):
+async def play_card_investigation_endpoint(match_id,player_id,player_target_id,card_id):
     
     match = get_match_by_id(match_id)
     if match == None:
@@ -313,28 +315,28 @@ async def play_card_suspect(match_id,player_id,player_target_id,card_id):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
+        
+    match_live = get_live_match_by_id(match.id)
+    print(match_live)
+    player_target = get_player_by_id(player_target_id)
+        
+    names = play_card_investigation(player_target,card)
     
-    with db_session:
-        match_live = get_live_match_by_id(match.id)
-        print(match_live)
-        player_target = get_player_by_id(player_target_id)
-        card_random = select(c for c in player_target.hand).random(1)[0]
+    #al player deberia mandarle que carto tiene el jugador objetivo
+    status = WS_STATUS_CARD_DISCOVER
+    msg_ws = create_ws_message(match.id,status,player.id,player_target.id,names)
+    await match_live._match_connection_manager.send_personal_json(msg_ws,player_id)
+    
+    #al player afectado por la carta le manda un msj de que han visto su carta y cual
+    status = WS_STATUS_CARD_SHOWN
+    msg_ws = create_ws_message(match_id,status,player_id,player_target_id,names) 
+    await match_live._match_connection_manager.send_personal_json(msg_ws,player_target_id)
+    
+    status = WS_STATUS_SUSPECT
+    msg_ws = create_ws_message(match_id,status,player_id,player_target_id)
+    await match_live._match_connection_manager.broadcast_json(msg_ws)
         
-        #al player deberia mandarle que carto tiene el jugador objetivo
-        status = WS_STATUS_CARD_DISCOVER
-        msg_ws = create_ws_message(match.id,status,player.id,player_target.id,card_random.name)
-        await match_live._match_connection_manager.send_personal_json(msg_ws,player_id)
-        
-        #al player afectado por la carta le manda un msj de que han visto su carta y cual
-        status = WS_STATUS_CARD_SHOWN
-        msg_ws = create_ws_message(match_id,status,player_id,player_target_id,card_random.id) 
-        await match_live._match_connection_manager.send_personal_json(msg_ws,player_target_id)
-        
-        status = WS_STATUS_SUSPECT
-        msg_ws = create_ws_message(match_id,status,player_id,player_target_id)
-        await match_live._match_connection_manager.broadcast_json(msg_ws)
-        
-    msg = {"msg" : "card suspect played"}
+    msg = {"msg" : "Card investigation played"}
     return msg
 
 
