@@ -281,56 +281,55 @@ async def start_match(input: StartMatchIn):
     status_code=status.HTTP_200_OK,
 )
 async def play_card_investigation_endpoint(match_id,player_id,player_target_id,card_id):
-    
-    match = get_match_by_id(match_id)
-    if match == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Match not found",
-        )
-    elif match.started == False:
-        raise HTTPException(
-            status_code=status.HTTP_412_PRECONDITION_FAILED,
-            detail="Match has not started",
-        )
+    with db_session:
+        match = get_match_by_id(match_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+        elif match.started == False:
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED,
+                detail="Match has not started",
+            )
 
-    # check if player in exists
-    player = get_player_by_id(player_id)
-    if player== None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Player not found",
-        )
-    
-    card = get_card_by_id(card_id)
-    if card == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Card not found",
-        )
+        # check if player in exists
+        player = get_player_by_id(player_id)
+        if player== None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Player not found",
+            )
         
-    match_live = get_live_match_by_id(match.id)
-    print(match_live)
-    player_target = get_player_by_id(player_target_id)
+        card = get_card_by_id(card_id)
+        if card == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Card not found",
+            )
+            
+        match_live = get_live_match_by_id(match.id)
+        print(match_live)
+        player_target = get_player_by_id(player_target_id)
+            
+        names = play_card_investigation(player_target,card)
         
-    names = play_card_investigation(player_target,card)
-    
-    #al player deberia mandarle que carto tiene el jugador objetivo
-    status = WS_STATUS_CARD_DISCOVER
-    msg_ws = create_ws_message(match.id,status,player.id,player_target.id,names)
-    await match_live._match_connection_manager.send_personal_json(msg_ws,player_id)
-    
-    #al player afectado por la carta le manda un msj de que han visto su carta y cual
-    status = WS_STATUS_CARD_SHOWN
-    msg_ws = create_ws_message(match_id,status,player_id,player_target_id,names) 
-    await match_live._match_connection_manager.send_personal_json(msg_ws,player_target_id)
-    
-    status = WS_STATUS_SUSPECT
-    msg_ws = create_ws_message(match_id,status,player_id,player_target_id)
-    await match_live._match_connection_manager.broadcast_json(msg_ws)
+        #al player deberia mandarle que carto tiene el jugador objetivo
+        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_DISCOVER,player.id,player_target.id,names)
+        await match_live._match_connection_manager.send_personal_json(msg_ws,player_id)
         
-    msg = {"msg" : "Card investigation played"}
-    return msg
+        #al player afectado por la carta le manda un msj de que han visto su carta y cual
+        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_SHOWN,player.id,player_target.id,names) 
+        await match_live._match_connection_manager.send_personal_json(msg_ws,player_target.id)
+        
+        #por ahora se jugo una carta sospecha.
+        msg_ws = create_ws_message(match.id,WS_STATUS_SUSPECT,player.id,player_target.id)
+        await match_live._match_connection_manager.broadcast_json(msg_ws)
+        
+        discard_card_of_player(card.id,match.id,player.id)
+        msg = {"msg" : "Card investigation played"}
+        return msg
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
