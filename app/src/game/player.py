@@ -129,6 +129,7 @@ def get_player_hand(match_id: int, player_id: int):
     return hand
 
 
+@db_session
 def delete_player(player_id: int, match_id: int):
     """
     Delete a player from the match
@@ -140,8 +141,8 @@ def delete_player(player_id: int, match_id: int):
     Returns:
         None
     """
-    with db_session:
-        match = MatchDB.get(id=match_id)
-        player = PlayerDB.get(id=player_id)
-        match.players.remove(player)
-        flush()
+
+    match = MatchDB.get(id=match_id)
+    player = PlayerDB.get(id=player_id)
+    match.players.remove(player)
+    flush()

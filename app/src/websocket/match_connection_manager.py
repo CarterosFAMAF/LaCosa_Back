@@ -45,12 +45,17 @@ class MatchConnectionManager:
         for conn in self.active_connections:
             if websocket in conn:
                 self.active_connections.remove(conn)
-
-                # send message to all players
-                data_ws = create_ws_message(match_id, WS_STATUS_PLAYER_LEFT, player_id)
-                await self.broadcast_json(data_ws)
-
                 break
+
+        # if match is not finished, send message to all players
+        with db_session:
+            match_db = MatchDB.get(id=match_id)
+            if match_db != None:
+                if match_db.finalized == False:
+                    data_ws = create_ws_message(
+                        match_id, WS_STATUS_PLAYER_LEFT, player_id
+                    )
+                    await self.broadcast_json(data_ws)
 
     async def broadcast_json(self, data: dict):
         """
