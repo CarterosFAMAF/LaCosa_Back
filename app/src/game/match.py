@@ -176,13 +176,13 @@ def next_turn(match_id: int):
             else:
                 match.turn = ((match.turn - 1) % match.number_players)
             # get the player with the current turn
+            flush()
             player = select(
                 p for p in match.players if p.position == match.turn
             ).first()
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
                 break
-            flush()
         
             
         
