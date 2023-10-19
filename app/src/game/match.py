@@ -171,7 +171,10 @@ def next_turn(match_id: int):
         match = get_db_match_by_id(match_id)
         player = None
         while True:
-            match.turn = ((match.turn + 1) % match.number_players)
+            if match.clockwise:
+                match.turn = ((match.turn + 1) % match.number_players)
+            else:
+                match.turn = ((match.turn - 1) % match.number_players)
             # get the player with the current turn
             player = select(
                 p for p in match.players if p.position == match.turn
@@ -248,6 +251,7 @@ def start_game(match_id: int):
     match = MatchDB.get(id=match_id)
     add_cards_to_deck(match_id, match.number_players)
     match.started = True
+    match.clockwise = True
     match.turn = 0
     deal_cards(match_id)
     players = select(p for p in match.players).random(match.number_players)

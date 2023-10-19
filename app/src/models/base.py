@@ -13,6 +13,7 @@ class Match(db.Entity):
     started = Optional(bool)
     finalized = Optional(bool)
     turn = Optional(int)
+    clockwise = Optional(bool)
     players = Set("Player", reverse="match")
     player_owner = Required("Player", reverse="match_owner")
     deck = Set("Card", reverse="deck")
