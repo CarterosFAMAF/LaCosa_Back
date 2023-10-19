@@ -144,4 +144,6 @@ def play_card_investigation(player_target,card):
         card_image = get_card_image(card_random.image)
         
     return {"id": card_random.id, "name": card_random.name, "image": card_image}
-    
+
+def is_investigation_card(card):
+    return card.card_id == SOSPECHA or card.card_id == WHISKY
