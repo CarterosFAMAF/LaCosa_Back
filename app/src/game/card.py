@@ -122,13 +122,16 @@ def play_vigila_tus_espaldas(match_id):
     # Invierte todas las posiciones de los jugadores en la partida
     with db_session:
         match = get_match_by_id(match_id)
+        match.clockwise = not match.clockwise
+        """
         turn = match.turn
         all_players = match.number_players
         
         for player in match.players:
             player.position = ((2 * turn) - player.position) % all_players
             flush()
-            
+        """
+        
     status = WS_STATUS_REVERSE_POSITION
     return status
 
@@ -137,7 +140,7 @@ def play_card_investigation(player_target,card):
     
     if card.card_id == SOSPECHA:
         card_random = select(c for c in player_target.hand).random(1)[0]
-        names = card_random.name
+        card_image = get_card_image(card_random.image)
         
-    return names
+    return {"id": card_random.id, "name": card_random.name, "image": card_image}
     

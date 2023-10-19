@@ -60,6 +60,7 @@ def get_card(match_id: int, player_id: int):
         match.discard_pile.clear()
         match.deck.add(deck)
 
+#se puede reutilizar para sospecha.
     card = select(c for c in match.deck).random(1)[0]
     card_image = get_card_image(card.image)
     player.hand.add(card)

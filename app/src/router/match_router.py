@@ -313,14 +313,14 @@ async def play_card_investigation_endpoint(match_id,player_id,player_target_id,c
         print(match_live)
         player_target = get_player_by_id(player_target_id)
             
-        names = play_card_investigation(player_target,card)
+        card_random = play_card_investigation(player_target,card)
         
         #al player deberia mandarle que carto tiene el jugador objetivo
-        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_DISCOVER,player.id,player_target.id,names)
+        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_DISCOVER,player.id,player_target.id,card_random["name"])
         await match_live._match_connection_manager.send_personal_json(msg_ws,player_id)
         
         #al player afectado por la carta le manda un msj de que han visto su carta y cual
-        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_SHOWN,player.id,player_target.id,names) 
+        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_SHOWN,player.id,player_target.id,card_random["name"]) 
         await match_live._match_connection_manager.send_personal_json(msg_ws,player_target.id)
         
         #por ahora se jugo una carta sospecha.
@@ -328,8 +328,9 @@ async def play_card_investigation_endpoint(match_id,player_id,player_target_id,c
         await match_live._match_connection_manager.broadcast_json(msg_ws)
         
         discard_card_of_player(card.id,match.id,player.id)
-        msg = {"msg" : "Card investigation played"}
-        return msg
+        
+        return CardModel(id=card_random["id"], name=card_random["name"], image=card_random["image"])
+    
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
