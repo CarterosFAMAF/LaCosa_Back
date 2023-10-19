@@ -79,6 +79,7 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 @router.put(
     "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card",
+    response_model = CardModel ,
     status_code=status.HTTP_200_OK,
 )
 async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
@@ -128,7 +129,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     live_match = get_live_match_by_id(match_id)
     print(live_match)
 
-    card_random = CardModel
+    card_random = CardModel(id=0, name="", image="")
 
     if is_investigation_card(card):
         card_random = play_card_investigation(player_out,card)
@@ -144,7 +145,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
         status = play_card(player_in, player_out, match_id, card_id)
     
     # send message to all players of the card played
-    msg_ws = create_ws_message(match_id, status, player_in.id, player_out.id)
+    msg_ws = create_ws_message(match_id, status, player_in.id, player_out_id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
 
     next_turn(match_id)
@@ -152,8 +153,8 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    #return card model , if not played card investigation return empty
-    return CardModel(id=card_random["id"], name=card_random["name"], image=card_random["image"])
+    #return card model , if not played card investigation return empty (traducido como pintó)
+    return card_random
 
 @router.put(
     "/matches/{match_id}/players/{player_id}/{card_id}/discard",

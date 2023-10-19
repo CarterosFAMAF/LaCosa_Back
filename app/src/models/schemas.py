@@ -40,9 +40,9 @@ class JoinMatchOut(BaseModel):
 
 
 class CardModel(BaseModel):
-    id: int
-    name: str
-    image: str
+    id: int = 0
+    name: str = ""
+    image: str = ""
     
 class PlayCardModel(BaseModel):
     match_id : int

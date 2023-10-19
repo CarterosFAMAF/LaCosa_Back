@@ -138,10 +138,10 @@ def play_vigila_tus_espaldas(match_id):
 
 def play_card_investigation(player_target,card):
     names = ""
-    
-    if card.card_id == SOSPECHA:
-        card_random = select(c for c in player_target.hand).random(1)[0]
-        card_image = get_card_image(card_random.image)
+    with db_session:
+        if card.card_id == SOSPECHA:
+            card_random = select(c for c in player_target.hand).random(1)[0]
+            card_image = get_card_image(card_random.image)
         
     return {"id": card_random.id, "name": card_random.name, "image": card_image}
 
