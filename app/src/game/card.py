@@ -123,6 +123,7 @@ def play_vigila_tus_espaldas(match_id):
     with db_session:
         match = get_match_by_id(match_id)
         match.clockwise = not match.clockwise
+        flush()
         """
         turn = match.turn
         all_players = match.number_players
