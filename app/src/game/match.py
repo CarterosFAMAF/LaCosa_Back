@@ -219,6 +219,7 @@ def next_turn(match_id: int):
             
 
 
+
 @db_session
 def deal_cards(match_id: int):
     """
