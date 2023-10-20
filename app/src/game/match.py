@@ -164,10 +164,7 @@ def get_live_match_by_id(match_id: int):
     return_match = None
 
     for match in MATCHES:
-        print("DEBUG: match._id: " + str(match._id) + " match_id: " + str(match_id))
-        print(match._id == match_id)
         if match._id == match_id:
-            print("DEBUG: match found")
             return_match = match
             break
     print(return_match)
@@ -352,9 +349,6 @@ def check_and_set_match_end(match_id):
         if humans_alive == 1:
             ended = True
             end_match(match_id)
-
-        else:
-            ended = False
 
         return ended
 
