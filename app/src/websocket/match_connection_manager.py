@@ -147,9 +147,7 @@ def create_ws_message(
             )
         # sort players by turn
         players.sort(key=lambda x: x["turn"])
-        msg = get_ws_message_with_status(
-            status, player_name, player_target_name, card_name
-        )
+        msg = get_ws_message_with_status(status, player_name, player_target_name,card_name)
 
         match_ws = {
             "player_id": player_id,
