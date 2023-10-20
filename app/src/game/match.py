@@ -361,7 +361,6 @@ def check_and_set_match_end(match_id):
 
         if humans_alive == 1:
             ended = True
-            end_match(match_id)
 
         return ended
 
