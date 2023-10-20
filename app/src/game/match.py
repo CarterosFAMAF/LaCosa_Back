@@ -356,12 +356,11 @@ def check_and_set_match_end(match_id):
         ended = False
 
         for player in players:
-            if player.role == PLAYER_ROLE_HUMAN:
+            if player.role == PLAYER_ROLE_HUMAN or player.role == PLAYER_ROLE_THE_THING:
                 humans_alive += 1
 
         if humans_alive == 1:
             ended = True
-            end_match(match_id)
 
         return ended
 
