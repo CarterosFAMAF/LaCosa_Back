@@ -170,21 +170,20 @@ def next_turn(match_id: int):
     with db_session:
         match = get_db_match_by_id(match_id)
         player = None
-        
+
         while True:
-
-            match.turn = ((match.turn + 1) % match.number_players)
-
+            if match.clockwise:
+                match.turn = ((match.turn + 1) % match.number_players)
+            else:
+                match.turn = ((match.turn - 1) % match.number_players)
             # get the player with the current turn
+            flush()
             player = select(
                 p for p in match.players if p.position == match.turn
             ).first()
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
                 break
-            flush()
-
-
 
 @db_session
 def deal_cards(match_id: int):
@@ -200,12 +199,15 @@ def deal_cards(match_id: int):
 
     match = MatchDB.get(id=match_id)
     players_list = select(p for p in match.players)[:]
+    
     for player in players_list:
         cards = select(c for c in match.deck).random(4)
         player.hand.add(cards)
         match.deck.remove(cards)
+        
     the_thing_player = select(p for p in match.players).random(1)[0]
     card = select(p for p in the_thing_player.hand).random(1)
+    
     the_thing_player.hand.remove(card)
     match.deck.add(card)
     card_the_thing = CardDB.get(card_id=LA_COSA)
@@ -234,6 +236,7 @@ def get_db_match_by_id(match_id: int):
 def start_game(match_id: int):
     """
     Start a match
+    anade las cartas al deck ,reparte las cartas , asigna posiciones
 
     Args:
         match_id (int)
@@ -241,9 +244,11 @@ def start_game(match_id: int):
     Returns:
         None
     """
+    
     match = MatchDB.get(id=match_id)
     add_cards_to_deck(match_id, match.number_players)
     match.started = True
+    match.clockwise = True
     match.turn = 0
     deal_cards(match_id)
     players = select(p for p in match.players).random(match.number_players)

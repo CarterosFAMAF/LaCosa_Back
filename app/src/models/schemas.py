@@ -38,11 +38,23 @@ class JoinMatchOut(BaseModel):
     player_id: int
     match_name: str
 
+
 class CardModel(BaseModel):
-    id: int
-    name: str
-    image: str
+    id: int = 0
+    name: str = ""
+    image: str = ""
+    
+class PlayCardModel(BaseModel):
+    match_id : int
+    player_in_id : int
+    player_out_id : int 
+    card_id : int
     
 class StartMatchIn(BaseModel):
+    player_id: int
+    match_id: int
+
+class DiscardIn(BaseModel):
+    card_id: int
     player_id: int
     match_id: int
