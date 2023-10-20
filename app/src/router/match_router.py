@@ -339,7 +339,13 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
         # if the match has started end match.
         match_db = get_match_by_id(match_id)
 
-        if match_db != None and match_db.started == True:
+        # if the match has ended
+
+        if (
+            (match_db != None)
+            and (match_db.started == True)
+            and (match_db.finalized == False)
+        ):
             await manager.disconnect(websocket, player_id, match._id)
             end_match(match_id)
             print("if the match has started end match.")
