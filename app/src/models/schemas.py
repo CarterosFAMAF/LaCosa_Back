@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, model_validator, constr
 class MatchIn(BaseModel):
     player_name: str
     # match name not empty and string
-    match_name: constr(min_length=1, max_length=20)
+    match_name: constr(min_length=1, max_length=100)
     min_players: int = Field(ge=4, le=12)
     max_players: int = Field(ge=4, le=12)
 
@@ -40,7 +40,7 @@ class ListMatchOut(BaseModel):
 
 
 class JoinMatchIn(BaseModel):
-    player_name: constr(min_length=1, max_length=20)
+    player_name: constr(min_length=1, max_length=100)
     match_id: int = Field(ge=1)
 
 
