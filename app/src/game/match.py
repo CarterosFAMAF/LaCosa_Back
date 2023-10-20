@@ -309,6 +309,19 @@ def end_match(match_id):
     MATCHES.remove(get_live_match_by_id(match_id))
 
 
+def delete_live_match(match_id):
+    """
+    Delete match from live matches
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
+    MATCHES.remove(get_live_match_by_id(match_id))
+
+
 def delete_match(match_id):
     """
     Delete match from db

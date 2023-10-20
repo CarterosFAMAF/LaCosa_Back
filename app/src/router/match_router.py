@@ -43,7 +43,7 @@ async def join_match_endpoint(input: JoinMatchIn):
     match_db = get_match_by_id(input.match_id)
 
     # check if match exists and if it is not finalized
-    if live_match == None:
+    if live_match == None or match_db == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Match not found",
@@ -354,6 +354,7 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
             await manager.broadcast_json(ws_msg)
 
+            delete_live_match(match_id)
             delete_match(match_id)
 
         # if the match has not started and player disconnects, delete player.
