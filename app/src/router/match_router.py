@@ -353,7 +353,11 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             await manager.broadcast_json(ws_msg)
 
         # if the match has not started and host disconnects, delete match.
-        elif match_db != None and player_id == match_db.player_owner.id:
+        elif (
+            match_db != None
+            and player_id == match_db.player_owner.id
+            and (match_db.finalized == False)
+        ):
             await manager.disconnect(websocket, player_id, match._id)
 
             print("if the match has not started and host disconnects, delete match.")
@@ -364,7 +368,7 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             delete_match(match_id)
 
         # if the match has not started and player disconnects, delete player.
-        elif match_db != None:
+        elif match_db != None and match_db.finalized == False:
             print("if the match has not started and player disconnects, delete player")
             delete_player(player_id, match_id)
             await manager.disconnect(websocket, player_id, match._id)
