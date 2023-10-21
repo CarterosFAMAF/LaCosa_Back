@@ -304,20 +304,32 @@ def check_and_set_match_end(match_id):
         match = MatchDB.get(id=match_id)
         players = select(p for p in match.players)[:]
         humans_alive = 0
+        the_thing_is_alive = False
+        infeteds_alive = 0
+        dead_players = 0
         ended = False
+        msg = ""
 
         for player in players:
+            if player.role == PLAYER_ROLE_DEAD:
+                dead_players += 1
             if player.role == PLAYER_ROLE_HUMAN:
                 humans_alive += 1
+            if player.role == PLAYER_ROLE_INFECTED:
+                infeteds_alive += 1
+            if player.role == PLAYER_ROLE_THE_THING:
+                the_thing_is_alive = True
 
-        if humans_alive == 1:
-            ended = True
-            end_match(match_id)
-
+        if not the_thing_is_alive:
+            msg = HUMANS_WIN
+        elif the_thing_is_alive and infeteds_alive ==  match.number_players -1:
+            msg = THE_THING_WIN
+        elif the_thing_is_alive and humans_alive == 0:
+            msg = INFECTEDS_WIN
         else:
-            ended = False
+            msg = "the match continues"
 
-        return ended
+        return msg
 
 
 MATCHES: List[Match] = []

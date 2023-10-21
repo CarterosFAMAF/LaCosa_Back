@@ -133,7 +133,8 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     # check if match has ended
-    if check_and_set_match_end(match_id):
+    status_match = check_and_set_match_end(match_id):    
+    if start_match != "the match continues":
         end_match(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
