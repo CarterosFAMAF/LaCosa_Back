@@ -132,7 +132,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     list_card = []
 
     if is_investigation_card(card):
-        list_card = play_card_investigation(player_out,card)
+        list_card = play_card_investigation(player_in,player_out,card)
         status = create_status_investigation(card)
         
         if need_personal_message(card):
