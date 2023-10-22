@@ -175,7 +175,8 @@ def personal_message(match,player_main,player_target,list_card,card):
     return msg_ws
 
 def create_status_investigation(card):
-    status = -1
+    status = None
+    
     if card.card_id == SOSPECHA:
         status = WS_STATUS_SUSPECT
     elif card.card_id == ANALISIS:

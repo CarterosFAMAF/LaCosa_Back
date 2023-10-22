@@ -194,16 +194,18 @@ async def discard(match_id, player_id, card_id):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
-
-    discard_card_of_player(card_id, match_id, player_id)
-    next_turn(match_id)
-
+        
     live_match = get_live_match_by_id(match.id)
     print(live_match)
-
+    
+    discard_card_of_player(card_id, match_id, player_id)
     msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
 
+    next_turn(match_id)
+    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
+    
     return {"message": "Card discard"}
 
 
