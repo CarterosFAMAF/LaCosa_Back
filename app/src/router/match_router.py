@@ -127,16 +127,15 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
             detail="Card not found",
         )
     live_match = get_live_match_by_id(match.id)
-    print(live_match)
 
     list_card = []
 
     if is_investigation_card(card):
-        list_card = play_card_investigation(player_in,player_out,card)
+        list_card = play_card_investigation(player_in, player_out, card)
         status = create_status_investigation(card)
-        
+
         if need_personal_message(card):
-            msg_ws = personal_message(match,player_in,player_out,list_card,card)
+            msg_ws = personal_message(match, player_in, player_out, list_card, card)
             await live_match._match_connection_manager.send_personal_json(
                 msg_ws, player_out.id
             )
@@ -145,10 +144,12 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
         status = play_card(player_in, player_out, match_id, card_id)
 
     # send message to all players of the card played
-    msg_ws = create_ws_message(match_id, status, player_in.id, player_out_id)
+    msg_ws = create_ws_message(
+        match_id, status, player_in.id, player_out_id, "", list_card
+    )
     await live_match._match_connection_manager.broadcast_json(msg_ws)
 
-    next_turn(match_id)
+    next_turn(match.id)
     # send next turn message to all players in the match
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
@@ -193,10 +194,10 @@ async def discard(match_id, player_id, card_id):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
-        
+
     live_match = get_live_match_by_id(match.id)
     print(live_match)
-    
+
     discard_card_of_player(card_id, match_id, player_id)
     msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
@@ -204,7 +205,7 @@ async def discard(match_id, player_id, card_id):
     next_turn(match_id)
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
-    
+
     return {"message": "Card discard"}
 
 
