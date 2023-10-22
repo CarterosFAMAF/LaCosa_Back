@@ -110,7 +110,7 @@ def play_mas_vale_que_corras(player_main_id, player_target_id):
         pos_tmp = player_main.position
         player_main.position = player_target.position
         player_target.position = pos_tmp
-        match = get_match_by_id(player_main.match_id)
+        match = get_match_by_id(player_main.match)
         match.turn = player_main.position
         flush()
     status = WS_STATUS_CHANGED_OF_PLACES
