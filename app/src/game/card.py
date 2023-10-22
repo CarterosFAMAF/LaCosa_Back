@@ -79,7 +79,7 @@ def play_mas_vale_que_corras(player_main_id, player_target_id):
         pos_tmp = player_main.position
         player_main.position = player_target.position
         player_target.position = pos_tmp
-        match = get_match_by_id(player_main.match_id)
+        match = get_match_by_id(player_main.match)
         match.turn = player_main.position
         flush()
     status = WS_STATUS_CHANGED_OF_PLACES
@@ -93,7 +93,7 @@ def play_cambio_de_lugar(player_main_id, player_target_id):
         pos_tmp = player_main.position
         player_main.position = player_target.position
         player_target.position = pos_tmp
-        match = get_match_by_id(player_main.match_id)
+        match = get_match_by_id(player_main.match)
         match.turn = player_main.position
         flush()
     status = WS_STATUS_CHANGED_OF_PLACES
@@ -138,9 +138,16 @@ def play_card_investigation(player_target,card):
             card_to_return = {"id": card_random.id, "name": card_random.name, "image": card_image}
             cards_returns.append(card_to_return)
 
-    if card.card_id == WHISKY or card.card_id == ANALISIS:
+    elif card.card_id == ANALISIS:
         with db_session:
             cards = select(c for c in player_target.hand)[:]
+            for card in cards:
+                card_image = get_card_image(card.image)
+                cards_returns.append({"id": card.id, "name": card.name, "image": card_image})
+                
+    elif card.card_id == WHISKY:
+        with db_session:
+            cards = select(c for c in player_target.hand if c.id != card.id)[:]
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append({"id": card.id, "name": card.name, "image": card_image})
