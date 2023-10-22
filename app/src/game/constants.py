@@ -110,7 +110,8 @@ DECK = [
 
 
 # fijarse de meter las otras cartas.
-
+NADA_DE_BARBACOA = 17
+AQUI_ESTOY_BIEN = 14
 MAS_VALE_QUE_CORRAS = 12
 VIGILA_TUS_ESPALDAS = 10
 CAMBIO_DE_LUGAR = 9
