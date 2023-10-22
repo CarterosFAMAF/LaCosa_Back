@@ -185,3 +185,30 @@ def create_status_investigation(card):
         status = WS_STATUS_WHISKY
         
     return status
+
+
+def can_defend(player_target,card):
+    can_defend = False
+    cards = select(c for c in player_target.hand if c.id != card.id)[:]
+    
+    if card.card_id == LANZALLAMAS:
+        for card in cards:
+            if card.card_id == NADA_DE_BARBACOA:
+                can_defend == True
+    if card.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
+        for card in cards:
+            if card.card_id == AQUI_ESTOY_BIEN:
+                can_defend == True
+    
+    return can_defend
+        
+def effect_defense(player_main,player_target,card_main,card_target,match):
+    if card_target.card_id == NADA_DE_BARBACOA:
+        discard_card_of_player(card_main.id,match.id,player_main.id)
+        discard_card_of_player(card_target.id,match.id,player_target.id)
+        #broadcasteamos "{player_target} evito ser calzinado por {player_main}"
+    
+    if card_target.card_id == AQUI_ESTOY_BIEN:
+        discard_card_of_player(card_main.id,match.id,player_main.id)
+        discard_card_of_player(card_target.id,match.id,player_target.id)
+        #broadcasteamos ""
