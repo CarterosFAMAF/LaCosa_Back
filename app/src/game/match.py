@@ -213,11 +213,6 @@ def next_turn(match_id: int):
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
                 break
-        
-            
-        
-            
-
 
 
 @db_session
