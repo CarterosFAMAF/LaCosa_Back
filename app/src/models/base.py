@@ -23,7 +23,7 @@ class Match(db.Entity):
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    position = Optional(int)
+    position = Optional(int, default=-1)
     role = Optional(str)
     hand = Set("Card")
     match = Optional(Match, reverse="players")
@@ -83,6 +83,21 @@ def load_cards():
                 card_id = VIGILA_TUS_ESPALDAS,
                 name="Vigila_Tus_Espaldas",
                 image="app/cards/Vigila_tus_espaldas.png",
+            )
+            Card(
+                card_id = WHISKY,
+                name="Whisky",
+                image="app/cards/Whisky.png",
+            )
+            Card(
+                card_id = ANALISIS,
+                name="Analisis",
+                image="app/cards/Analisis.png",
+            )
+            Card(
+                card_id = CAMBIO_DE_LUGAR,
+                name="Cambio_de_lugar",
+                image="app/cards/Cambio_de_lugar.png",
             )
             flush()
     except:

@@ -71,6 +71,39 @@ class Match:
         MATCHES.append(self)
 
 
+def list_not_started_matches() -> list:
+    """
+    Return a list of ListMatchOut objects with all the matches that are not started.
+
+    Args:
+        None
+
+    Returns:
+        matches (List[ListMatchOut])
+    """
+    matches_db = None
+    matches_out = []
+
+    with db_session:
+        matches_db = select(m for m in MatchDB if m.started == False)[:]
+
+        if matches_db is not None:
+            for match_db in matches_db:
+                match_out = ListMatchOut(
+                    match_id=match_db.id,
+                    match_name=match_db.name,
+                    owner_name=match_db.player_owner.name,
+                    player_count=match_db.number_players,
+                    player_min=match_db.min_players,
+                    player_max=match_db.max_players,
+                    joined_players=[player.name for player in match_db.players],
+                )
+
+                matches_out.append(match_out)
+
+    return matches_out
+
+
 def join_match(player_name: str, match_id: int):
     """
     Join a player to a match
@@ -131,10 +164,7 @@ def get_live_match_by_id(match_id: int):
     return_match = None
 
     for match in MATCHES:
-        print("DEBUG: match._id: " + str(match._id) + " match_id: " + str(match_id))
-        print(match._id == match_id)
         if match._id == match_id:
-            print("DEBUG: match found")
             return_match = match
             break
     print(return_match)
@@ -172,9 +202,9 @@ def next_turn(match_id: int):
         player = None
         while True:
             if match.clockwise:
-                match.turn = ((match.turn + 1) % match.number_players)
+                match.turn = (match.turn + 1) % match.number_players
             else:
-                match.turn = ((match.turn - 1) % match.number_players)
+                match.turn = (match.turn - 1) % match.number_players
             # get the player with the current turn
             flush()
             player = select(
@@ -187,6 +217,7 @@ def next_turn(match_id: int):
             
         
             
+
 
 @db_session
 def deal_cards(match_id: int):
@@ -202,15 +233,15 @@ def deal_cards(match_id: int):
 
     match = MatchDB.get(id=match_id)
     players_list = select(p for p in match.players)[:]
-    
+
     for player in players_list:
         cards = select(c for c in match.deck).random(4)
         player.hand.add(cards)
         match.deck.remove(cards)
-        
+
     the_thing_player = select(p for p in match.players).random(1)[0]
     card = select(p for p in the_thing_player.hand).random(1)
-    
+
     the_thing_player.hand.remove(card)
     match.deck.add(card)
     card_the_thing = CardDB.get(card_id=LA_COSA)
@@ -247,7 +278,7 @@ def start_game(match_id: int):
     Returns:
         None
     """
-    
+
     match = MatchDB.get(id=match_id)
     add_cards_to_deck(match_id, match.number_players)
     match.started = True
@@ -278,6 +309,19 @@ def end_match(match_id):
         match = MatchDB.get(id=match_id)
         match.finalized = True
         flush()
+    MATCHES.remove(get_live_match_by_id(match_id))
+
+
+def delete_live_match(match_id):
+    """
+    Delete match from live matches
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
     MATCHES.remove(get_live_match_by_id(match_id))
 
 
