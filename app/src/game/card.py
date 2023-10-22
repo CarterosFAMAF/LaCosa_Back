@@ -30,7 +30,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     status = None
 
     if card.card_id == LANZALLAMAS:
-        status = play_lanzallamas(player_out.id)
+        status = play_lanzallamas(player_out.id,match_id)
     if card.card_id == MAS_VALE_QUE_CORRAS:
         status = play_mas_vale_que_corras(player_in.id, player_out.id,match_id)
     if card.card_id == VIGILA_TUS_ESPALDAS:
@@ -44,7 +44,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     return status
 
 
-def play_lanzallamas(player_target_id):
+def play_lanzallamas(player_target_id,match_id):
     """
     Set the role of a player to dead
 
@@ -56,7 +56,7 @@ def play_lanzallamas(player_target_id):
     """
     with db_session:
         match = get_match_by_id(match_id)
-        player_target = get_player_by_id(player_target_id)
+s        player_target = get_player_by_id(player_target_id)
         player_target.role = "dead"
         for card in player_target.hand:
             discard_card_of_player(card.id, match_id, player_target.id)
