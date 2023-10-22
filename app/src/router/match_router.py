@@ -264,7 +264,7 @@ async def get_hand(match_id: int, player_id: int):
 
 # endpoin to list matches
 @router.get(
-    "/matches", resp    onse_model=List[ListMatchOut], status_code=status.HTTP_200_OK
+    "/matches", response_model=List[ListMatchOut], status_code=status.HTTP_200_OK
 )
 async def list_matches():
     matches = list_not_started_matches()
