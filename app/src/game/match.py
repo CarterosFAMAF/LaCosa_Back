@@ -213,8 +213,7 @@ def next_turn(match_id: int):
             ).first()
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
-                break
-
+                    break
 
 @db_session
 def deal_cards(match_id: int):

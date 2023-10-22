@@ -156,7 +156,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     msg_ws = create_ws_message(match_id, status, player_in.id, player_out_id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
 
-    next_turn(match_id)
+    next_turn(match.id)
     # send next turn message to all players in the match
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)

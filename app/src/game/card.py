@@ -79,7 +79,7 @@ def play_sospecha(player_id, player_target_id, match_id):
         status = WS_STATUS_CARD_DISCOVER
         msg_ws = create_ws_message(
             match_id, status, player_id, player_target_id, card_random.id
-        )
+        )                           
         match._match_connection_manager.send_personal_json(msg_ws, player_id)
 
         # al player afectado por la carta le manda un msj de que han visto su carta y cual
