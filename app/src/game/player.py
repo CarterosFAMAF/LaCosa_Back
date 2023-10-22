@@ -99,7 +99,7 @@ def get_card(match_id: int, player_id: int):
         match.discard_pile.clear()
         match.deck.add(deck)
 
-#se puede reutilizar para sospecha.
+    # se puede reutilizar para sospecha.
     card = select(c for c in match.deck).random(1)[0]
     card_image = get_card_image(card.image)
     player.hand.add(card)
@@ -146,4 +146,5 @@ def delete_player(player_id: int, match_id: int):
     match = MatchDB.get(id=match_id)
     player = PlayerDB.get(id=player_id)
     match.players.remove(player)
+    match.number_players -= 1
     flush()
