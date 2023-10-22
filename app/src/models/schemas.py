@@ -1,11 +1,11 @@
 from fastapi import HTTPException, status
-from pydantic import BaseModel, Field, model_validator , constr
-
+from pydantic import BaseModel, Field, model_validator, constr
 
 
 class MatchIn(BaseModel):
     player_name: str
-    match_name: str
+    # match name not empty and string
+    match_name: constr(min_length=1, max_length=100)
     min_players: int = Field(ge=4, le=12)
     max_players: int = Field(ge=4, le=12)
 
@@ -29,8 +29,18 @@ class MatchOut(BaseModel):
     result: str
 
 
+class ListMatchOut(BaseModel):
+    match_id: int
+    match_name: str
+    owner_name: str
+    player_count: int
+    player_min: int
+    player_max: int
+    joined_players: list
+
+
 class JoinMatchIn(BaseModel):
-    player_name: constr(min_length=3, max_length=20)
+    player_name: constr(min_length=1, max_length=100)
     match_id: int = Field(ge=1)
 
 
@@ -43,16 +53,19 @@ class CardModel(BaseModel):
     id: int = 0
     name: str = ""
     image: str = ""
-    
+
+
 class PlayCardModel(BaseModel):
-    match_id : int
-    player_in_id : int
-    player_out_id : int 
-    card_id : int
-    
+    match_id: int
+    player_in_id: int
+    player_out_id: int
+    card_id: int
+
+
 class StartMatchIn(BaseModel):
     player_id: int
     match_id: int
+
 
 class DiscardIn(BaseModel):
     card_id: int

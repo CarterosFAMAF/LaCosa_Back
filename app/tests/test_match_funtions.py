@@ -4,7 +4,7 @@ from app.src.game.constants import *
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
 from app.src.game.deck import add_cards_to_deck
-from app.src.game.match import deal_cards, check_and_set_match_end
+from app.src.game.match import *
 from app.src.game.constants import *
 
 
@@ -32,21 +32,18 @@ def test_deal_card():
 
 @db_session
 def test_check_and_set_match_end():
-    player = PlayerDB(name="test_player")
+    # create match with match class constructor
+    new_match = Match("test_player", "test_match", 4, 12)
+    match = MatchDB.get(id=new_match._id)
+    # set match as started
+    match.started = True
+    flush()
+    # get player
+    player = PlayerDB.get(id=new_match._player_owner_id)
+    # set player as human
     player.role = PLAYER_ROLE_HUMAN
     flush()
 
-    match = MatchDB(
-        name="test_match",
-        number_players=4,
-        max_players=12,
-        min_players=4,
-        started=False,
-        finalized=False,
-        turn=None,
-        player_owner=player,
-        players=[player],
-    )
-    flush()
-    check_and_set_match_end(match.id)
+    check_and_set_match_end(match_id=new_match._id)
+
     assert match.finalized == True

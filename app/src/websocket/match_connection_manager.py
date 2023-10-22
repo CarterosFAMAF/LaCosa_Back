@@ -137,6 +137,8 @@ def create_ws_message(
                     "alive": True if player.role != "dead" else False,
                 }
             )
+        # sort players by turn
+        players.sort(key=lambda x: x["turn"])
         msg = get_ws_message_with_status(status, player_name, player_target_name,card_name)
 
         match_ws = {
@@ -192,6 +194,10 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
         message = f"se descubrió que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
         message = f"tu carta {card_name} ha sido vista por {player_name}"
+    elif status == WS_STATUS_ANALYSIS:
+        message = f"{player_name} ha analizado las cartas de {player_target_name}"
+    elif status == WS_STATUS_WHISKY:
+        message = f"{player_name} ha mostrado todas sus cartas"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

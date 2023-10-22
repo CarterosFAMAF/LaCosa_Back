@@ -109,3 +109,65 @@ def test_join_match_valid():
         json={"player_name": "agu", "match_id": res_match_created.json()["match_id"]},
     )
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_list_matches_empty():
+    response = client.get(
+        "/matches",
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_list_matches_not_empty():
+    res_match_created = client.post(
+        "/matches",
+        json={
+            "player_name": "string",
+            "match_name": "string",
+            "max_players": 12,
+            "min_players": 4,
+        },
+    )
+    res_match_created = client.post(
+        "/matches",
+        json={
+            "player_name": "string",
+            "match_name": "string",
+            "max_players": 12,
+            "min_players": 4,
+        },
+    )
+    res_match_created = client.post(
+        "/matches",
+        json={
+            "player_name": "string",
+            "match_name": "string",
+            "max_players": 12,
+            "min_players": 4,
+        },
+    )
+    response = client.get(
+        "/matches",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 12
+
+
+def test_list_matches_not_empty_2():
+    for i in range(12):
+        res_match_created = client.post(
+            "/matches",
+            json={
+                "player_name": "string",
+                "match_name": "string",
+                "max_players": 12,
+                "min_players": 4,
+            },
+        )
+    response = client.get(
+        "/matches",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 24

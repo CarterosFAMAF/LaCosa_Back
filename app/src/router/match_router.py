@@ -43,7 +43,7 @@ async def join_match_endpoint(input: JoinMatchIn):
     match_db = get_match_by_id(input.match_id)
 
     # check if match exists and if it is not finalized
-    if live_match == None:
+    if live_match == None or match_db == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Match not found",
@@ -79,7 +79,7 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 @router.put(
     "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card",
-    response_model = CardModel ,
+    response_model=List[CardModel],
     status_code=status.HTTP_200_OK,
 )
 async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
@@ -88,7 +88,7 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     player_in_id = int(player_in_id)
     player_out_id = int(player_out_id)
     card_id = int(card_id)
-    
+
     # check if match exists and if it is not finalized
     match = get_match_by_id(match_id)
     if match == None:
@@ -119,31 +119,31 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Player not found",
             )
-            
+
     card = get_card_by_id(card_id)
     if card == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
-    live_match = get_live_match_by_id(match_id)
+    live_match = get_live_match_by_id(match.id)
     print(live_match)
 
-    card_random = CardModel(id=0, name="", image="")
+    list_card = []
 
     if is_investigation_card(card):
-        card_random = play_card_investigation(player_out,card)
+        list_card = play_card_investigation(player_out,card)
+        status = create_status_investigation(card)
         
-        #al player afectado por la carta le manda un msj de que han visto su carta y cual
-        msg_ws = create_ws_message(match.id,WS_STATUS_CARD_SHOWN,player_in.id,player_out.id,card_random["name"]) 
-        await live_match._match_connection_manager.send_personal_json(msg_ws,player_out.id)
-        
-        #status de carta sospecha
-        status = WS_STATUS_SUSPECT
+        if need_personal_message(card):
+            msg_ws = personal_message(match,player_in,player_out,list_card,card)
+            await live_match._match_connection_manager.send_personal_json(
+                msg_ws, player_out.id
+            )
 
     else:
         status = play_card(player_in, player_out, match_id, card_id)
-    
+
     # send message to all players of the card played
     msg_ws = create_ws_message(match_id, status, player_in.id, player_out_id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
@@ -158,15 +158,15 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
         end_match(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
-        
-    #return card model , if not played card investigation return empty (traducido como pintó)
-    return card_random
+
+    # return card model , if not played card investigation return empty (traducido como pintó)
+    return list_card
+
 
 @router.put(
     "/matches/{match_id}/players/{player_id}/{card_id}/discard",
 )
-async def discard(match_id,player_id,card_id):
-
+async def discard(match_id, player_id, card_id):
     match = get_match_by_id(match_id)
     if match == None:
         raise HTTPException(
@@ -181,29 +181,30 @@ async def discard(match_id,player_id,card_id):
 
     # check if player in exists
     player = get_player_by_id(player_id)
-    if player== None:
+    if player == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Player not found",
         )
-    
+
     card = get_card_by_id(card_id)
     if card == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
-        
+
     discard_card_of_player(card_id, match_id, player_id)
     next_turn(match_id)
-    
+
     live_match = get_live_match_by_id(match.id)
     print(live_match)
 
-    msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD , player.id)
+    msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
 
-    return {"message" : "Card discard"}
+    return {"message": "Card discard"}
+
 
 @router.get(
     "/matches/{match_id}/players/{player_id}/get_card",
@@ -259,6 +260,15 @@ async def get_hand(match_id: int, player_id: int):
     return hand
 
 
+# endpoin to list matches
+@router.get(
+    "/matches", response_model=List[ListMatchOut], status_code=status.HTTP_200_OK
+)
+async def list_matches():
+    matches = list_not_started_matches()
+    return matches
+
+
 @router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
 async def start_match(input: StartMatchIn):
     with db_session:
@@ -295,6 +305,7 @@ async def start_match(input: StartMatchIn):
     msg = {"message": "The match has been started"}
     return msg
 
+
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:
@@ -320,7 +331,13 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
         # if the match has started end match.
         match_db = get_match_by_id(match_id)
 
-        if match_db != None and match_db.started == True:
+        # if the match has ended
+
+        if (
+            (match_db != None)
+            and (match_db.started == True)
+            and (match_db.finalized == False)
+        ):
             await manager.disconnect(websocket, player_id, match._id)
             end_match(match_id)
             print("if the match has started end match.")
@@ -328,17 +345,22 @@ async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int
             await manager.broadcast_json(ws_msg)
 
         # if the match has not started and host disconnects, delete match.
-        elif match_db != None and player_id == match_db.player_owner.id:
+        elif (
+            match_db != None
+            and player_id == match_db.player_owner.id
+            and (match_db.finalized == False)
+        ):
             await manager.disconnect(websocket, player_id, match._id)
 
             print("if the match has not started and host disconnects, delete match.")
             ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
             await manager.broadcast_json(ws_msg)
 
+            delete_live_match(match_id)
             delete_match(match_id)
 
         # if the match has not started and player disconnects, delete player.
-        elif match_db != None:
+        elif match_db != None and match_db.finalized == False:
             print("if the match has not started and player disconnects, delete player")
             delete_player(player_id, match_id)
             await manager.disconnect(websocket, player_id, match._id)
