@@ -32,7 +32,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     if card.card_id == LANZALLAMAS:
         status = play_lanzallamas(player_out.id)
     if card.card_id == MAS_VALE_QUE_CORRAS:
-        status = play_mas_vale_que_corras(player_in.id, player_out.id)
+        status = play_mas_vale_que_corras(player_in.id, player_out.id,match_id)
     if card.card_id == VIGILA_TUS_ESPALDAS:
         status = play_vigila_tus_espaldas(match_id)
     if card.card_id == CAMBIO_DE_LUGAR:
@@ -95,7 +95,7 @@ def play_mas_vale_que_corras(player_main_id, player_target_id, match_id):
         return status
 
 
-def play_mas_vale_que_corras(player_main_id, player_target_id):
+def play_mas_vale_que_corras(player_main_id, player_target_id,match_id):
     """
     Change the position of two players, and change the turn of the match
 
@@ -130,6 +130,7 @@ def play_cambio_de_lugar(player_main_id, player_target_id, match_id):
         match = get_match_by_id(match_id)
         match.turn = player_main.position
         flush()
+        
     status = WS_STATUS_CHANGED_OF_PLACES
     return status
 
