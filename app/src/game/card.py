@@ -128,7 +128,7 @@ def play_vigila_tus_espaldas(match_id):
     return status
 
 
-def play_card_investigation(player_target,card):
+def play_card_investigation(player_main,player_target,card):
     cards_returns = []
     
     if card.card_id == SOSPECHA:    
@@ -147,11 +147,11 @@ def play_card_investigation(player_target,card):
                 
     elif card.card_id == WHISKY:
         with db_session:
-            cards = select(c for c in player_target.hand if c.id != card.id)[:]
+            cards = select(c for c in player_main.hand if c.id != card.id)[:]
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append({"id": card.id, "name": card.name, "image": card_image})
-                
+
     return cards_returns
 
 
