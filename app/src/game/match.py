@@ -213,7 +213,8 @@ def next_turn(match_id: int):
             ).first()
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
-                    break
+                break
+
 
 @db_session
 def deal_cards(match_id: int):
@@ -337,7 +338,7 @@ def delete_match(match_id):
         flush()
 
 
-def check_and_set_match_end(match_id):
+def check_match_end(match_id):
     """
     Check if match has ended
     Iterate over players and check if there is only one human player alive

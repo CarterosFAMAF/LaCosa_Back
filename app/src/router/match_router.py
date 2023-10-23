@@ -12,6 +12,8 @@ from app.src.websocket.match_connection_manager import *
 
 from app.src.models.schemas import *
 
+from app.src.router.utils import *
+
 
 router = APIRouter()
 
@@ -79,7 +81,7 @@ async def join_match_endpoint(input: JoinMatchIn):
 
 @router.put(
     "/matches/{match_id}/players/{player_in_id}/{player_out_id}/{card_id}/play_card",
-    response_model=CardModel,
+    response_model=List[CardModel],
     status_code=status.HTTP_200_OK,
 )
 async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
@@ -126,49 +128,43 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
-    live_match = get_live_match_by_id(match_id)
-    print(live_match)
 
-    card_random = CardModel(id=0, name="", image="")
+    live_match = get_live_match_by_id(match.id)
+    list_card = []
 
     if is_investigation_card(card):
-        card_random = play_card_investigation(player_out, card)
-
-        # al player afectado por la carta le manda un msj de que han visto su carta y cual
-        msg_ws = create_ws_message(
-            match.id,
-            WS_STATUS_CARD_SHOWN,
-            player_in.id,
-            player_out.id,
-            card_random["name"],
-        )
-        await live_match._match_connection_manager.send_personal_json(
-            msg_ws, player_out.id
-        )
-
-        # status de carta sospecha
-        status = WS_STATUS_SUSPECT
-
+        # sospecha, whiskey, analisis
+        list_card = play_card_investigation(player_in, player_out, card)
+        status = create_status_investigation(card)
     else:
         status = play_card(player_in, player_out, match_id, card_id)
 
-    # send message to all players of the card played
-    msg_ws = create_ws_message(match_id, status, player_in.id, player_out_id)
-    await live_match._match_connection_manager.broadcast_json(msg_ws)
+    # CARD PLAYED MSG
+    await send_message_card_played(
+        match_id=match.id,
+        status=status,
+        player_in_id=player_in.id,
+        player_out_id=player_out.id if player_out else 0,
+        card_name=card.name,
+        list_cards=list_card,
+    )
 
+    discard_card_of_player(card.id, match.id, player_in.id)
+    ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_in_id)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
+
+    # NEXT TURN MSG
     next_turn(match.id)
-    # send next turn message to all players in the match
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # check if match has ended
-    if check_and_set_match_end(match_id):
+    # FINALIZE MATCH MSG
+    if check_match_end(match_id):
         end_match(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # return card model , if not played card investigation return empty (traducido como pintó)
-    return card_random
+    return list_card
 
 
 @router.put(
@@ -202,14 +198,16 @@ async def discard(match_id, player_id, card_id):
             detail="Card not found",
         )
 
-    discard_card_of_player(card_id, match_id, player_id)
-    next_turn(match_id)
-
     live_match = get_live_match_by_id(match.id)
     print(live_match)
 
+    discard_card_of_player(card_id, match_id, player_id)
     msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
+
+    next_turn(match_id)
+    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return {"message": "Card discard"}
 

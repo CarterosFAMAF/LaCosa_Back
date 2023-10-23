@@ -99,10 +99,15 @@ class MatchConnectionManager:
 
 
 def create_ws_message(
-    match_id: int, status: int, player_id: int = 0, player_target_id: int = 0, card_name: str = ""
+    match_id: int,
+    status: int,
+    player_id: int = 0,
+    player_target_id: int = 0,
+    card_name: str = "",
+    list_revealed_card: list = [],
 ):
     """
-    Create a dictionary to then send as a json message to the client. Utilizes the state of the match in the db
+    Create a dictionary to then send it as a json message to the client. Utilizes the state of the match in the db
 
     Args:
         match_id (int)
@@ -119,7 +124,7 @@ def create_ws_message(
         players = []
         player_name = ""
         player_target_name = ""
-        
+
         for player in match_db.players:
             # get player names to make the msg, if there isn't player_id or player_target_id, set to None
             if player_id > 0 and player.id == player_id:
@@ -127,7 +132,7 @@ def create_ws_message(
 
             if player_target_id > 0 and player.id == player_target_id:
                 player_target_name = player.name
-                        
+
             # add player to the list of players
             players.append(
                 {
@@ -135,11 +140,16 @@ def create_ws_message(
                     "name": player.name,
                     "turn": player.position,
                     "alive": True if player.role != "dead" else False,
+                    "revealed_cards": list_revealed_card
+                    if player.id == player_id
+                    else [],
                 }
             )
         # sort players by turn
         players.sort(key=lambda x: x["turn"])
-        msg = get_ws_message_with_status(status, player_name, player_target_name,card_name)
+        msg = get_ws_message_with_status(
+            status, player_name, player_target_name, card_name
+        )
 
         match_ws = {
             "player_id": player_id,
@@ -153,7 +163,9 @@ def create_ws_message(
     return match_ws
 
 
-def get_ws_message_with_status(status: int, player_name: str, player_target_name: str, card_name: str):
+def get_ws_message_with_status(
+    status: int, player_name: str, player_target_name: str, card_name: str
+):
     """
     Returns the message associated with a status code
 
@@ -189,11 +201,17 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
     elif status == WS_STATUS_DISCARD:
         message = f"{player_name} ha descartado una carta"
     elif status == WS_STATUS_SUSPECT:
-        message = f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
+        message = (
+            f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
+        )
     elif status == WS_STATUS_CARD_DISCOVER:
-        message = f"se descubrió que {player_target_name} tenia una carta {card_name}"
+        message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
         message = f"tu carta {card_name} ha sido vista por {player_name}"
+    elif status == WS_STATUS_ANALYSIS:
+        message = f"{player_name} ha analizado las cartas de {player_target_name}"
+    elif status == WS_STATUS_WHISKY:
+        message = f"{player_name} ha mostrado todas sus cartas"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message
