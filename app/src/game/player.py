@@ -154,3 +154,13 @@ def delete_player(player_id: int, match_id: int):
     match.players.remove(player)
     match.number_players -= 1
     flush()
+
+
+def exchange(player_main,player_target,card_main,card_target):
+    with db_session:
+        player_target.hand.add(card_main)
+        player_main.hand.remove(card_main)
+
+        player_main.hand.add(card_target)
+        player_target.hand.remove(card_target)
+    flush()

@@ -31,12 +31,14 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
 
     if card.card_id == LANZALLAMAS:
         status = play_lanzallamas(player_out.id, match_id)
-    if card.card_id == MAS_VALE_QUE_CORRAS:
+    elif card.card_id == MAS_VALE_QUE_CORRAS:
         status = play_mas_vale_que_corras(player_in.id, player_out.id, match_id)
-    if card.card_id == VIGILA_TUS_ESPALDAS:
+    elif card.card_id == VIGILA_TUS_ESPALDAS:
         status = play_vigila_tus_espaldas(match_id)
-    if card.card_id == CAMBIO_DE_LUGAR:
+    elif card.card_id == CAMBIO_DE_LUGAR:
         status = play_cambio_de_lugar(player_in.id, player_out.id, match_id)
+    elif card.card_id == SEDUCCION:
+        status = play_seduccion(player_in, player_out, card, card_target)
     else:
         pass
 
@@ -121,6 +123,12 @@ def play_vigila_tus_espaldas(match_id):
         match.clockwise = not match.clockwise
         flush()
     status = WS_STATUS_REVERSE_POSITION
+    return status
+
+
+def play_seduccion(player_main, player_target, card, card_target):
+    exchange(player_main, player_target, card, card_target)
+    status = WS_STATUS_SEDUCCION
     return status
 
 

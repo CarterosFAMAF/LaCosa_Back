@@ -225,6 +225,21 @@ async def start_match(input: StartMatchIn):
     msg = {"message": "The match has been started"}
     return msg
 
+    
+"""
+@router.post(
+    "/matches/{match_id}/players/{player_id}/{player_target_id}/{card_id}/{card_target_id}/exchange"
+)
+def exchange_endpoint(match_id, player_id, player_target_id, card_id, card_target_id):
+    match, player, player_target, card, card_target = validate_match_players_and_cards(
+        match_id, player_id, player_target_id, card_id, card_target_id
+    )
+
+    exchange(player, player_target, card, card_target)
+
+    return {"message":"exchange realized"}
+"""
+
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
