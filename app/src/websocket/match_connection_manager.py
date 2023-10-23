@@ -211,7 +211,7 @@ def get_ws_message_with_status(
             f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
         )
     elif status == WS_STATUS_CARD_DISCOVER:
-        message = f"se descubrió que {player_target_name} tenia una carta {card_name}"
+        message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
         message = f"tu carta {card_name} ha sido vista por {player_name}"
     elif status == WS_STATUS_ANALYSIS:
