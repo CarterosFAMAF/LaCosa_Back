@@ -12,6 +12,8 @@ from app.src.websocket.match_connection_manager import *
 
 from app.src.models.schemas import *
 
+from app.src.router.utils import *
+
 
 router = APIRouter()
 
@@ -126,41 +128,38 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found",
         )
-    live_match = get_live_match_by_id(match.id)
 
+    live_match = get_live_match_by_id(match.id)
     list_card = []
 
     if is_investigation_card(card):
+        # sospecha, whiskey, analisis
         list_card = play_card_investigation(player_in, player_out, card)
         status = create_status_investigation(card)
-
-        if need_personal_message(card):
-            msg_ws = personal_message(match, player_in, player_out, list_card, card)
-            await live_match._match_connection_manager.send_personal_json(
-                msg_ws, player_out.id
-            )
-
     else:
         status = play_card(player_in, player_out, match_id, card_id)
 
-    # send message to all players of the card played
-    msg_ws = create_ws_message(
-        match_id, status, player_in.id, player_out_id, "", list_card
+    # CARD PLAYED MSG
+    await send_message_card_played(
+        match_id=match_id,
+        status=status,
+        player_in_id=player_in_id,
+        player_out_id=player_out_id,
+        card_name=card.name,
+        list_cards=list_card,
     )
-    await live_match._match_connection_manager.broadcast_json(msg_ws)
 
+    # NEXT TURN MSG
     next_turn(match.id)
-    # send next turn message to all players in the match
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # check if match has ended
+    # FINALIZE MATCH MSG
     if check_and_set_match_end(match_id):
         end_match(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # return card model , if not played card investigation return empty (traducido como pintó)
     return list_card
 
 
