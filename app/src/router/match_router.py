@@ -141,26 +141,25 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
 
     # CARD PLAYED MSG
     await send_message_card_played(
-    match_id=match.id,
-    status=status,
-    player_in_id=player_in.id,
-    player_out_id=player_out.id if player_out else 0,
-    card_name=card.name,
-    list_cards=list_card,
+        match_id=match.id,
+        status=status,
+        player_in_id=player_in.id,
+        player_out_id=player_out.id if player_out else 0,
+        card_name=card.name,
+        list_cards=list_card,
     )
 
-
-    discard_card_of_player(card.id,match.id,player_in.id)
+    discard_card_of_player(card.id, match.id, player_in.id)
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
-    
+
     # NEXT TURN MSG
     next_turn(match.id)
     ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     # FINALIZE MATCH MSG
-    if check_and_set_match_end(match_id):
+    if check_match_end(match_id):
         end_match(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
         await live_match._match_connection_manager.broadcast_json(ws_msg)

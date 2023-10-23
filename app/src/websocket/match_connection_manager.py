@@ -107,7 +107,7 @@ def create_ws_message(
     list_revealed_card: list = [],
 ):
     """
-    Create a dictionary to then send as a json message to the client. Utilizes the state of the match in the db
+    Create a dictionary to then send it as a json message to the client. Utilizes the state of the match in the db
 
     Args:
         match_id (int)

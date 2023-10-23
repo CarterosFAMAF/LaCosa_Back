@@ -338,7 +338,7 @@ def delete_match(match_id):
         flush()
 
 
-def check_and_set_match_end(match_id):
+def check_match_end(match_id):
     """
     Check if match has ended
     Iterate over players and check if there is only one human player alive
