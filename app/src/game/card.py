@@ -56,7 +56,7 @@ def play_lanzallamas(player_target_id,match_id):
     """
     with db_session:
         match = get_match_by_id(match_id)
-s        player_target = get_player_by_id(player_target_id)
+        player_target = get_player_by_id(player_target_id)
         player_target.role = "dead"
         for card in player_target.hand:
             discard_card_of_player(card.id, match_id, player_target.id)
