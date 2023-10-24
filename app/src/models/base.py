@@ -1,6 +1,6 @@
 from pony.orm import *
 from app.src.game.constants import *
-
+import random
 db = Database()
 
 
@@ -54,8 +54,11 @@ def define_database_and_entities(test: bool):
     db.generate_mapping(create_tables=True)
 
 
+#imagenes para infeccion
+
 @db_session
 def load_cards():
+    image_infected = ["app/cards/Infeccion_1.png", "app/cards/Infeccion_2.png","app/cards/Infeccion_3.png"]
     try:
         exists_card = db.exists("select * from Card where name='lanzallamas'")
         if not exists_card:
@@ -103,6 +106,11 @@ def load_cards():
                 card_id = SEDUCCION,
                 name="Seduccion",
                 image="app/cards/Seduccion.png",
+            )
+            Card(
+                card_id = INFECCION,
+                name="Infeccion",
+                image= random.choice(image_infected),
             )
             flush()
     except:

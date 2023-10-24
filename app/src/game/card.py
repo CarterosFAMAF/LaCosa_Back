@@ -38,7 +38,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     elif card.card_id == CAMBIO_DE_LUGAR:
         status = play_cambio_de_lugar(player_in.id, player_out.id, match_id)
     elif card.card_id == SEDUCCION:
-        status = play_seduccion(player_in, player_out, card)
+        status = play_seduccion()
     else:
         pass
 
@@ -126,9 +126,7 @@ def play_vigila_tus_espaldas(match_id):
     return status
 
 
-def play_seduccion(player_main, player_target, card):
-    
-    exchange(player_main, player_target, card)
+def play_seduccion():
     status = WS_STATUS_SEDUCCION
     return status
 
@@ -219,6 +217,19 @@ def create_status_investigation(card):
 def need_broadcast_message(match, player_main, player_target, list_card, card):
     return card.card_id == WHISKY
 
+def apply_effect_infeccion(match,player_target):
+    #hace falta el status de infectado
+    with db_session:
+        if player_target == 0:
+            player_target = select (c for c in match.players if c.position == match.turn)
+            player_target.role = "infected"
+            flush()
+        else:
+            player_target.role = "infected"
+            flush()
+
+def is_card_infected(card):
+    return card.card_id == INFECCION 
 
 def can_defend(player_target, card):
     can_defend = False

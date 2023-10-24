@@ -4,6 +4,7 @@ from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Card as CardDB
 from app.src.models.schemas import *
+from app.src.game.card import *
 from pony.orm import *
 import base64
 
@@ -165,6 +166,7 @@ def is_player_main(match, player):
 
 
 def exchange(player_main, player_target, card_main):
+    #deberia buscar al player_target que es el jugador del siguiente turno
     with db_session:
         player_target.hand.add(card_main)
         player_main.hand.remove(card_main)
