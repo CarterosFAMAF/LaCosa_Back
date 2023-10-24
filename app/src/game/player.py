@@ -3,8 +3,10 @@ from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Card as CardDB
+
+from app.src.game.constants import *
+
 from app.src.models.schemas import *
-from app.src.game.card import *
 from pony.orm import *
 import base64
 
@@ -161,13 +163,66 @@ def delete_player(player_id: int, match_id: int):
     flush()
 
 
-def is_player_main(match, player):
+def is_player_main_turn(match, player):
+    """
+    Returns True if is the player turn
+
+    Args:
+        match (Match)
+        player (Player)
+
+    Returns:
+        bool
+    """
+
     return match.turn == player.position
 
 
-def exchange(player_main, player_target, card_main):
-    #deberia buscar al player_target que es el jugador del siguiente turno
+def get_next_player(match) -> PlayerDB:
+    """
+    Find the next player by turn in the match
+
+    Args:
+        match (Match)
+
+    Returns:
+        player (PlayerDB)
+    """
+
+    player = None
+
+    turn = match.turn
+
     with db_session:
-        player_target.hand.add(card_main)
-        player_main.hand.remove(card_main)
-    flush()
+        while True:
+            if match.clockwise:
+                turn = (turn + 1) % match.number_players
+            else:
+                turn = (turn - 1) % match.number_players
+
+            player = select(p for p in match.players if p.position == turn).first()
+            # if it is not dead, break the loop, else, continue
+            if player.role != PLAYER_ROLE_DEAD:
+                break
+    return player
+
+
+def exchange_card(player_main_id, player_target_id, card_id):
+    """
+    Discard card of main player and add it to the target player hand
+
+    Args:
+        player_main (Player)
+        player_target (Player)
+        card_main (Card)
+
+    Returns:
+        None
+    """
+    with db_session:
+        player_main = PlayerDB.get(id=player_main_id)
+        player_target = PlayerDB.get(id=player_target_id)
+        card = CardDB.get(id=card_id)
+        player_main.hand.remove(card)
+        player_target.hand.add(card)
+        flush()

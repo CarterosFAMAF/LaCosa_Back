@@ -227,51 +227,53 @@ async def start_match(input: StartMatchIn):
 
 
 @router.post("/matches/{match_id}/player/{player_id}/exchange_cards")
-async def exchange_endpoint(match_id, player_id, player_target_id, card_id):
+async def exchange_endpoint(input: ExchangeCardIn):
+    # validate match players and cards
     match, player, player_target, card, card_target = validate_match_players_and_cards(
-        match_id, player_id, player_target_id, card_id, 0
+        input.match_id, input.player_id, input.player_target_id, input.card_id, 0
     )
+
     match_live = get_live_match_by_id(match.id)
-    #exchange average
-    if is_player_main(match, player) and player_target_id == 0:
-        # mandar msg privado con la carta que se desea intercambiar
-        # es para avisar.
-        # se le asigna la card_id al player target y se la eliminas al player_main
-        exchange(player, 0 , card)
-        # broadcastear msg publico de intercambio
+
+    # EXCHANGE PRIMER PASO
+    if is_player_main_turn(match, player):
+        print("ECHANGE PRIMER PASO")
+
+        if input.player_target_id == 0:
+            player_target = get_next_player(match)
+
+        exchange_card(player.id, player_target.id, card.id)
+
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-    #exchange seduccion
-    elif is_player_main(match, player):
-        #esto seria el caso de seduccion.
-        exchange(player, player_target, card)
-        #broadcastear
-
     else:
-        # se le asigna la card_id al player target y se la eliminas al player_main
-        exchange(player, player_target, card)
+        print("exchange segundo paso")
+
+        exchange_card(player.id, player_target.id, card.id)
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-        #todo el tramuyo de fijarse si la carta
+        """
         if is_card_infected(card):
-            apply_effect_infeccion(match,player_target)
+            apply_effect_infeccion(match, player_target)
             ws_msg = create_ws_message(
-            match.id, WS_STATUS_INFECTED, player_target.id,
-        )
-            await match_live._match_connection_manager.send_personal_json(ws_msg,player.id)
-            
-        # se hace next turn y todo lo que conlleva
-        next_turn(match.id)
-        ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
-        await match_live._match_connection_manager.broadcast_json(ws_msg)
+                match.id,
+                WS_STATUS_INFECTED,
+                player_target.id,
+            )
+            await match_live._match_connection_manager.send_personal_json(
+                ws_msg, player.id
+            )
+        """
 
-    return {"message": "exchange realized"}
+        next_turn(match.id)
+        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
