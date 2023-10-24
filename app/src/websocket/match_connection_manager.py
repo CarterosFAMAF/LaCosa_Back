@@ -216,6 +216,11 @@ def get_ws_message_with_status(
         message = (
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
+
+    elif status == WS_STATUS_EXCHANGE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

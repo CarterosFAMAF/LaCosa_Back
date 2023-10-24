@@ -84,7 +84,7 @@ async def join_match_endpoint(input: JoinMatchIn):
     response_model=List[CardModel],
     status_code=status.HTTP_200_OK,
 )
-async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
+async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id):
     # convert all the fields to int
     match_id = int(match_id)
     player_in_id = int(player_in_id)
@@ -225,20 +225,37 @@ async def start_match(input: StartMatchIn):
     msg = {"message": "The match has been started"}
     return msg
 
-    
-"""
-@router.post(
-    "/matches/{match_id}/players/{player_id}/{player_target_id}/{card_id}/{card_target_id}/exchange"
-)
-def exchange_endpoint(match_id, player_id, player_target_id, card_id, card_target_id):
+
+@router.post("/matches/{match_id}/player/{player_id}/exchange_cards")
+async def exchange_endpoint(match_id, player_id, player_target_id, card_id):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
-        match_id, player_id, player_target_id, card_id, card_target_id
+        match_id, player_id, player_target_id, card_id, 0
     )
+    match_live = get_live_match_by_id(match.id)
+    if is_player_main(match, player):
+        # broadcastear msg publico de intercambio
+        ws_msg = create_ws_message(
+            match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
+        )
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-    exchange(player, player_target, card, card_target)
+        # mandar msg privado con la carta que se desea intercambiar
 
-    return {"message":"exchange realized"}
-"""
+        # se le asigna la card_id al player target y se la eliminas al player_main
+        exchange(player, player_target, card)
+    else:
+        # se le asigna la card_id al player target y se la eliminas al player_main
+        exchange(player, player_target, card)
+        ws_msg = create_ws_message(
+            match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
+        )
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
+        # se hace next turn y todo lo que conlleva
+        next_turn(match.id)
+        ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+    return {"message": "exchange realized"}
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")

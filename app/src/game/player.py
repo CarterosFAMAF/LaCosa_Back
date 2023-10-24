@@ -72,6 +72,7 @@ def discard_card_of_player(card_id, match_id, player_id):
         match.discard_pile.add(card)
         flush()
 
+
 """
 def get_card_image(path: str):
     with open(path, "rb") as f:
@@ -80,9 +81,12 @@ def get_card_image(path: str):
     return card_img
 """
 
+
 def get_card_image(path: str):
     with open(path, "rb") as f:
-        card_img = base64.b64encode(f.read()).decode('utf-8')  # Convertir a cadena de texto
+        card_img = base64.b64encode(f.read()).decode(
+            "utf-8"
+        )  # Convertir a cadena de texto
     return card_img
 
 
@@ -156,11 +160,12 @@ def delete_player(player_id: int, match_id: int):
     flush()
 
 
-def exchange(player_main,player_target,card_main,card_target):
+def is_player_main(match, player):
+    return match.turn == player.position
+
+
+def exchange(player_main, player_target, card_main):
     with db_session:
         player_target.hand.add(card_main)
         player_main.hand.remove(card_main)
-
-        player_main.hand.add(card_target)
-        player_target.hand.remove(card_target)
     flush()
