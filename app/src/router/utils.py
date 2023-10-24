@@ -71,9 +71,11 @@ async def send_message_card_played(
             player_id=player_in_id,
             player_target_id=player_out_id,
             card_name=list_cards[0]["name"],
-            list_revealed_card=[]
+            list_revealed_card=[],
         )
-        await live_match._match_connection_manager.send_personal_json(msg_ws,player_out_id)
+        await live_match._match_connection_manager.send_personal_json(
+            msg_ws, player_out_id
+        )
 
         # send public msg
         msg_ws = create_ws_message(
@@ -85,3 +87,37 @@ async def send_message_card_played(
             list_revealed_card=[],
         )
         await live_match._match_connection_manager.broadcast_json(msg_ws)
+
+
+async def send_message_defense(
+    match_id: int, status: int, player_in_id: int, player_out_id: int, card_name: str
+):
+    """
+    Send defense message to a particular player
+
+    Args:
+        match_id (int)
+        status (int
+        player_in_id (int)
+        player_out_id (int)
+        card_name (str)
+
+    Returns:
+        None
+    """
+
+    # Get live match
+    live_match = get_live_match_by_id(match_id)
+
+    msg_ws = create_ws_message(
+        match_id=match_id,
+        status=status,
+        player_id=player_in_id,
+        player_target_id=player_out_id,
+        card_name=card_name,
+        list_revealed_card=[],
+    )
+    await live_match._match_connection_manager.send_personal_json(msg_ws, player_out_id)
+
+
+send_message_play_defense = send_message_defense

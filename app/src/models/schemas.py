@@ -71,3 +71,10 @@ class DiscardIn(BaseModel):
     card_id: int
     player_id: int
     match_id: int
+
+
+class PlayCardDefenseIn(BaseModel):
+    player_id: int
+    match_id: int
+    card_id: int
+    player_target_id: int

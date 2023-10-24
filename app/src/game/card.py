@@ -61,6 +61,7 @@ def play_lanzallamas(player_target_id, match_id):
         for card in player_target.hand:
             discard_card_of_player(card.id, match_id, player_target.id)
         flush()
+
     status = WS_STATUS_PLAYER_BURNED
     return status
 
@@ -107,7 +108,7 @@ def play_cambio_de_lugar(player_main_id, player_target_id, match_id):
 
 def play_vigila_tus_espaldas(match_id):
     """
-    reverse all positions of the players
+    Reverse clockwise
 
     Args:
         match_id(int)
@@ -176,24 +177,6 @@ def is_investigation_card(card):
     )
 
 
-def need_personal_message(card):
-    return card.card_id == SOSPECHA
-
-
-def personal_message(match, player_main, player_target, list_card, card):
-    msg_ws = ""
-
-    assert card.card_id == SOSPECHA
-    msg_ws = create_ws_message(
-        match.id,
-        WS_STATUS_CARD_SHOWN,
-        player_main.id,
-        player_target.id,
-        list_card[0]["name"],
-    )
-    return msg_ws
-
-
 def create_status_investigation(card):
     status = None
 
@@ -207,11 +190,21 @@ def create_status_investigation(card):
     return status
 
 
-def need_broadcast_message(match, player_main, player_target, list_card, card):
-    return card.card_id == WHISKY
+# DEFENSE
 
 
-def can_defend(player_target, card):
+def can_defend(player_target_id, card):
+    """
+    From specific card and player, return if the player can defend with a defense card
+
+    Args:
+        player_target_id (int)
+        card (Card)
+
+    Returns:
+        Bool
+    """
+    player_target = get_player_by_id(player_target_id)
     can_defend = False
     cards = select(c for c in player_target.hand if c.id != card.id)[:]
 
@@ -227,13 +220,55 @@ def can_defend(player_target, card):
     return can_defend
 
 
-def effect_defense(player_main, player_target, card_main, card_target, match):
-    if card_target.card_id == NADA_DE_BARBACOA:
-        discard_card_of_player(card_main.id, match.id, player_main.id)
-        discard_card_of_player(card_target.id, match.id, player_target.id)
-        # broadcasteamos "{player_target} evito ser calzinado por {player_main}"
+def play_card_defense(player_main_id, player_target_id, card_id, match_id):
+    """
+    Play a card from a player to another player, changes the state of the game, and send a message to all players
 
-    if card_target.card_id == AQUI_ESTOY_BIEN:
-        discard_card_of_player(card_main.id, match.id, player_main.id)
-        discard_card_of_player(card_target.id, match.id, player_target.id)
-        # broadcasteamos ""
+    Args:
+        player_main_id (int)
+        player_target_id (int)
+        card_id (int)
+        match_id (int)
+
+    Returns:
+        None
+    """
+    card = get_card_by_id(card_id)
+    assert card is not None
+    status = None
+
+    if card.card_id == NADA_DE_BARBACOA:
+        status = WS_STATUS_NOTHING_BARBECUE
+
+    if card.card_id == AQUI_ESTOY_BIEN:
+        status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
+    else:
+        raise Exception("Defense card not found")
+
+    discard_card_of_player(card.id, match_id, player_main_id)
+    return status
+
+
+def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
+    """
+    Change the position of two players, and change the turn of the match
+
+    Args:
+        player_main_id (int)
+        player_target_id (int)
+
+    Returns:
+        message of players that change position
+    """
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+        player_target = get_player_by_id(player_target_id)
+        pos_tmp = player_main.position
+        player_main.position = player_target.position
+        player_target.position = pos_tmp
+        match = get_match_by_id(match_id)
+        match.turn = player_main.position
+        flush()
+
+    status = WS_STATUS_HERE_IM_FINE
+    return status
