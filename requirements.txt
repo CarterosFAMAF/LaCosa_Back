@@ -5,3 +5,4 @@ databases
 websockets
 pytest
 httpx
+coverage

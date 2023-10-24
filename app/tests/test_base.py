@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from app.src.models.base import db
 from app.tests.test_main import test_app
 from app.src.models.base import load_cards
+from app.src.game.constants import *
 
 client = TestClient(app=test_app)
 
@@ -12,3 +13,4 @@ client = TestClient(app=test_app)
 def test_load_cards():
     load_cards()
     assert db.exists("select * from Card where name = 'lanzallamas'")
+    assert db.exists("select * from Card where name = 'La_Cosa'")
