@@ -226,3 +226,21 @@ def exchange_card(player_main_id, player_target_id, card_id):
         player_main.hand.remove(card)
         player_target.hand.add(card)
         flush()
+
+
+def apply_effect_infeccion(player_target_id):
+    """
+    Change player role to infected
+
+    Args:
+        player_target_id (int)
+
+    Return:
+        None
+    """
+    with db_session:
+        player_target = get_player_by_id(player_target_id)
+        if player_target.role != PLAYER_ROLE_THE_THING:
+            player_target = get_player_by_id(player_target_id)
+            player_target.role = PLAYER_ROLE_INFECTED
+            flush()

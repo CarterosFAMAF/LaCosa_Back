@@ -217,19 +217,10 @@ def create_status_investigation(card):
 def need_broadcast_message(match, player_main, player_target, list_card, card):
     return card.card_id == WHISKY
 
-def apply_effect_infeccion(match,player_target):
-    #hace falta el status de infectado
-    with db_session:
-        if player_target == 0:
-            player_target = select (c for c in match.players if c.position == match.turn)
-            player_target.role = "infected"
-            flush()
-        else:
-            player_target.role = "infected"
-            flush()
 
 def is_card_infected(card):
-    return card.card_id == INFECCION 
+    return card.card_id == INFECCION
+
 
 def can_defend(player_target, card):
     can_defend = False
