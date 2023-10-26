@@ -363,6 +363,22 @@ def check_match_end(match_id):
             ended = True
 
         return ended
+    
+def declare_end(match_id):
+    status = None
+    match = get_match_by_id(match_id)
+    match.finalized = True
 
+    human = 0
+    players = select(p for p in match.players)[:]
+
+    for player in players:
+        if player.role == PLAYER_ROLE_HUMAN:
+            human += 1
+            status = WS_HUMANS_WIN
+            break
+    if human == 0:
+        status = WS_INFECTEDS_WIN
+    return status
 
 MATCHES: List[Match] = []
