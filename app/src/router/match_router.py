@@ -273,7 +273,6 @@ async def exchange_endpoint(input: ExchangeCardIn):
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
     try:
