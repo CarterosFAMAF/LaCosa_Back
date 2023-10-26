@@ -224,11 +224,11 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_INFECTED:
         message = f"{player_name} te ha infectado"
     elif status == WS_HUMANS_WIN :
-        message = f"Ganan los humanos"
+        message = "Ganan los humanos"
     elif status == WS_INFECTEDS_WIN:
-        message = f"Gana La Cosa junto a los infectados"
+        message = "Gana La Cosa junto a los infectados"
     elif status == WS_THE_THING_WIN:
-        message = f"Gana La Cosa"
+        message = "Gana La cosa"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

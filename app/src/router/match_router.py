@@ -274,10 +274,15 @@ async def exchange_endpoint(input: ExchangeCardIn):
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
 @router.put("/matches/{match_id}/player/{player_id}/declare_end")
-async def declare_end(match_id: int):
-    live_match = get_live_match_by_id(match_id)
-    status = declare_end(match_id)
-    ws_msg = create_ws_message(match_id,status)
+async def declare_end_endpoint(input : declare_endIn):
+    live_match = get_live_match_by_id(input.match_id)
+    status = declare_end(input.match_id)
+    
+    #anunciar el ganador.
+    ws_msg = create_ws_message(input.match_id,status)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
+    #Anunciar que la partida termino
+    ws_msg = create_ws_message(input.match_id, WS_STATUS_MATCH_ENDED)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")

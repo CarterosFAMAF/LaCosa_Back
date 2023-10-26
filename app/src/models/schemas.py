@@ -78,3 +78,6 @@ class DiscardIn(BaseModel):
     card_id: int
     player_id: int
     match_id: int
+
+class declare_endIn(BaseModel):
+    match_id:int
