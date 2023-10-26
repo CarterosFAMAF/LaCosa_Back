@@ -367,11 +367,10 @@ def check_match_end(match_id):
 def declare_end(match_id):
     status = None
     human = 0
+    end_match(match_id)
     with db_session:
         match = get_match_by_id(match_id)
         players = select(p for p in match.players)[:]
-        match.finalized = True
-        flush()
         
         for player in players:
             if player.role == PLAYER_ROLE_HUMAN:

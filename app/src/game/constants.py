@@ -110,6 +110,10 @@ DECK = [
 
 
 # fijarse de meter las otras cartas.
+UPS = 31
+CITA_A_CIEGAS = 30
+QUE_QUEDE_ENTRE_NOSOTROS = 27
+REVELACIONES = 20
 NADA_DE_BARBACOA = 17
 AQUI_ESTOY_BIEN = 14
 MAS_VALE_QUE_CORRAS = 12
@@ -153,7 +157,7 @@ DECK = [
     Nada de Barbacoa         = 17
     Cuarentena               = 18
     Puerta Atrancada         = 19
-    Revelacion               = 20
+    Revelaciones             = 20
     Cuerdas Podridas         = 21
     Sal de Aqui              = 22
     Olvidadizo               = 23

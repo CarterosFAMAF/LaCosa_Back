@@ -38,7 +38,7 @@ async def send_message_card_played(
         status == WS_STATUS_PLAYER_BURNED
         or status == WS_STATUS_CHANGED_OF_PLACES
         or status == WS_STATUS_REVERSE_POSITION
-        or status == WS_STATUS_ANALYSIS
+        or status == WS_STATUS_ANALYSIS #analisis no se va a mostrar nunca.
     ):
         ws_msg = create_ws_message(
             match_id=match_id,
@@ -50,7 +50,7 @@ async def send_message_card_played(
         )
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    elif status == WS_STATUS_WHISKY:
+    elif status == WS_STATUS_WHISKY or status == WS_STATUS_UPS:
         ws_msg = create_ws_message(
             match_id=match_id,
             status=status,
@@ -60,6 +60,19 @@ async def send_message_card_played(
             list_revealed_card=list_cards,
         )
         await live_match._match_connection_manager.broadcast_json(ws_msg)
+        
+    elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
+        ws_msg = create_ws_message(
+            match_id=match_id,
+            status=status,
+            player_id=player_in_id,
+            player_target_id=player_out_id,
+            card_name="",
+            list_revealed_card=list_cards,
+        )
+        await live_match._match_connection_manager.send_personal_json(
+            msg_ws, player_out_id
+        )
 
     elif status == WS_STATUS_SUSPECT:
         # send private msg to notice card seen

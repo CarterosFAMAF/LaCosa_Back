@@ -39,6 +39,8 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
         status = play_cambio_de_lugar(player_in.id, player_out.id, match_id)
     elif card.card_id == SEDUCCION:
         status = play_seduccion()
+    elif card.card_id == CITA_A_CIEGAS:
+        status = play_blind_date()
     else:
         pass
 
@@ -130,7 +132,23 @@ def play_seduccion():
     status = WS_STATUS_SEDUCCION
     return status
 
+#esto probablemente cambie.
+def play_blind_date(player_id,card_id,match_id):
+    #debo sacar el card_id del hand de player y del deck de match e intercambiar.
+    player = get_player_by_id(player_id)
+    card = get_card_by_id(card_id)
+    match = get_match_by_id(match_id)
+    status = WS_STATUS_BLIND_DATE
+    with db_session:
+        player.hand.remove(card)
+        card_deck = match.deck.get()
+        player.hand.add(card_deck)
+        match.deck.remove(card)
+        #sacar una carta del mazo
+    return status
 
+
+    
 def play_card_investigation(player_main, player_target, card):
     """
     Devuelve las cartas respectivo a su tipo de carta de investigacion
@@ -146,6 +164,8 @@ def play_card_investigation(player_main, player_target, card):
     cards_returns = []
 
     if card.card_id == SOSPECHA:
+        cards_returns = play_suspicions(player_target)
+        """ 
         with db_session:
             card_random = select(c for c in player_target.hand).random(1)[0]
             card_image = get_card_image(card_random.image)
@@ -155,50 +175,49 @@ def play_card_investigation(player_main, player_target, card):
                 "image": card_image,
             }
             cards_returns.append(card_to_return)
+            """
 
     elif card.card_id == ANALISIS:
-        with db_session:
-            cards = select(c for c in player_target.hand)[:]
-            for card in cards:
-                card_image = get_card_image(card.image)
-                cards_returns.append(
-                    {"id": card.id, "name": card.name, "image": card_image}
-                )
+        cards_returns = play_analisis(player_target)
 
-    elif card.card_id == WHISKY:
-        with db_session:
+    elif card.card_id == WHISKY or card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS:
+        cards_returns = cards_in_hand_player(player_main)
+    return cards_returns
+
+def play_suspicions(player_target):
+    cards_returns = []
+    with db_session:
+        card_random = select(c for c in player_target.hand).random(1)[0]
+        card_image = get_card_image(card_random.image)
+        card_to_return = {
+            "id": card_random.id,
+            "name": card_random.name,
+            "image": card_image,
+        }
+        cards_returns.append(card_to_return)
+    return cards_returns
+
+def cards_in_hand_player(player_main):
+    cards_returns = []
+    with db_session:
             cards = select(c for c in player_main.hand if c.id != card.id)[:]
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append(
                     {"id": card.id, "name": card.name, "image": card_image}
                 )
-
     return cards_returns
 
-
-def is_investigation_card(card):
-    return (
-        card.card_id == SOSPECHA or card.card_id == WHISKY or card.card_id == ANALISIS
-    )
-
-
-def need_personal_message(card):
-    return card.card_id == SOSPECHA
-
-
-def personal_message(match, player_main, player_target, list_card, card):
-    msg_ws = ""
-
-    assert card.card_id == SOSPECHA
-    msg_ws = create_ws_message(
-        match.id,
-        WS_STATUS_CARD_SHOWN,
-        player_main.id,
-        player_target.id,
-        list_card[0]["name"],
-    )
-    return msg_ws
+def play_analisis(player_target):
+    cards_returns = []
+    with db_session:
+            cards = select(c for c in player_target.hand)[:]
+            for card in cards:
+                card_image = get_card_image(card.image)
+                cards_returns.append(
+                    {"id": card.id, "name": card.name, "image": card_image}
+                )
+    return cards_returns
 
 
 def create_status_investigation(card):
@@ -210,17 +229,22 @@ def create_status_investigation(card):
         status = WS_STATUS_ANALYSIS
     elif card.card_id == WHISKY:
         status = WS_STATUS_WHISKY
-
+    elif card.card_id == UPS:
+        status = WS_STATUS_UPS
+    elif card.card_id == QUE_QUEDE_ENTRE_NOSOTROS:
+        status = WS_STATUS_LET_IT_REMAIN_BETWEEN_US
     return status
 
-
-def need_broadcast_message(match, player_main, player_target, list_card, card):
-    return card.card_id == WHISKY
-
+def is_investigation_card(card):
+    return (
+        card.card_id == SOSPECHA or card.card_id == WHISKY or card.card_id == ANALISIS or card.card_id == UPS
+    )
 
 def is_card_infected(card):
     return card.card_id == INFECCION
 
+def is_card_panic(card):
+    return card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS or card.card_id == REVELACIONES or card.card_id == CITA_A_CIEGAS
 
 def can_defend(player_target, card):
     can_defend = False
@@ -236,7 +260,6 @@ def can_defend(player_target, card):
                 can_defend == True
 
     return can_defend
-
 
 def effect_defense(player_main, player_target, card_main, card_target, match):
     if card_target.card_id == NADA_DE_BARBACOA:

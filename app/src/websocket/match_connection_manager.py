@@ -229,6 +229,10 @@ def get_ws_message_with_status(
         message = "Gana La Cosa junto a los infectados"
     elif status == WS_THE_THING_WIN:
         message = "Gana La cosa"
+    elif status == WS_STATUS_UPS:
+        message = f"Ups! a {player_name} se le han caido sus cartas"
+    elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
+        message = f"{player_name} le esta susurrando a {player_target_name}"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

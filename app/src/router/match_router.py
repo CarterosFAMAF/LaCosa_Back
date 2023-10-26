@@ -237,7 +237,6 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     # EXCHANGE PRIMER PASO
     if is_player_main_turn(match, player):
-        print("ECHANGE PRIMER PASO")
 
         if input.player_target_id == 0:
             player_target = get_next_player(match)
@@ -250,7 +249,6 @@ async def exchange_endpoint(input: ExchangeCardIn):
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
     else:
-        print("exchange segundo paso")
 
         exchange_card(player.id, player_target.id, card.id)
         ws_msg = create_ws_message(
