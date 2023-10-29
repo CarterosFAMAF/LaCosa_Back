@@ -95,11 +95,8 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     match, player_in, player_out, card, card_target = validate_match_players_and_cards(
         match_id, player_in_id, player_out_id, card_id, 0
     )
-    if card == None:
-        print("MI LOCO NO ENCONTRE NADA")
     live_match = get_live_match_by_id(match.id)
     list_card = []
-
     if is_investigation_card(card):
         # sospecha, whiskey, analisis
         list_card = play_card_investigation(player_in, player_out, card)

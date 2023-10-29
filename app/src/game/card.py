@@ -237,7 +237,7 @@ def create_status_investigation(card):
 
 def is_investigation_card(card):
     return (
-        card.card_id == SOSPECHA or card.card_id == WHISKY or card.card_id == ANALISIS or card.card_id == UPS
+        card.card_id == SOSPECHA or card.card_id == WHISKY or card.card_id == ANALISIS or card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
     )
 
 def is_card_infected(card):
