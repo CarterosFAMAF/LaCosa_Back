@@ -162,7 +162,7 @@ def play_card_investigation(player_main, player_target, card):
         List of cards
     """
     cards_returns = []
-
+    card_id = card.id
     if card.card_id == SOSPECHA:
         cards_returns = play_suspicions(player_target)
         """ 
@@ -181,7 +181,7 @@ def play_card_investigation(player_main, player_target, card):
         cards_returns = play_analisis(player_target)
 
     elif card.card_id == WHISKY or card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS:
-        cards_returns = cards_in_hand_player(player_main)
+        cards_returns = cards_in_hand_player(player_main,card_id)
     return cards_returns
 
 def play_suspicions(player_target):
@@ -197,10 +197,10 @@ def play_suspicions(player_target):
         cards_returns.append(card_to_return)
     return cards_returns
 
-def cards_in_hand_player(player_main):
+def cards_in_hand_player(player_main,card_id):
     cards_returns = []
     with db_session:
-            cards = select(c for c in player_main.hand if c.id != card.id)[:]
+            cards = select(c for c in player_main.hand if c.id != card_id)[:]
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append(
