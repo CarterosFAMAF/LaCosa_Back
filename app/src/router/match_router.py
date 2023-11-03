@@ -217,7 +217,7 @@ async def start_match(input: StartMatchIn):
     return msg
 
 
-@router.put("/matches/{match_id}/player/{player_id}/{card_id}/exchange_cards")
+@router.put("/matches/{match_id}/player/{player_id}/exchange_cards")
 async def exchange_endpoint(input: ExchangeCardIn):
     # validate match players and cards
     match, player, player_target, card, card_target = validate_match_players_and_cards(
