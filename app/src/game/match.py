@@ -289,7 +289,7 @@ def delete_match(match_id):
         flush()
 
 
-def check_and_set_match_end(match_id):
+def check_match_end(match_id):
     """
     Check if match has ended
     Iterate over players and check if there is only one human player alive
@@ -308,7 +308,6 @@ def check_and_set_match_end(match_id):
         infeteds_alive = 0
         dead_players = 0
         ended = False
-        msg = ""
 
         for player in players:
             if player.role == PLAYER_ROLE_DEAD:
@@ -321,14 +320,13 @@ def check_and_set_match_end(match_id):
                 the_thing_is_alive = True
 
         if not the_thing_is_alive:
-            msg = HUMANS_WIN
+            msg = WS_STATUS_HUMANS_WIN
         elif the_thing_is_alive and infeteds_alive ==  match.number_players -1:
-            msg = THE_THING_WIN
+            msg = WS_STATUS_THE_THING_WIN
         elif the_thing_is_alive and humans_alive == 0:
-            msg = INFECTEDS_WIN
+            msg = WS_STATUS_INFECTEDS_WIN
         else:
-            msg = "the match continues"
-
+            msg = MATCH_CONTINUES
         return msg
 
 

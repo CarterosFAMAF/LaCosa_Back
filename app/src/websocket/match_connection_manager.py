@@ -180,6 +180,12 @@ def get_ws_message_with_status(status: int, player_name: str, player_target_name
         message = f"Turno nuevo de {player_name}"
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
+    elif status == WS_STATUS_HUMANS_WIN:
+        message = "Los Humanos ganan"
+    elif status == WS_STATUS_INFECTEDS_WIN:
+        message = "Los Infectados ganan"
+    elif status == WS_STATUS_THE_THING_WIN:
+        message = "La cosa gana"
     else:
         message = "Status desconocido"  # Handle unknown status values
 
