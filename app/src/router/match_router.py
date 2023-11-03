@@ -243,7 +243,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
     else:
 
         exchange_card(player.id, player_target.id, card.id)
-
+        
         card_msg = create_card_exchange_message(card.id)
         await match_live._match_connection_manager.send_personal_json(card_msg,player_target.id)
 

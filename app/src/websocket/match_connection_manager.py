@@ -104,6 +104,7 @@ def create_card_exchange_message(card_id):
     card_image = get_card_image(card.image)
 
     card_ws = {
+        "status" : WS_CARD,
         "id" : card.id ,
         "name" : card.name,
         "image" : card_image
