@@ -120,11 +120,6 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # NEXT TURN MSG
-    next_turn(match.id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
-
     # FINALIZE MATCH MSG
     if check_match_end(match_id):
         end_match(match_id)
@@ -147,10 +142,6 @@ async def discard(match_id, player_id, card_id):
     discard_card_of_player(card_id, match_id, player_id)
     msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
-
-    next_turn(match_id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return {"message": "Card discard"}
 
