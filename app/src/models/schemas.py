@@ -31,7 +31,7 @@ class MatchOut(BaseModel):
 
 class ExchangeCardIn(BaseModel):
     match_id: int
-    player_main_id: int
+    player_id: int
     player_target_id: int
     card_id: int
 
