@@ -3,6 +3,7 @@ import json
 from fastapi import WebSocket
 from pony.orm import *
 
+from app.src.game.card import get_card_by_id,get_card_image
 from app.src.models.base import Match as MatchDB
 from app.src.websocket.constants import *
 
@@ -97,6 +98,17 @@ class MatchConnectionManager:
                 except:
                     self.active_connections.remove(conn)
 
+
+def create_card_exchange_message(card_id):
+    card = get_card_by_id(card_id)
+    card_image = get_card_image(card.image)
+
+    card_ws = {
+        "id" : card.id ,
+        "name" : card.name,
+        "image" : card_image
+    }
+    return card_ws
 
 def create_ws_message(
     match_id: int,
