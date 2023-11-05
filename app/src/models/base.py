@@ -24,6 +24,7 @@ class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
     position = Optional(int, default=-1)
+    winner= Optional(bool)
     role = Optional(str)
     hand = Set("Card")
     match = Optional(Match, reverse="players")

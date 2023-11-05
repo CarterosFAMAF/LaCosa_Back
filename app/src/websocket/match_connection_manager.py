@@ -140,6 +140,7 @@ def create_ws_message(
                     "name": player.name,
                     "turn": player.position,
                     "alive": True if player.role != "dead" else False,
+                    "winner": player.winner,
                     "revealed_cards": list_revealed_card
                     if player.id == player_id
                     else [],

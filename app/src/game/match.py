@@ -286,6 +286,7 @@ def start_game(match_id: int):
     position = 0
     for player in players:
         player.position = position
+        player.winner = False
         if player.role != PLAYER_ROLE_THE_THING:
             player.role = PLAYER_ROLE_HUMAN
         position += 1
@@ -341,13 +342,13 @@ def delete_match(match_id):
 def check_match_end(match_id):
     """
     Check if match has ended
-    Iterate over players and check if there is only one human player alive
+    Iterate over players and check if the thing is alive or if all the humans are infected 
 
     Args:
         match_id (int)
 
     Returns:
-        ended (bool)
+        msg (str)
     """
     with db_session:
         match = MatchDB.get(id=match_id)
@@ -379,4 +380,27 @@ def check_match_end(match_id):
         return msg
 
 
+def set_winners(match_id, result):
+    """
+    Set the winners for the diferent results
+
+    Args:
+        match_id (int)
+    
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        players = select(p for p in match.players)[:]
+        
+        for player in players:
+            if result == WS_STATUS_HUMANS_WIN and player.role == PLAYER_ROLE_HUMAN :
+                player.winner = True
+            elif result == WS_STATUS_THE_THING_WIN and player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+            elif result == WS_STATUS_INFECTEDS_WIN and player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+        flush()
+    
 MATCHES: List[Match] = []
