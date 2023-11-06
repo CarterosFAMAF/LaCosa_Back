@@ -229,10 +229,10 @@ def prepare_exchange_card(player_main_id, card_id):
         flush()
 
 def apply_exchange(player_main_id,player_target_id):
-    player_main = get_player_by_id(player_main_id)
-    player_target = get_player_by_id(player_target_id)
   
     with db_session:
+        player_main = get_player_by_id(player_main_id)
+        player_target = get_player_by_id(player_target_id)
         card_main_id = player_main.card_exchange.id
         card_target_id = player_target.card_exchange.id
         player_main.hand.add(player_target.card_exchange)
