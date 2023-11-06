@@ -401,6 +401,8 @@ def set_winners(match_id, result):
                 player.winner = True
             elif result == WS_STATUS_INFECTEDS_WIN and player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING:
                 player.winner = True
+            else:
+                player.winner = False
         flush()
     
 MATCHES: List[Match] = []
