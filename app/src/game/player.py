@@ -207,7 +207,7 @@ def get_next_player(match) -> PlayerDB:
     return player
 
 
-def exchange_card(player_main_id, player_target_id, card_id):
+def prepare_exchange_card(player_main_id, card_id):
     """
     Discard card of main player and add it to the target player hand
 
@@ -221,12 +221,27 @@ def exchange_card(player_main_id, player_target_id, card_id):
     """
     with db_session:
         player_main = PlayerDB.get(id=player_main_id)
-        player_target = PlayerDB.get(id=player_target_id)
         card = CardDB.get(id=card_id)
+        
+        player_main.card_exchange = card
         player_main.hand.remove(card)
-        player_target.hand.add(card)
+
         flush()
 
+def apply_exchange(player_main_id,player_target_id):
+    player_main = get_player_by_id(player_main_id)
+    player_target = get_player_by_id(player_target_id)
+    card_main_id = player_main.card_exchange.id
+    card_target_id = player_target.card_exchange.id
+
+    with db_session:
+        player_main.hand.add(player_target.card_exchange)
+        player_target.hand.add(player_main.card_exchange)
+        player_main.card_exchange = None
+        player_target.card_exchange = None
+        flush()
+    
+    return card_main_id,card_target_id
 
 def apply_effect_infeccion(player_target_id):
     """

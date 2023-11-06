@@ -6,6 +6,7 @@ from pony.orm import *
 from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.constants import *
+from app.src.websocket.constants import *
 
 
 class Card:

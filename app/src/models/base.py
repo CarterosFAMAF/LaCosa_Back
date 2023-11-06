@@ -28,7 +28,7 @@ class Player(db.Entity):
     hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
-
+    card_exchange = Optional("Card",reverse = "player_card_exchange")
 
 class Card(db.Entity):
     """
@@ -42,7 +42,7 @@ class Card(db.Entity):
     player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
-
+    player_card_exchange = Optional(Player,reverse = "card_exchange")
 
 def define_database_and_entities(test: bool):
     global db

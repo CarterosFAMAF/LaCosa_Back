@@ -230,10 +230,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
 
-        exchange_card(player.id, player_target.id, card.id)
-
-        card_msg = create_card_exchange_message(card.id)
-        await match_live._match_connection_manager.send_personal_json(card_msg,player_target.id)
+        prepare_exchange_card(player.id, card.id)
 
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
@@ -242,10 +239,13 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     else:
 
-        exchange_card(player.id, player_target.id, card.id)
-        
-        card_msg = create_card_exchange_message(card.id)
+        prepare_exchange_card(player.id, card.id)
+        card_main_id,card_target_id = apply_exchange(player.id,player_target.id)
+
+        card_msg = create_card_exchange_message(card_main_id)
         await match_live._match_connection_manager.send_personal_json(card_msg,player_target.id)
+        card_msg = create_card_exchange_message(card_target_id)
+        await match_live._match_connection_manager.send_personal_json(card_msg,player.id)
 
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
