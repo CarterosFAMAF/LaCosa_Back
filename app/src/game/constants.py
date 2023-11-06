@@ -1,7 +1,7 @@
 DECK = [
-    3,
-    4,
-    6,
+    18,
+    19,
+    5,
     8,
     9,
     10,
@@ -120,6 +120,9 @@ SOSPECHA = 6
 ANALISIS = 4
 LANZALLAMAS = 3
 LA_COSA = 1
+CUARENTENA = 18
+PUERTA_ATRANCADA = 19
+HACHA = 5
 
 """
 DECK = [

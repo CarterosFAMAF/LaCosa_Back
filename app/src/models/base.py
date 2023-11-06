@@ -99,6 +99,21 @@ def load_cards():
                 name="Cambio_de_lugar",
                 image="app/cards/Cambio_de_lugar.png",
             )
+            Card(
+                card_id = CUARENTENA,
+                name="Cuarentena",
+                image="app/cards/Cuarentena.png",
+            )
+            Card(
+                card_id = PUERTA_ATRANCADA,
+                name="Puerta Atrancada",
+                image="app/cards/Puerta_atrancada.png",
+            )
+            Card(
+                card_id = HACHA,
+                name="Hacha",
+                image="app/cards/Hacha.png",
+            )
             flush()
     except:
         pass
