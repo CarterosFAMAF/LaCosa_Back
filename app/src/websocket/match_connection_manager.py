@@ -104,12 +104,17 @@ def create_card_exchange_message(card_id):
     card_image = get_card_image(card.image)
 
     card_ws = {
-        "status" : WS_CARD,
         "id" : card.id ,
         "name" : card.name,
         "image" : card_image
     }
-    return card_ws
+    
+    response = {
+        "status" : WS_CARD,
+        "card" : card_ws
+    }
+    
+    return response
 
 def create_ws_message(
     match_id: int,
