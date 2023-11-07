@@ -110,7 +110,7 @@ DECK = [
 
 
 # fijarse de meter las otras cartas.
-NADA_DE_BARBACOA = 17
+NADA_DE_BARBACOAS = 17
 FALLASTE = 16
 NO_GRACIAS = 15
 AQUI_ESTOY_BIEN = 14

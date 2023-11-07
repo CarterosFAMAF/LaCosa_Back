@@ -35,7 +35,6 @@ async def send_message_card_played(
     # Get live match
     live_match = get_live_match_by_id(match_id)
     print(live_match)
-    print("ACA ESTA EL LIVE MATCH")
     if (
         status == WS_STATUS_PLAYER_BURNED
         or status == WS_STATUS_CHANGED_OF_PLACES

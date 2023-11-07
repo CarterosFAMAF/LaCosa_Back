@@ -214,6 +214,14 @@ def get_ws_message_with_status(
         message = f"{player_name} ha mostrado todas sus cartas"
     elif status == WS_STATUS_DEFENSE_PRIVATE_MSG:
         message = f"{player_name} intenta utilizar {card_name} en tu contra, ¿quieres defenderte?"
+    elif status == WS_STATUS_NOTHING_BARBECUE:
+        message = f"{player_name} se ha salvado de ser calzinado por {player_target_name}"
+    elif status == WS_STATUS_SCARY:
+        message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+    elif status == WS_STATUS_HERE_IM_FINE:
+        message = f"{player_name} se siente seguro en donde esta"
+    elif status == WS_STATUS_NOPE_THANKS:
+        message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

@@ -223,7 +223,8 @@ async def play_card_defense_endpoint(input=PlayCardDefenseIn):
 
     else:
         status,list_card = play_card_defense(input.player_target_id, input.player_main_id, input.match_id, card_target.id)
-        
+        #descarto la carta de accion jugada por el jugador en turno.
+        discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
         # DEFENSE MSG
         await send_message_play_defense(
         match_id=input.match_id,

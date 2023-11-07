@@ -210,7 +210,7 @@ def can_defend(player_target_id, card):
 
     if card.card_id == LANZALLAMAS:
         for card in cards:
-            if card.card_id == NADA_DE_BARBACOA:
+            if card.card_id == NADA_DE_BARBACOAS:
                 can_defend == True
     if card.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
         for card in cards:
@@ -239,23 +239,23 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     assert card is not None
     status = None
 
-    if card.card_id == NADA_DE_BARBACOA:
+    if card.card_id == NADA_DE_BARBACOAS:
         status = WS_STATUS_NOTHING_BARBECUE
     elif card.card_id == AQUI_ESTOY_BIEN:
         status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
     elif card.card_id == NO_GRACIAS:
         status = play_no_gracias(player_main_id,player_target_id)
-    elif card.card_id == FALLASTE:
-        status,list_card = play_fallaste(player_main_id,player_target_id,match_id)
+    elif card.card_id == ATERRADOR:
+        status,list_card = play_aterrador(player_main_id,player_target_id,match_id)
     else:
         raise Exception("Defense card not found")
 
     discard_card_of_player(card.id, match_id, player_main_id)
     return status, list_card
 
-def play_fallaste(player_main_id):
+def play_aterrador(player_main_id):
     list_card = []
-    status = WS_STATUS_YOU_FAILED
+    status = WS_STATUS_SCARY
     with db_session:
         player_main = get_player_by_id(player_main_id)
         card_image = get_card_image(player_main.card_exchange.card.image)
