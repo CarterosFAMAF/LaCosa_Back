@@ -3,6 +3,7 @@ import json
 from fastapi import WebSocket
 from pony.orm import *
 
+from app.src.game.card import get_card_by_id, get_card_image
 from app.src.models.base import Match as MatchDB
 from app.src.websocket.constants import *
 
@@ -96,6 +97,17 @@ class MatchConnectionManager:
                     await conn[1].send_json(json_data)
                 except:
                     self.active_connections.remove(conn)
+
+
+def create_card_exchange_message(card_id):
+    card = get_card_by_id(card_id)
+    card_image = get_card_image(card.image)
+
+    card_ws = {"id": card.id, "name": card.name, "image": card_image}
+
+    response = {"status": WS_CARD, "card": card_ws}
+
+    return response
 
 
 def create_ws_message(
@@ -215,13 +227,25 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_DEFENSE_PRIVATE_MSG:
         message = f"{player_name} intenta utilizar {card_name} en tu contra, ¿quieres defenderte?"
     elif status == WS_STATUS_NOTHING_BARBECUE:
-        message = f"{player_name} se ha salvado de ser calzinado por {player_target_name}"
+        message = (
+            f"{player_name} se ha salvado de ser calzinado por {player_target_name}"
+        )
     elif status == WS_STATUS_SCARY:
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
     elif status == WS_STATUS_HERE_IM_FINE:
         message = f"{player_name} se siente seguro en donde esta"
     elif status == WS_STATUS_NOPE_THANKS:
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
+    elif status == WS_STATUS_SEDUCCION:
+        message = (
+            f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
+        )
+    elif status == WS_STATUS_EXCHANGE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
+    elif status == WS_STATUS_INFECTED:
+        message = f"{player_name} te ha infectado"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message
