@@ -1,6 +1,6 @@
 from pony.orm import *
 from app.src.game.constants import *
-
+import random
 db = Database()
 
 
@@ -28,7 +28,7 @@ class Player(db.Entity):
     hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
-
+    card_exchange = Optional("Card",reverse = "player_card_exchange")
 
 class Card(db.Entity):
     """
@@ -42,7 +42,7 @@ class Card(db.Entity):
     player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
-
+    player_card_exchange = Optional(Player,reverse = "card_exchange")
 
 def define_database_and_entities(test: bool):
     global db
@@ -54,8 +54,11 @@ def define_database_and_entities(test: bool):
     db.generate_mapping(create_tables=True)
 
 
+#imagenes para infeccion
+
 @db_session
 def load_cards():
+    image_infected = ["app/cards/Infeccion_1.png", "app/cards/Infeccion_2.png","app/cards/Infeccion_3.png"]
     try:
         exists_card = db.exists("select * from Card where name='lanzallamas'")
         if not exists_card:
@@ -98,6 +101,16 @@ def load_cards():
                 card_id = CAMBIO_DE_LUGAR,
                 name="Cambio_de_lugar",
                 image="app/cards/Cambio_de_lugar.png",
+            )
+            Card(
+                card_id = SEDUCCION,
+                name="Seduccion",
+                image="app/cards/Seduccion.png",
+            )
+            Card(
+                card_id = INFECCION,
+                name="Infeccion",
+                image= random.choice(image_infected),
             )
             flush()
     except:

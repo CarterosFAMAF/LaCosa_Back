@@ -29,6 +29,13 @@ class MatchOut(BaseModel):
     result: str
 
 
+class ExchangeCardIn(BaseModel):
+    match_id: int
+    player_id: int
+    player_target_id: int
+    card_id: int
+
+
 class ListMatchOut(BaseModel):
     match_id: int
     match_name: str
