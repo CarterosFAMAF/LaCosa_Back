@@ -170,6 +170,12 @@ DECK = [
     Ups                      = 31
 """
 
+#Type of cards
+TYPE_LA_COSA = "La_Cosa"
+TYPE_ACTION = "Accion"
+TYPE_DEFENSE = "Defensa"
+TYPE_INFECTED = "Infectado"
+TYPE_PANIC = "Panico"
 
 # Player roles
 PLAYER_ROLE_HUMAN = "human"
