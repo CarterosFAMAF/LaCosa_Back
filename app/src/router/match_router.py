@@ -120,11 +120,6 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # NEXT TURN MSG
-    next_turn(match.id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
-
     # FINALIZE MATCH MSG
     if check_match_end(match_id):
         end_match(match_id)
@@ -147,10 +142,6 @@ async def discard(match_id, player_id, card_id):
     discard_card_of_player(card_id, match_id, player_id)
     msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
-
-    next_turn(match_id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return {"message": "Card discard"}
 
@@ -226,7 +217,7 @@ async def start_match(input: StartMatchIn):
     return msg
 
 
-@router.post("/matches/{match_id}/player/{player_id}/exchange_cards")
+@router.put("/matches/{match_id}/players/{player_id}/exchange_cards")
 async def exchange_endpoint(input: ExchangeCardIn):
     # validate match players and cards
     match, player, player_target, card, card_target = validate_match_players_and_cards(
@@ -234,15 +225,12 @@ async def exchange_endpoint(input: ExchangeCardIn):
     )
 
     match_live = get_live_match_by_id(match.id)
-
-    # EXCHANGE PRIMER PASO
     if is_player_main_turn(match, player):
-        print("ECHANGE PRIMER PASO")
-
+        
         if input.player_target_id == 0:
             player_target = get_next_player(match)
 
-        exchange_card(player.id, player_target.id, card.id)
+        prepare_exchange_card(player.id, card.id)
 
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
@@ -250,9 +238,15 @@ async def exchange_endpoint(input: ExchangeCardIn):
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
     else:
-        print("exchange segundo paso")
 
-        exchange_card(player.id, player_target.id, card.id)
+        prepare_exchange_card(player.id, card.id)
+        card_main_id,card_target_id = apply_exchange(player.id,player_target.id)
+
+        card_msg = create_card_exchange_message(card_main_id)
+        await match_live._match_connection_manager.send_personal_json(card_msg,player_target.id)
+        card_msg = create_card_exchange_message(card_target_id)
+        await match_live._match_connection_manager.send_personal_json(card_msg,player.id)
+
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
         )
