@@ -267,7 +267,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-@router.put("/matches/{match_id}/player/{player_id}/declare_end")
+@router.put("/matches/{match_id}/declare_end")
 async def declare_end_endpoint(input : declare_endIn):
     live_match = get_live_match_by_id(input.match_id)
     status = declare_end(input.match_id)

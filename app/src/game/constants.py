@@ -179,3 +179,4 @@ PLAYER_ROLE_LOBBY = "lobby"
 INFECTEDS_WIN = "The Infecteds and The Thing win"
 THE_THING_WIN = "The Thing win"
 HUMANS_WIN = "The Humans win"
+MATCH_CONTINUES = 500

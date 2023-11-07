@@ -24,11 +24,13 @@ class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
     position = Optional(int, default=-1)
+    winner= Optional(bool)
     role = Optional(str)
     hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
     card_exchange = Optional("Card",reverse = "player_card_exchange")
+    
 
 class Card(db.Entity):
     """
