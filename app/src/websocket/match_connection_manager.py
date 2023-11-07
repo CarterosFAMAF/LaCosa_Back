@@ -212,6 +212,8 @@ def get_ws_message_with_status(
         message = f"{player_name} ha analizado las cartas de {player_target_name}"
     elif status == WS_STATUS_WHISKY:
         message = f"{player_name} ha mostrado todas sus cartas"
+    elif status == WS_STATUS_DEFENSE_PRIVATE_MSG:
+        message = f"{player_name} intenta utilizar {card_name} en tu contra, ¿quieres defenderte?"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

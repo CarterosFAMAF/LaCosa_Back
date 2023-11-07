@@ -233,21 +233,52 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     Returns:
         None
     """
+    # aclaracion de uso: player_main es jugador en turno y player_target_id es quien va a jugar carta def
     card = get_card_by_id(card_id)
+    list_card = []
     assert card is not None
     status = None
 
     if card.card_id == NADA_DE_BARBACOA:
         status = WS_STATUS_NOTHING_BARBECUE
-
-    if card.card_id == AQUI_ESTOY_BIEN:
+    elif card.card_id == AQUI_ESTOY_BIEN:
         status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
+    elif card.card_id == NO_GRACIAS:
+        status = play_no_gracias(player_main_id,player_target_id)
+    elif card.card_id == FALLASTE:
+        status,list_card = play_fallaste(player_main_id,player_target_id,match_id)
     else:
         raise Exception("Defense card not found")
 
     discard_card_of_player(card.id, match_id, player_main_id)
-    return status
+    return status, list_card
 
+def play_fallaste(player_main_id):
+    list_card = []
+    status = WS_STATUS_YOU_FAILED
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+        card_image = get_card_image(player_main.card_exchange.card.image)
+        list_card.append(
+                    {"id": player_main.card_exchange.card.id, 
+                     "name": player_main.card_exchange.card.name, 
+                     "image": card_image
+                     }
+                )
+        player_main.hand.add(player_main.card_exchange)
+        player_main.card_exchange = None
+        flush()
+    return status,list_card
+
+def play_no_gracias(player_main_id):
+    status = WS_STATUS_NOPE_THANKS
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+
+        player_main.hand.add(player_main.card_exchange)
+        player_main.card_exchange = None
+        flush()
+    return status
 
 def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
     """

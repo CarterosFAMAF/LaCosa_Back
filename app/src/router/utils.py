@@ -89,7 +89,7 @@ async def send_message_card_played(
         await live_match._match_connection_manager.broadcast_json(msg_ws)
 
 
-async def send_message_defense(
+async def send_message_private_defense(
     match_id: int, status: int, player_in_id: int, player_out_id: int, card_name: str
 ):
     """
@@ -120,4 +120,18 @@ async def send_message_defense(
     await live_match._match_connection_manager.send_personal_json(msg_ws, player_out_id)
 
 
-send_message_play_defense = send_message_defense
+#send_message_play_defense = send_message_defense --> esto lo comente porque no lo entendi
+
+async def send_message_play_defense( match_id , status , player_in_id , player_out_id, card_name):
+    
+    live_match = get_live_match_by_id(match_id)
+
+    msg_ws = create_ws_message(
+        match_id=match_id,
+        status=status,
+        player_id=player_in_id,
+        player_target_id=player_out_id,
+        card_name=card_name,
+        list_revealed_card=[],
+    )
+    await live_match._match_connection_manager.broadcast_json(msg_ws)
