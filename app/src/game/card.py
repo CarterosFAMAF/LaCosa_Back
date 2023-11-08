@@ -228,13 +228,13 @@ def can_defend(player_target_id, card_action):
             for card in cards:
                 if card.card_id == AQUI_ESTOY_BIEN:
                     can_defend = True
-                    list_id_cards.add(card.id)
+                    list_id_cards.append(card.id)
     else:
         #casos para intercambio, no tenemos id de card_action
         for card in cards:
             if card.card_id == ATERRADOR:
                 can_defend = True
-                list_id_cards.add(card.id)
+                list_id_cards.append(card.id)
     
     return can_defend,list_id_cards
 
