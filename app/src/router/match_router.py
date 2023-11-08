@@ -170,7 +170,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     live_match = get_live_match_by_id(input.match_id)
     list_card = []
 
-    if input.card_main_id == 0 :
+    if input.card_main_id == 0:
         # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista en play_card.
 
         status = play_card(
@@ -191,7 +191,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 
     else:
         status, list_card = play_card_defense(
-            input.player_main_id, input.player_target_id, input.match_id, card_main.id
+            input.player_main_id, input.player_target_id, input.match_id, input.card_main_id
         )
         await discard_message(input.match_id, input.player_main_id)
 

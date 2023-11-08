@@ -276,6 +276,7 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
         raise Exception("Defense card not found")
 
     discard_card_of_player(card.id, match_id, player_main_id)
+    
     return status, list_card
 
 def play_aterrador(player_main_id):
@@ -304,6 +305,7 @@ def play_no_gracias(player_main_id):
         player_main.hand.add(player_main.card_exchange)
         player_main.card_exchange = None
         flush()
+        
     return status
 
 def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
