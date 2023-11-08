@@ -43,7 +43,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     else:
         pass
 
-    discard_card_of_player(card.id, match_id, player_in.id)
+    discard_card_of_player(card_id, match_id, player_in.id)
     return status
 
 
