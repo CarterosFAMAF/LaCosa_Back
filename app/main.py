@@ -4,11 +4,8 @@ from app.constants import origins
 from app.src.models.base import define_database_and_entities, load_cards
 from app.src.router import match_router
 
-print ("ANTES DE DATABASE AND ENTITIES")
 define_database_and_entities(test=False)
-print ("ANTES DEE LOAD CARDS")
 load_cards()
-print ("DESPUES DE LOAD CARDS")
 app = FastAPI()
 
 

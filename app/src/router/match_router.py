@@ -146,12 +146,13 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
 
     return list_card
 
+
 @router.put(
     "/matches/{match_id}/players/{player_id}/play_card_defense",
     response_model=List[CardModel],
     status_code=status.HTTP_200_OK,
 )
-async def play_card_defense_endpoint(input:PlayCardDefenseIn):
+async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     # check if card exists
     card_main = get_card_by_id(input.card_main_id)
     if card_main == None:
@@ -171,7 +172,7 @@ async def play_card_defense_endpoint(input:PlayCardDefenseIn):
     list_card = []
 
     if input.card_target_id == 0:
-        # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista.
+        # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista en play_card.
 
         status = play_card(
             input.player_target_id,
@@ -351,8 +352,12 @@ async def exchange_endpoint(input: ExchangeCardIn):
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-        if is_card_infected(card):
-            apply_effect_infeccion(player_target.id)
+        if (
+            is_card_infected(card)
+            and player.role == PLAYER_ROLE_HUMAN
+            and player_target.role == PLAYER_ROLE_THE_THING
+        ):
+            apply_effect_infeccion(player.id)
             ws_msg = create_ws_message(
                 match.id,
                 WS_STATUS_INFECTED,
