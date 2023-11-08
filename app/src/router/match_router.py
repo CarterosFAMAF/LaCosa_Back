@@ -152,12 +152,13 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     player_main = get_player_by_id(input.player_main_id)
     player_target = get_player_by_id(input.player_target_id)
     
-    card_main = get_card_by_id(input.card_main_id)
-    if card_main == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Card not found",
-        )
+    if input.card_main_id != 0:
+        card_main = get_card_by_id(input.card_main_id)
+        if card_main == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Card not found",
+            )
 
     if input.card_target_id != 0:
         card_target = get_card_by_id(input.card_target_id)
