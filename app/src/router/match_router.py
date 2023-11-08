@@ -98,7 +98,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
 
     live_match = get_live_match_by_id(match.id)
     list_card = []
-    can_defend_bool, list_card = can_defend(player_out_id, card.id)
+    can_defend_bool, list_card = can_defend(player_out_id, card.card_id)
 
     if (can_defend_bool):  # si el target tiene nada de barbacoas
         # deberia mandarle el id de la carta del jugador main.
@@ -187,7 +187,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             player_out_id=input.player_target_id,
             card_name=card_main.name,
             list_cards=[],
-        )
+    """_summary_
+    """        )
 
     else:
         status, list_card = play_card_defense(
