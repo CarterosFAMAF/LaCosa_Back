@@ -183,15 +183,15 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
         await send_message_card_played(
             match_id=input.match_id,
             status=status,
-            player_in_id=input.player_main_id,
-            player_out_id=input.player_target_id,
-            card_name=card_main.name,
+            player_in_id=input.player_target_id,
+            player_out_id=input.player_main_id,
+            card_name=card_target.name,
             list_cards=[],
         )
 
     else:
         status, list_card = play_card_defense(
-            input.player_main_id, input.player_target_id, input.match_id, input.card_main_id
+            input.player_main_id, input.player_target_id, input.card_main_id ,input.match_id
         )
         await discard_message(input.match_id, input.player_main_id)
 
