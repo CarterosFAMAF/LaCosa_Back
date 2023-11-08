@@ -202,7 +202,7 @@ def create_status_investigation(card):
 # DEFENSE
 
 
-def can_defend(player_target_id, card_action):
+def can_defend(player_target_id, card_action_id):
     """
     From specific card and player, return if the player can defend with a defense card
 
@@ -217,14 +217,14 @@ def can_defend(player_target_id, card_action):
     can_defend = False
     list_id_cards = []
     with db_session:
-        if card_action != 0:
-            cards = select(c for c in player_target.hand if c.id != card_action.id)[:]
-            if card_action.card_id == LANZALLAMAS:
+        if card_action_id != 0:
+            cards = select(c for c in player_target.hand if c.id != card_action_id)[:]
+            if card_action_id == LANZALLAMAS:
                 for card in cards:
                     if card.card_id == NADA_DE_BARBACOAS:
                         can_defend = True     
                         list_id_cards.append(card.id)
-            if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
+            if card_action_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
                 for card in cards:
                     if card.card_id == AQUI_ESTOY_BIEN:
                         can_defend = True
