@@ -112,7 +112,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
         return list_card
 
     elif is_investigation_card(card):  # sospecha, whiskey, analisis
-        list_card = play_card_investigation(player_in, player_out, card)
+        list_card = play_card_investigation(player_in, player_out, card,match)
         status = create_status_investigation(card)
         discard_card_of_player(card.id, match.id, player_in.id)
 

@@ -134,9 +134,10 @@ def play_seduccion():
     status = WS_STATUS_SEDUCCION
     return status
 
-#esto probablemente cambie.
-def play_blind_date(player_id,card_id,match_id):
-    #debo sacar el card_id del hand de player y del deck de match e intercambiar.
+
+# esto probablemente cambie.
+def play_blind_date(player_id, card_id, match_id):
+    # debo sacar el card_id del hand de player y del deck de match e intercambiar.
     player = get_player_by_id(player_id)
     card = get_card_by_id(card_id)
     match = get_match_by_id(match_id)
@@ -146,12 +147,11 @@ def play_blind_date(player_id,card_id,match_id):
         card_deck = match.deck.get()
         player.hand.add(card_deck)
         match.deck.remove(card)
-        #sacar una carta del mazo
+        # sacar una carta del mazo
     return status
 
 
-    
-def play_card_investigation(player_main, player_target, card):
+def play_card_investigation(player_main, player_target, card, match):
     """
     Devuelve las cartas respectivo a su tipo de carta de investigacion
 
@@ -183,9 +183,31 @@ def play_card_investigation(player_main, player_target, card):
     elif card.card_id == ANALISIS:
         cards_returns = play_analisis(player_target)
 
-    elif card.card_id == WHISKY or card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS:
-        cards_returns = cards_in_hand_player(player_main,card_id)
+    elif (
+        card.card_id == WHISKY
+        or card.card_id == UPS
+        or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
+    ):
+        cards_returns = cards_in_hand_player(player_main, card_id)
+    elif card.card_id == DETERMINACION:
+        cards_returns = play_determination(player_main, match)
+
     return cards_returns
+
+
+def play_determination(player_main, match):
+    cards_random = []
+    with db_session:
+        cards_random = select(c for c in match.deck if c.type != TYPE_PANIC).random(3)[
+            :
+        ]
+        for card in cards_random:
+            player_main.hand.add(card)
+            match.deck.remove(card)
+            match.discard_pile.add(card)
+
+    return cards_random
+
 
 def play_suspicions(player_target):
     cards_returns = []
@@ -196,30 +218,43 @@ def play_suspicions(player_target):
             "id": card_random.id,
             "name": card_random.name,
             "image": card_image,
+            "type": card_random.type,
         }
         cards_returns.append(card_to_return)
     return cards_returns
 
-def cards_in_hand_player(player_main,card_id):
+
+def cards_in_hand_player(player_main, card_id):
     cards_returns = []
     with db_session:
-            cards = select(c for c in player_main.hand if c.id != card_id)[:]
-            for card in cards:
-                card_image = get_card_image(card.image)
-                cards_returns.append(
-                    {"id": card.id, "name": card.name, "image": card_image}
-                )
+        cards = select(c for c in player_main.hand if c.id != card_id)[:]
+        for card in cards:
+            card_image = get_card_image(card.image)
+            cards_returns.append(
+                {
+                    "id": card.id,
+                    "name": card.name,
+                    "image": card_image,
+                    "type": card.type,
+                }
+            )
     return cards_returns
+
 
 def play_analisis(player_target):
     cards_returns = []
     with db_session:
-            cards = select(c for c in player_target.hand)[:]
-            for card in cards:
-                card_image = get_card_image(card.image)
-                cards_returns.append(
-                    {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
-                )
+        cards = select(c for c in player_target.hand)[:]
+        for card in cards:
+            card_image = get_card_image(card.image)
+            cards_returns.append(
+                {
+                    "id": card.id,
+                    "name": card.name,
+                    "image": card_image,
+                    "type": card.type,
+                }
+            )
     return cards_returns
 
 
@@ -236,12 +271,21 @@ def create_status_investigation(card):
         status = WS_STATUS_UPS
     elif card.card_id == QUE_QUEDE_ENTRE_NOSOTROS:
         status = WS_STATUS_LET_IT_REMAIN_BETWEEN_US
+    elif card.card_id == DETERMINACION:
+        status = WS_STATUS_DETERMINATION
     return status
+
 
 def is_investigation_card(card):
     return (
-        card.card_id == SOSPECHA or card.card_id == WHISKY or card.card_id == ANALISIS or card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
+        card.card_id == SOSPECHA
+        or card.card_id == WHISKY
+        or card.card_id == ANALISIS
+        or card.card_id == UPS
+        or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
+        or card.card_id == DETERMINACION
     )
+
 
 # DEFENSE
 
@@ -266,7 +310,7 @@ def can_defend(player_target_id, card_action):
         if card_action.card_id == LANZALLAMAS:
             for card in cards:
                 if card.card_id == NADA_DE_BARBACOAS:
-                    can_defend = True     
+                    can_defend = True
                     list_id_cards.add(card.id)
         if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
             for card in cards:
@@ -274,19 +318,28 @@ def can_defend(player_target_id, card_action):
                     can_defend = True
                     list_id_cards.add(card.id)
     else:
-        #casos para intercambio, no tenemos id de card_action
+        # casos para intercambio, no tenemos id de card_action
         for card in cards:
             if card.card_id == ATERRADOR:
                 can_defend = True
                 list_id_cards.add(card.id)
-    
-    return can_defend,list_id_cards
+
+    return can_defend, list_id_cards
+
 
 def is_card_infected(card):
     return card.card_id == INFECCION
 
+
 def is_card_panic(card):
-    return card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS or card.card_id == REVELACIONES or card.card_id == CITA_A_CIEGAS
+    return (
+        card.card_id == UPS
+        or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
+        or card.card_id == REVELACIONES
+        or card.card_id == CITA_A_CIEGAS
+    )
+
+
 def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     """
     Play a card from a player to another player, changes the state of the game, and send a message to all players
@@ -311,14 +364,15 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     elif card.card_id == AQUI_ESTOY_BIEN:
         status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
     elif card.card_id == NO_GRACIAS:
-        status = play_no_gracias(player_main_id,player_target_id)
+        status = play_no_gracias(player_main_id, player_target_id)
     elif card.card_id == ATERRADOR:
-        status,list_card = play_aterrador(player_main_id,player_target_id,match_id)
+        status, list_card = play_aterrador(player_main_id, player_target_id, match_id)
     else:
         raise Exception("Defense card not found")
 
     discard_card_of_player(card.id, match_id, player_main_id)
     return status, list_card
+
 
 def play_aterrador(player_main_id):
     list_card = []
@@ -327,16 +381,18 @@ def play_aterrador(player_main_id):
         player_main = get_player_by_id(player_main_id)
         card_image = get_card_image(player_main.card_exchange.card.image)
         list_card.append(
-                    {"id": player_main.card_exchange.card.id, 
-                     "name": player_main.card_exchange.card.name, 
-                     "image": card_image,
-                     "type" : player_main.card_exchange.card.type
-                     }
-                )
+            {
+                "id": player_main.card_exchange.card.id,
+                "name": player_main.card_exchange.card.name,
+                "image": card_image,
+                "type": player_main.card_exchange.card.type,
+            }
+        )
         player_main.hand.add(player_main.card_exchange)
         player_main.card_exchange = None
         flush()
-    return status,list_card
+    return status, list_card
+
 
 def play_no_gracias(player_main_id):
     status = WS_STATUS_NOPE_THANKS
@@ -347,6 +403,7 @@ def play_no_gracias(player_main_id):
         player_main.card_exchange = None
         flush()
     return status
+
 
 def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
     """
@@ -372,19 +429,13 @@ def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
     status = WS_STATUS_HERE_IM_FINE
     return status
 
+
 def create_card_exchange_message(card_id):
     card = get_card_by_id(card_id)
     card_image = get_card_image(card.image)
 
-    card_ws = {
-        "id" : card.id ,
-        "name" : card.name,
-        "image" : card_image
-    }
-    
-    response = {
-        "status" : WS_CARD,
-        "card" : card_ws
-    }
-    
+    card_ws = {"id": card.id, "name": card.name, "image": card_image}
+
+    response = {"status": WS_CARD, "card": card_ws}
+
     return response
