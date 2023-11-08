@@ -224,7 +224,7 @@ async def discard(match_id, player_id, card_id):
         match_id, player_id, 0, card_id, 0
     )
 
-    discard_card_of_player(card.id, match_id.id, player_id.id)
+    discard_card_of_player(card.id, match.id, player.id)
     await discard_message(match.id, player.id)
 
     return {"message": "Card discard"}
