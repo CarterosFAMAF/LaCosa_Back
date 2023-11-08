@@ -125,6 +125,12 @@ def load_cards():
                 image="app/cards/Seduccion.png",
                 type = TYPE_ACTION
             )
+            Card(
+                card_id=DETERMINACION,
+                name="Determinacion",
+                image="app/cards/Determinacion.png",
+                type = TYPE_ACTION
+            )
             #CARTAS DEFENSA
             Card(
                 card_id = AQUI_ESTOY_BIEN,
