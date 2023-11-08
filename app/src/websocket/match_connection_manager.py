@@ -3,9 +3,9 @@ import json
 from fastapi import WebSocket
 from pony.orm import *
 
-from app.src.game.card import get_card_by_id,get_card_image
 from app.src.models.base import Match as MatchDB
 from app.src.websocket.constants import *
+from app.src.game.player import get_player_by_id
 
 
 class MatchConnectionManager:
@@ -99,22 +99,35 @@ class MatchConnectionManager:
                     self.active_connections.remove(conn)
 
 
-def create_card_exchange_message(card_id):
-    card = get_card_by_id(card_id)
-    card_image = get_card_image(card.image)
+def create_msg_defense(player_main_id, card_id, card_name, list_id_cards_def):
+    # que mando en el mensaje: status,id de player que activo carta accion,card id, ids de cartas defense del objetivo
 
-    card_ws = {
-        "id" : card.id ,
-        "name" : card.name,
-        "image" : card_image
+    with db_session:
+        player = get_player_by_id(player_main_id)
+        player_name = player.name
+
+    if card_id == 0:
+        message = (
+            f"{player_name} intenta intercambiar cartas contigo, ¿Quieres defenderte?"
+        )
+
+    else:
+        message = f"{player_name} intenta utilizar {card_name} en tu contra, ¿Quieres defenderte?"
+
+    data_for_defense = {
+        "player_id": player_main_id,
+        "card_main_id": card_id,
+        "defensive_options_id": list_id_cards_def,
+        "message": message,
     }
-    
+
     response = {
-        "status" : WS_CARD,
-        "card" : card_ws
+        "status": WS_STATUS_DEFENSE_PRIVATE_MSG,
+        "data_for_defense": data_for_defense,
     }
-    
+
     return response
+
 
 def create_ws_message(
     match_id: int,
@@ -197,7 +210,7 @@ def get_ws_message_with_status(
     """
 
     message = ""
-
+    # Lobby
     if status == WS_STATUS_PLAYER_JOINED:
         message = f"{player_name} se unio a la partida"
     elif status == WS_STATUS_PLAYER_LEFT:
@@ -208,20 +221,26 @@ def get_ws_message_with_status(
         message = "La partida finalizo"
     elif status == WS_STATUS_PLAYER_WELCOME:
         message = f"Bienvenido a la partida {player_name}"
+
+    # Partida
     elif status == WS_STATUS_NEW_TURN:
         message = f"Turno nuevo de {player_name}"
+    elif status == WS_STATUS_DISCARD:
+        message = f"{player_name} ha descartado una carta"
+    elif status == WS_STATUS_EXCHANGE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
+    elif status == WS_STATUS_INFECTED:
+        message = f"{player_name} te ha infectado"
+
+    # Accion
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
     elif status == WS_STATUS_CHANGED_OF_PLACES:
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
         message = f"se han inviertido todas las posiciones"
-    elif status == WS_STATUS_DISCARD:
-        message = f"{player_name} ha descartado una carta"
-    elif status == WS_STATUS_SUSPECT:
-        message = (
-            f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
-        )
     elif status == WS_STATUS_CARD_DISCOVER:
         message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
@@ -235,12 +254,18 @@ def get_ws_message_with_status(
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
 
-    elif status == WS_STATUS_EXCHANGE:
-        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
-    elif status == WS_STATUS_EXCHANGE_REQUEST:
-        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
-    elif status == WS_STATUS_INFECTED:
-        message = f"{player_name} te ha infectado"
+    # Defensa
+    elif status == WS_STATUS_HERE_IM_FINE:
+        message = f"{player_name} se siente seguro en donde esta"
+    elif status == WS_STATUS_NOTHING_BARBECUE:
+        message = (
+            f"{player_name} se ha salvado de ser calzinado por {player_target_name}"
+        )
+    elif status == WS_STATUS_NOPE_THANKS:
+        message = f"{player_name} dice que no al intercambio pero igual lo agradece"
+    elif status == WS_STATUS_SCARY:
+        message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

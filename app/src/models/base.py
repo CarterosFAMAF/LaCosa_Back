@@ -39,6 +39,7 @@ class Card(db.Entity):
     card_id = Required(int)
     name = Required(str)
     image = Required(str)
+    type = Required(str)
     player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
@@ -62,55 +63,92 @@ def load_cards():
     try:
         exists_card = db.exists("select * from Card where name='lanzallamas'")
         if not exists_card:
-            Card(
-                card_id=LANZALLAMAS,
-                name="lanzallamas",
-                image="app/cards/lanzallamas.png",
-            )
+            #LA COSA
             Card(
                 card_id=LA_COSA,
                 name="La_Cosa",
-                image="app/cards/LaCosa.png",
+                image="app/cards/La_Cosa.png",
+                type = TYPE_LA_COSA
+            )
+            # CARTAS ACCION
+            Card(
+                card_id=LANZALLAMAS,
+                name="lanzallamas",
+                image="app/cards/Lanzallamas.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = MAS_VALE_QUE_CORRAS,
                 name="Mas_Vale_Que_Corras",
                 image="app/cards/Mas_vale_que_corras.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = SOSPECHA,
                 name="Sospecha",
-                image="app/cards/sospecha.png",
+                image="app/cards/Sospecha.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = VIGILA_TUS_ESPALDAS,
                 name="Vigila_Tus_Espaldas",
                 image="app/cards/Vigila_tus_espaldas.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = WHISKY,
                 name="Whisky",
                 image="app/cards/Whisky.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = ANALISIS,
                 name="Analisis",
                 image="app/cards/Analisis.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = CAMBIO_DE_LUGAR,
                 name="Cambio_de_lugar",
                 image="app/cards/Cambio_de_lugar.png",
+                type = TYPE_ACTION
             )
             Card(
                 card_id = SEDUCCION,
                 name="Seduccion",
                 image="app/cards/Seduccion.png",
+                type = TYPE_ACTION
+            )
+            #CARTAS DEFENSA
+            Card(
+                card_id = AQUI_ESTOY_BIEN,
+                name="Aqui_Estoy_Bien",
+                image="app/cards/Aqui_estoy_bien.png",
+                type = TYPE_DEFENSE
+            )
+            Card(
+                card_id = ATERRADOR,
+                name="Aterrador",
+                image="app/cards/Aterrador.png",
+                type = TYPE_DEFENSE
+            )
+            Card(
+                card_id = NO_GRACIAS,
+                name="No_gracias",
+                image="app/cards/No_gracias.png",
+                type = TYPE_DEFENSE
+            )
+            Card(
+                card_id = NADA_DE_BARBACOAS,
+                name="Nada_de_barbacoas",
+                image="app/cards/Nada_de_barbacoas.png",
+                type = TYPE_DEFENSE
             )
             Card(
                 card_id = INFECCION,
                 name="Infeccion",
                 image= random.choice(image_infected),
+                type = TYPE_INFECTED
             )
             flush()
     except:

@@ -87,6 +87,55 @@ async def send_message_card_played(
         await live_match._match_connection_manager.broadcast_json(msg_ws)
 
 
+async def send_message_private_defense(
+    match_id: int,
+    player_in_id: int,
+    card_id: int,
+    player_out_id: int,
+    card_name: str,
+    list_card: list,
+):
+    """
+    Send defense message to a particular player
+
+    Args:
+        match_id (int)
+        status (int
+        player_in_id (int)
+        player_out_id (int)
+        card_name (str)
+
+    Returns:
+        None
+    """
+
+    # Get live match
+    live_match = get_live_match_by_id(match_id)
+    # necesito mandar el id del jugador que esta en turno y el id de la carta.
+    msg_ws = create_msg_defense(player_in_id, card_id, card_name, list_card)
+
+    await live_match._match_connection_manager.send_personal_json(msg_ws, player_out_id)
+
+
+# send_message_play_defense = send_message_defense --> esto lo comente porque no lo entendi
+
+
+async def send_message_play_defense(
+    match_id, status, player_in_id, player_out_id, card_name
+):
+    live_match = get_live_match_by_id(match_id)
+
+    msg_ws = create_ws_message(
+        match_id=match_id,
+        status=status,
+        player_id=player_in_id,
+        player_target_id=player_out_id,
+        card_name=card_name,
+        list_revealed_card=[],
+    )
+    await live_match._match_connection_manager.broadcast_json(msg_ws)
+
+
 def validate_match_players_and_cards(
     match_id, player_in_id, player_out_id, card_id, card_target_id
 ):
@@ -135,3 +184,9 @@ def validate_match_players_and_cards(
             )
 
     return match, player_in, player_out, card, card_target
+
+
+async def discard_message(match_id, player_id):
+    live_match = get_live_match_by_id(match_id)
+    ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_id)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
