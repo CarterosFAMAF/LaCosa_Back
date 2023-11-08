@@ -60,7 +60,7 @@ def play_lanzallamas(player_target_id, match_id):
     with db_session:
         match = get_match_by_id(match_id)
         player_target = get_player_by_id(player_target_id)
-        player_target.role = "dead"
+        player_target.role = PLAYER_ROLE_DEAD
         for card in player_target.hand:
             discard_card_of_player(card.id, match_id, player_target.id)
         flush()
@@ -155,6 +155,7 @@ def play_card_investigation(player_main, player_target, card):
                 "id": card_random.id,
                 "name": card_random.name,
                 "image": card_image,
+                "type" : card_random.type
             }
             cards_returns.append(card_to_return)
 
@@ -164,7 +165,7 @@ def play_card_investigation(player_main, player_target, card):
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append(
-                    {"id": card.id, "name": card.name, "image": card_image}
+                    {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
                 )
 
     elif card.card_id == WHISKY:
@@ -173,7 +174,7 @@ def play_card_investigation(player_main, player_target, card):
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append(
-                    {"id": card.id, "name": card.name, "image": card_image}
+                    {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
                 )
 
     return cards_returns
@@ -201,7 +202,7 @@ def create_status_investigation(card):
 # DEFENSE
 
 
-def can_defend(player_target_id, card):
+def can_defend(player_target_id, card_action):
     """
     From specific card and player, return if the player can defend with a defense card
 
@@ -215,17 +216,25 @@ def can_defend(player_target_id, card):
     player_target = get_player_by_id(player_target_id)
     can_defend = False
     cards = select(c for c in player_target.hand if c.id != card.id)[:]
-
-    if card.card_id == LANZALLAMAS:
+    list_id_cards = []
+    if card_action != 0:
+        if card_action.card_id == LANZALLAMAS:
+            for card in cards:
+                if card.card_id == NADA_DE_BARBACOAS:
+                    can_defend = True     
+                    list_id_cards.add(card.id)
+        if card.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
+            for card in cards:
+                if card.card_id == AQUI_ESTOY_BIEN:
+                    can_defend = True
+                    list_id_cards.add(card.id)
+    else:
         for card in cards:
-            if card.card_id == NADA_DE_BARBACOAS:
-                can_defend == True
-    if card.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
-        for card in cards:
-            if card.card_id == AQUI_ESTOY_BIEN:
-                can_defend == True
-
-    return can_defend
+            if card.card_id == ATERRADOR:
+                can_defend = True
+                list_id_cards.add(card.id)
+    
+    return can_defend,list_id_cards
 
 def is_card_infected(card):
     return card.card_id == INFECCION
@@ -272,7 +281,8 @@ def play_aterrador(player_main_id):
         list_card.append(
                     {"id": player_main.card_exchange.card.id, 
                      "name": player_main.card_exchange.card.name, 
-                     "image": card_image
+                     "image": card_image,
+                     "type" : player_main.card_exchange.card.type
                      }
                 )
         player_main.hand.add(player_main.card_exchange)

@@ -60,6 +60,7 @@ class CardModel(BaseModel):
     id: int = 0
     name: str = ""
     image: str = ""
+    type: str = ""
 
 
 class PlayCardModel(BaseModel):

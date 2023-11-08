@@ -6,6 +6,7 @@ from pony.orm import *
 from app.src.game.card import get_card_by_id, get_card_image
 from app.src.models.base import Match as MatchDB
 from app.src.websocket.constants import *
+from app.src.game.player import get_player_by_id
 
 
 class MatchConnectionManager:
@@ -103,9 +104,35 @@ def create_card_exchange_message(card_id):
     card = get_card_by_id(card_id)
     card_image = get_card_image(card.image)
 
-    card_ws = {"id": card.id, "name": card.name, "image": card_image}
+    card_ws = {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
 
     response = {"status": WS_CARD, "card": card_ws}
+
+    return response
+
+
+def create_msg_defense(player_main_id, card_id, card_name, list_id_cards_def):
+    # que mando en el mensaje: status,id de player que activo carta accion,card id, ids de cartas defense del objetivo
+
+    with db_session:
+        player = get_player_by_id(player_main_id)
+        player_name = player.name
+
+    message = (
+        f"{player_name} intenta utilizar {card_name} en tu contra, ¿quieres defenderte?"
+    )
+
+    data_for_defense = {
+        "player_id": player_main_id,
+        "card_main_id": card_id,
+        "defensive_options_id": list_id_cards_def,
+        "message": message,
+    }
+
+    response = {
+        "status": WS_STATUS_DEFENSE_PRIVATE_MSG,
+        "data_for_defense": data_for_defense,
+    }
 
     return response
 
@@ -224,8 +251,6 @@ def get_ws_message_with_status(
         message = f"{player_name} ha analizado las cartas de {player_target_name}"
     elif status == WS_STATUS_WHISKY:
         message = f"{player_name} ha mostrado todas sus cartas"
-    elif status == WS_STATUS_DEFENSE_PRIVATE_MSG:
-        message = f"{player_name} intenta utilizar {card_name} en tu contra, ¿quieres defenderte?"
     elif status == WS_STATUS_NOTHING_BARBECUE:
         message = (
             f"{player_name} se ha salvado de ser calzinado por {player_target_name}"

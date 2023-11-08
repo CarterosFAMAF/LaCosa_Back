@@ -55,7 +55,6 @@ def define_database_and_entities(test: bool):
     db.generate_mapping(create_tables=True)
 
 
-
 #imagenes para infeccion
 
 @db_session
