@@ -99,7 +99,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     live_match = get_live_match_by_id(match.id)
     list_card = []
     can_defend_bool, list_card = can_defend(player_out.id, card.card_id)
-
+    print ("VOLVIIIIIIIIIIIIIIIIIIIIIIIIIII DE CAN DEFENDDD")
     if (can_defend_bool):  # si el target tiene nada de barbacoas
         # deberia mandarle el id de la carta del jugador main.
         await send_message_private_defense(
@@ -110,7 +110,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
             card_name=card.name,
             list_card=list_card,
         )
-        return list_card
+        return []
 
     elif is_investigation_card(card):  # sospecha, whiskey, analisis
         list_card = play_card_investigation(player_in, player_out, card)
