@@ -133,11 +133,6 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     # DISCARD MSG
     await discard_message(match_id, player_in_id)
 
-    # NEXT TURN MSG (if no defense)
-    next_turn(match.id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
-
     # FINALIZE MATCH MSG
     if check_match_end(match_id):
         end_match(match_id)
