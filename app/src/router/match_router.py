@@ -149,6 +149,9 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
 )
 async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     # check if card exists
+    player_main = get_player_by_id(input.player_main_id)
+    player_target = get_player_by_id(input.player_target_id)
+    
     card_main = get_card_by_id(input.card_main_id)
     if card_main == None:
         raise HTTPException(
@@ -166,12 +169,12 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     live_match = get_live_match_by_id(input.match_id)
     list_card = []
 
-    if input.card_target_id == 0:
+    if input.card_main_id == 0:
         # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista en play_card.
 
         status = play_card(
-            input.player_target_id,
-            input.player_main_id,
+            player_target.id,
+            player_main.id,
             input.match_id,
             input.card_main_id,
         )
