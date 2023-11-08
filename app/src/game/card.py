@@ -261,6 +261,8 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     # aclaracion de uso: player_main es jugador en turno y player_target_id es quien va a jugar carta def
     card = get_card_by_id(card_id)
     list_card = []
+    
+    print(f"SE ENCONTRO ESTA CARTA BRODEER: {card.id}")
     assert card is not None
     status = None
 
