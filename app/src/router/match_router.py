@@ -188,6 +188,12 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             card_name=card_target.name,
             list_cards=[],
         )
+        
+        # NEXT TURN MSG
+        next_turn(input.match_id)
+        player_turn = get_next_player(match)
+        ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     else:
         status, list_card = play_card_defense(
@@ -195,6 +201,12 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
         )
         await discard_message(input.match_id, input.player_main_id)
 
+        if card_main.card_id == NO_GRACIAS or card_main.card_id == ATERRADOR:
+            next_turn(input.match_id)
+            player_turn = get_next_player(match)
+            ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
+            await live_match._match_connection_manager.broadcast_json(ws_msg)
+        
         # DEFENSE MSG
         await send_message_play_defense(
             match_id=input.match_id,
@@ -206,12 +218,6 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 
     # DISCARD MAIN MSG
     await discard_message(input.match_id, input.player_target_id)
-
-    # NEXT TURN MSG
-    next_turn(input.match_id)
-    player_turn = get_next_player(match)
-    ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return list_card
 

@@ -266,9 +266,6 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     assert card is not None
     status = None
 
-    print(f"GOOOOOOOOOOOOOOOD")
-    print(f"SE ENCONTRO ESTA CARTA BRODEER: {card.card_id}")
-
 
     if card.card_id == NADA_DE_BARBACOAS:
         status = WS_STATUS_NOTHING_BARBECUE
