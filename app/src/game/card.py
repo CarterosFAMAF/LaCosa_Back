@@ -236,6 +236,9 @@ def can_defend(player_target_id, card_action):
                 if card.card_id == ATERRADOR:
                     can_defend = True
                     list_id_cards.append(card.id)
+                if card.card_id == NO_GRACIAS:
+                    can_defend = True
+                    list_id_cards.append(card.id)
     
     return can_defend,list_id_cards
 
