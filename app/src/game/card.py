@@ -337,7 +337,8 @@ def create_card_exchange_message(card_id):
     card_ws = {
         "id" : card.id ,
         "name" : card.name,
-        "image" : card_image
+        "image" : card_image,
+        "type" : card.type
     }
     
     response = {
