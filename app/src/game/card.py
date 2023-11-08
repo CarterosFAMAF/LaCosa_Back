@@ -6,6 +6,7 @@ from pony.orm import *
 from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.constants import *
+from app.src.websocket.constants import *
 
 
 class Card:
@@ -61,10 +62,11 @@ def play_lanzallamas(player_target_id, match_id):
     with db_session:
         match = get_match_by_id(match_id)
         player_target = get_player_by_id(player_target_id)
-        player_target.role = "dead"
+        player_target.role = PLAYER_ROLE_DEAD
         for card in player_target.hand:
             discard_card_of_player(card.id, match_id, player_target.id)
         flush()
+
     status = WS_STATUS_PLAYER_BURNED
     return status
 
@@ -111,7 +113,7 @@ def play_cambio_de_lugar(player_main_id, player_target_id, match_id):
 
 def play_vigila_tus_espaldas(match_id):
     """
-    reverse all positions of the players
+    Reverse clockwise
 
     Args:
         match_id(int)
@@ -173,6 +175,7 @@ def play_card_investigation(player_main, player_target, card):
                 "id": card_random.id,
                 "name": card_random.name,
                 "image": card_image,
+                "type" : card_random.type
             }
             cards_returns.append(card_to_return)
             """
@@ -215,7 +218,7 @@ def play_analisis(player_target):
             for card in cards:
                 card_image = get_card_image(card.image)
                 cards_returns.append(
-                    {"id": card.id, "name": card.name, "image": card_image}
+                    {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
                 )
     return cards_returns
 
@@ -240,34 +243,148 @@ def is_investigation_card(card):
         card.card_id == SOSPECHA or card.card_id == WHISKY or card.card_id == ANALISIS or card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
     )
 
+# DEFENSE
+
+
+def can_defend(player_target_id, card_action):
+    """
+    From specific card and player, return if the player can defend with a defense card
+
+    Args:
+        player_target_id (int)
+        card (Card)
+
+    Returns:
+        Bool
+    """
+    player_target = get_player_by_id(player_target_id)
+    can_defend = False
+    with db_session:
+        cards = select(c for c in player_target.hand if c.id != card_action.id)[:]
+    list_id_cards = []
+    if card_action != 0:
+        if card_action.card_id == LANZALLAMAS:
+            for card in cards:
+                if card.card_id == NADA_DE_BARBACOAS:
+                    can_defend = True     
+                    list_id_cards.add(card.id)
+        if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
+            for card in cards:
+                if card.card_id == AQUI_ESTOY_BIEN:
+                    can_defend = True
+                    list_id_cards.add(card.id)
+    else:
+        #casos para intercambio, no tenemos id de card_action
+        for card in cards:
+            if card.card_id == ATERRADOR:
+                can_defend = True
+                list_id_cards.add(card.id)
+    
+    return can_defend,list_id_cards
+
 def is_card_infected(card):
     return card.card_id == INFECCION
 
 def is_card_panic(card):
     return card.card_id == UPS or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS or card.card_id == REVELACIONES or card.card_id == CITA_A_CIEGAS
+def play_card_defense(player_main_id, player_target_id, card_id, match_id):
+    """
+    Play a card from a player to another player, changes the state of the game, and send a message to all players
 
-def can_defend(player_target, card):
-    can_defend = False
-    cards = select(c for c in player_target.hand if c.id != card.id)[:]
+    Args:
+        player_main_id (int)
+        player_target_id (int)
+        card_id (int)
+        match_id (int)
 
-    if card.card_id == LANZALLAMAS:
-        for card in cards:
-            if card.card_id == NADA_DE_BARBACOA:
-                can_defend == True
-    if card.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
-        for card in cards:
-            if card.card_id == AQUI_ESTOY_BIEN:
-                can_defend == True
+    Returns:
+        None
+    """
+    # aclaracion de uso: player_main es jugador en turno y player_target_id es quien va a jugar carta def
+    card = get_card_by_id(card_id)
+    list_card = []
+    assert card is not None
+    status = None
 
-    return can_defend
+    if card.card_id == NADA_DE_BARBACOAS:
+        status = WS_STATUS_NOTHING_BARBECUE
+    elif card.card_id == AQUI_ESTOY_BIEN:
+        status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
+    elif card.card_id == NO_GRACIAS:
+        status = play_no_gracias(player_main_id,player_target_id)
+    elif card.card_id == ATERRADOR:
+        status,list_card = play_aterrador(player_main_id,player_target_id,match_id)
+    else:
+        raise Exception("Defense card not found")
 
-def effect_defense(player_main, player_target, card_main, card_target, match):
-    if card_target.card_id == NADA_DE_BARBACOA:
-        discard_card_of_player(card_main.id, match.id, player_main.id)
-        discard_card_of_player(card_target.id, match.id, player_target.id)
-        # broadcasteamos "{player_target} evito ser calzinado por {player_main}"
+    discard_card_of_player(card.id, match_id, player_main_id)
+    return status, list_card
 
-    if card_target.card_id == AQUI_ESTOY_BIEN:
-        discard_card_of_player(card_main.id, match.id, player_main.id)
-        discard_card_of_player(card_target.id, match.id, player_target.id)
-        # broadcasteamos ""
+def play_aterrador(player_main_id):
+    list_card = []
+    status = WS_STATUS_SCARY
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+        card_image = get_card_image(player_main.card_exchange.card.image)
+        list_card.append(
+                    {"id": player_main.card_exchange.card.id, 
+                     "name": player_main.card_exchange.card.name, 
+                     "image": card_image,
+                     "type" : player_main.card_exchange.card.type
+                     }
+                )
+        player_main.hand.add(player_main.card_exchange)
+        player_main.card_exchange = None
+        flush()
+    return status,list_card
+
+def play_no_gracias(player_main_id):
+    status = WS_STATUS_NOPE_THANKS
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+
+        player_main.hand.add(player_main.card_exchange)
+        player_main.card_exchange = None
+        flush()
+    return status
+
+def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
+    """
+    Change the position of two players, and change the turn of the match
+
+    Args:
+        player_main_id (int)
+        player_target_id (int)
+
+    Returns:
+        message of players that change position
+    """
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+        player_target = get_player_by_id(player_target_id)
+        pos_tmp = player_main.position
+        player_main.position = player_target.position
+        player_target.position = pos_tmp
+        match = get_match_by_id(match_id)
+        match.turn = player_main.position
+        flush()
+
+    status = WS_STATUS_HERE_IM_FINE
+    return status
+
+def create_card_exchange_message(card_id):
+    card = get_card_by_id(card_id)
+    card_image = get_card_image(card.image)
+
+    card_ws = {
+        "id" : card.id ,
+        "name" : card.name,
+        "image" : card_image
+    }
+    
+    response = {
+        "status" : WS_CARD,
+        "card" : card_ws
+    }
+    
+    return response

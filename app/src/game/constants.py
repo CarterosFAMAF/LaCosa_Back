@@ -1,121 +1,15 @@
-DECK = [
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-   27,
-]
-
-
 # fijarse de meter las otras cartas.
 UPS = 31
 CITA_A_CIEGAS = 30
 QUE_QUEDE_ENTRE_NOSOTROS = 27
 REVELACIONES = 20
 NADA_DE_BARBACOA = 17
+# fijarse de meter las otras cartas.
+NADA_DE_BARBACOAS = 17
+FALLASTE = 16
+NO_GRACIAS = 15
 AQUI_ESTOY_BIEN = 14
+ATERRADOR = 13
 MAS_VALE_QUE_CORRAS = 12
 SEDUCCION = 11
 VIGILA_TUS_ESPALDAS = 10
@@ -126,6 +20,126 @@ ANALISIS = 4
 LANZALLAMAS = 3
 INFECCION = 2
 LA_COSA = 1
+
+DECK = [
+    # WITH 4 PLAYERS
+    INFECCION,  # ACA ESTARIA LA COSA
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    LANZALLAMAS,
+    LANZALLAMAS,
+    SOSPECHA,  # ACA ESTARIA HACHA
+    SOSPECHA,
+    SOSPECHA,
+    SOSPECHA,
+    SOSPECHA,
+    WHISKY,  # ACA ESTARIA DETERMINACION
+    WHISKY,  # ACA ESTARIA DETERMINACION
+    WHISKY,
+    CAMBIO_DE_LUGAR,
+    CAMBIO_DE_LUGAR,
+    VIGILA_TUS_ESPALDAS,
+    SEDUCCION,
+    SEDUCCION,
+    MAS_VALE_QUE_CORRAS,
+    MAS_VALE_QUE_CORRAS,
+    AQUI_ESTOY_BIEN,
+    NO_GRACIAS,
+    NO_GRACIAS,  # ACA ESTARIA FALLASTE
+    NADA_DE_BARBACOAS,
+    NADA_DE_BARBACOAS,  # ACA ESTARIA PUERTA ENTRANCADA
+    ANALISIS,  # ACA ESTARIA OLVIDADIZO
+    ANALISIS,  # ACA ESTARIA TRES,CUATRO...
+    ANALISIS,  # ACA ESTARIA VUELTA Y VUELTA
+    ANALISIS,  # ACA ESTARIA CITA A CIEGAS
+    # WITH 5 PLAYERS
+    ANALISIS,
+    ATERRADOR,
+    AQUI_ESTOY_BIEN,  # ACA ESTARIA CUARENTENA
+    NO_GRACIAS,  # ACA ESTARIA SAL DE AQUI
+    NO_GRACIAS,  # ACA ESTARIA UNO,DOS...
+    NADA_DE_BARBACOAS,  # ACA ESTARIA AQUI ESTA LA FIESTA?
+    # WITH 6 PLAYERS
+    INFECCION,
+    INFECCION,
+    LANZALLAMAS,
+    ANALISIS,
+    ANALISIS,  # ACA ESTARIA DETERMINACION
+    WHISKY,
+    SEDUCCION,
+    ATERRADOR,
+    AQUI_ESTOY_BIEN,
+    NO_GRACIAS,
+    NO_GRACIAS,  # ACA ESTARIA FALLASTE
+    NADA_DE_BARBACOAS,
+    SOSPECHA,  # ACA ESTARIA CUERDAS PODRIDAS
+    # WITH 7 PLAYERS
+    INFECCION,
+    INFECCION,
+    SOSPECHA,
+    CAMBIO_DE_LUGAR,
+    SEDUCCION,
+    MAS_VALE_QUE_CORRAS,
+    MAS_VALE_QUE_CORRAS,  # ACA ESTARIA PUERTA ENTRANCADA
+    MAS_VALE_QUE_CORRAS,  # ACA ESTARIA QUE QUEDE ENTRE NOSOTROS
+    SEDUCCION,  # ACA ESTARIA NO PODEMOS SER AMIGOS
+    # WITH 8 PLAYERS
+    INFECCION,
+    SOSPECHA,
+    SEDUCCION,
+    ATERRADOR,
+    NO_GRACIAS,
+    NO_GRACIAS,  # ACA ESTARIA REVELACIONES
+    # WITH 9 PLAYERS,
+    INFECCION,
+    INFECCION,
+    LANZALLAMAS,
+    ANALISIS,
+    ANALISIS,  # ACA ESTARIA HACHA
+    SOSPECHA,
+    ANALISIS,  # ACA ESTARIA DETERMINACION
+    CAMBIO_DE_LUGAR,
+    VIGILA_TUS_ESPALDAS,
+    MAS_VALE_QUE_CORRAS,
+    MAS_VALE_QUE_CORRAS,  # ACA ESTARIA CUARENTENA
+    MAS_VALE_QUE_CORRAS,  # ACA ESTARIA CUERDAS PODRIDAS
+    SEDUCCION,  # ACA ESTARIA UNO,DOS...
+    SEDUCCION,  # ACA ESTARIA TRES,CUATRO...
+    SEDUCCION,  # ACA ESTARIA DONDE ESTA LA FIESTA?
+    SOSPECHA,  # ACA ESTARIA QUE QUEDE ENTRE NOSOTROS
+    SOSPECHA,  # ACA ESTARIA VUELTA Y VUELTA
+    LANZALLAMAS,  # ACA ESTARIA NO PODEMOS SER AMIGOS
+    LANZALLAMAS,  # ACA ESTARIA CITA A CIEGAS
+    # WITH 10 PLAYERS
+    INFECCION,
+    INFECCION,
+    SOSPECHA,
+    SOSPECHA,  # ACA ESTARIA DETERMINACION
+    WHISKY,
+    SEDUCCION,
+    SEDUCCION,  # ACA ESTARIA UPS
+    # WITH 11 PLAYERS AND 12 PLAYERS
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    LANZALLAMAS,
+    CAMBIO_DE_LUGAR,
+    SEDUCCION,
+    MAS_VALE_QUE_CORRAS,
+    ATERRADOR,
+    AQUI_ESTOY_BIEN,
+    NO_GRACIAS,
+    ATERRADOR,  # ACA ESTARIA FALLASTE
+    NADA_DE_BARBACOAS,
+    NADA_DE_BARBACOAS,  # ACA ESTARIA PUERTA ENTRANCADA
+]
+
 
 """
 DECK = [
@@ -145,7 +159,7 @@ DECK = [
     Hacha                    = 5
     Sospecha                 = 6
     Determinacion            = 7
-    Wisky                    = 8
+    Whisky                   = 8
     Cambio de Lugar          = 9 
     Vigila tu Espalda        = 10
     Seduccion                = 11
@@ -163,7 +177,7 @@ DECK = [
     Olvidadizo               = 23
     uno, dos…                = 24
     tres, cuatro...          = 25
-    Aui es la fiesta?        = 26
+    Aqui es la fiesta?       = 26
     Que quede entre nosotros = 27
     Vuelta y vuelta          = 28 
     No podemos ser amigos    = 29
@@ -171,6 +185,12 @@ DECK = [
     Ups                      = 31
 """
 
+# Type of cards
+TYPE_LA_COSA = "La_Cosa"
+TYPE_ACTION = "Accion"
+TYPE_DEFENSE = "Defensa"
+TYPE_INFECTED = "Infectado"
+TYPE_PANIC = "Panico"
 
 # Player roles
 PLAYER_ROLE_HUMAN = "human"
