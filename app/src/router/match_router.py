@@ -131,7 +131,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     )
 
     # DISCARD MSG
-    await discard_message(match_id,player_in_id)
+    await discard_message(match_id, player_in_id)
 
     # NEXT TURN MSG (if no defense)
     next_turn(match.id)
@@ -194,7 +194,7 @@ async def play_card_defense_endpoint(input=PlayCardDefenseIn):
         status, list_card = play_card_defense(
             input.player_main_id, input.player_target_id, input.match_id, card_main.id
         )
-        await discard_message(input.match_id,input.player_main_id)
+        await discard_message(input.match_id, input.player_main_id)
 
         # DEFENSE MSG
         await send_message_play_defense(
@@ -206,7 +206,7 @@ async def play_card_defense_endpoint(input=PlayCardDefenseIn):
         )
 
     # DISCARD MAIN MSG
-    await discard_message(input.match_id,input.player_target_id)
+    await discard_message(input.match_id, input.player_target_id)
 
     # NEXT TURN MSG
     next_turn(input.match_id)
@@ -225,7 +225,7 @@ async def discard(match_id, player_id, card_id):
     )
 
     discard_card_of_player(card_id, match_id, player_id)
-    await discard_message(match_id,player_id)
+    await discard_message(match_id, player_id)
 
     return {"message": "Card discard"}
 
@@ -321,19 +321,18 @@ async def exchange_endpoint(input: ExchangeCardIn):
             match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
-        
-        """ 
-         if can_defend(player_target.id,0):
+
+        can_defense_bool, list_card = can_defend(player_target.id, 0)
+
+        if can_defense_bool:
             await send_message_private_defense(
-            match_id=match.id,
-            player_in_id=player.id,
-            card_id=card.id,
-            player_out_id=player_target.id if player_target else 0,
-            card_name=card.name,
-            list_card=[]
-        )
-        """
-       
+                match_id=match.id,
+                player_in_id=player.id,
+                card_id=0,
+                player_out_id=player_target.id if player_target else 0,
+                card_name="",
+                list_card=list_card,
+            )
 
     else:
         prepare_exchange_card(player.id, card.id)

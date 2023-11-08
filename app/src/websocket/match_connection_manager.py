@@ -118,9 +118,13 @@ def create_msg_defense(player_main_id, card_id, card_name, list_id_cards_def):
         player = get_player_by_id(player_main_id)
         player_name = player.name
 
-    message = (
-        f"{player_name} intenta utilizar {card_name} en tu contra, ¿quieres defenderte?"
-    )
+    if card_id == 0:
+        message = (
+            f"{player_name} intenta intercambiar cartas contigo, ¿Quieres defenderte?"
+        )
+
+    else:
+        message = f"{player_name} intenta utilizar {card_name} en tu contra, ¿Quieres defenderte?"
 
     data_for_defense = {
         "player_id": player_main_id,
