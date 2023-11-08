@@ -278,6 +278,8 @@ async def declare_end_endpoint(input : declare_endIn):
     #Anunciar que la partida termino
     ws_msg = create_ws_message(input.match_id, WS_STATUS_MATCH_ENDED)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
+    
+    return {"message" : "Match finalized"}
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):
