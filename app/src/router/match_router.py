@@ -146,13 +146,12 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
 
     return list_card
 
-
 @router.put(
     "/matches/{match_id}/players/{player_id}/play_card_defense",
     response_model=List[CardModel],
     status_code=status.HTTP_200_OK,
 )
-async def play_card_defense_endpoint(input=PlayCardDefenseIn):
+async def play_card_defense_endpoint(input:PlayCardDefenseIn):
     # check if card exists
     card_main = get_card_by_id(input.card_main_id)
     if card_main == None:
