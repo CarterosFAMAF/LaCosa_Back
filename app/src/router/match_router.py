@@ -174,8 +174,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
         # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista en play_card.
 
         status = play_card(
-            player_target.id,
-            player_main.id,
+            player_target,
+            player_main,
             input.match_id,
             input.card_target_id,
         )
