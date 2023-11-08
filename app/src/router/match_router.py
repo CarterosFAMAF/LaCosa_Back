@@ -213,7 +213,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             status=status,
             player_in_id=input.player_main_id,
             player_out_id=input.player_target_id,
-            card_name=card_target.name,
+            card_name=card_main.name,
         )
 
     # DISCARD MAIN MSG
