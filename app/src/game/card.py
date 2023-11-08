@@ -215,26 +215,27 @@ def can_defend(player_target_id, card_action):
     """
     player_target = get_player_by_id(player_target_id)
     can_defend = False
-    with db_session:
-        cards = select(c for c in player_target.hand if c.id != card_action.id)[:]
     list_id_cards = []
-    if card_action != 0:
-        if card_action.card_id == LANZALLAMAS:
+    with db_session:
+        if card_action != 0:
+            cards = select(c for c in player_target.hand if c.id != card_action.id)[:]
+            if card_action.card_id == LANZALLAMAS:
+                for card in cards:
+                    if card.card_id == NADA_DE_BARBACOAS:
+                        can_defend = True     
+                        list_id_cards.append(card.id)
+            if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
+                for card in cards:
+                    if card.card_id == AQUI_ESTOY_BIEN:
+                        can_defend = True
+                        list_id_cards.append(card.id)
+        else:
+            #casos para intercambio, no tenemos id de card_action
+            cards = select(c for c in player_target.hand)[:]
             for card in cards:
-                if card.card_id == NADA_DE_BARBACOAS:
-                    can_defend = True     
-                    list_id_cards.append(card.id)
-        if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
-            for card in cards:
-                if card.card_id == AQUI_ESTOY_BIEN:
+                if card.card_id == ATERRADOR:
                     can_defend = True
                     list_id_cards.append(card.id)
-    else:
-        #casos para intercambio, no tenemos id de card_action
-        for card in cards:
-            if card.card_id == ATERRADOR:
-                can_defend = True
-                list_id_cards.append(card.id)
     
     return can_defend,list_id_cards
 
