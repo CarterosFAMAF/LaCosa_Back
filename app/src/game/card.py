@@ -223,7 +223,7 @@ def can_defend(player_target_id, card_action):
             for card in cards:
                 if card.card_id == NADA_DE_BARBACOAS:
                     can_defend = True     
-                    list_id_cards.add(card.id)
+                    list_id_cards.append(card.id)
         if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
             for card in cards:
                 if card.card_id == AQUI_ESTOY_BIEN:
