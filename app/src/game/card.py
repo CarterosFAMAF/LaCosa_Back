@@ -202,7 +202,7 @@ def create_status_investigation(card):
 # DEFENSE
 
 
-def can_defend(player_target_id, card_action_id):
+def can_defend(player_target_id, card_action):
     """
     From specific card and player, return if the player can defend with a defense card
 
@@ -216,27 +216,29 @@ def can_defend(player_target_id, card_action_id):
     player_target = get_player_by_id(player_target_id)
     can_defend = False
     list_id_cards = []
+    
     with db_session:
-        if card_action_id != 0:
-            cards = select(c for c in player_target.hand if c.id != card_action_id)[:]
-            if card_action_id == LANZALLAMAS:
-                for card in cards:
-                    if card.card_id == NADA_DE_BARBACOAS:
-                        can_defend = True     
-                        list_id_cards.append(card.id)
-            if card_action_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
-                for card in cards:
-                    if card.card_id == AQUI_ESTOY_BIEN:
-                        can_defend = True
-                        list_id_cards.append(card.id)
-        else:
-            #casos para intercambio, no tenemos id de card_action
             cards = select(c for c in player_target.hand)[:]
+            
+    if card_action == 0:
+        #casos para intercambio, no tenemos id de card_action
+        for card in cards:
+            if card.card_id == ATERRADOR:
+                can_defend = True
+                list_id_cards.append(card.id)
+            elif card.card_id == NO_GRACIAS:
+                can_defend = True
+                list_id_cards.append(card.id)
+    else:
+        if card_action == LANZALLAMAS:
             for card in cards:
-                if card.card_id == ATERRADOR:
-                    can_defend = True
+                if card.card_id == NADA_DE_BARBACOAS:
+                    can_defend = True     
                     list_id_cards.append(card.id)
-                if card.card_id == NO_GRACIAS:
+                    
+        elif card_action == CAMBIO_DE_LUGAR or card_action == MAS_VALE_QUE_CORRAS:
+            for card in cards:
+                if card.card_id == AQUI_ESTOY_BIEN:
                     can_defend = True
                     list_id_cards.append(card.id)
     
@@ -264,6 +266,10 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     assert card is not None
     status = None
 
+    print(f"GOOOOOOOOOOOOOOOD")
+    print(f"SE ENCONTRO ESTA CARTA BRODEER: {card.card_id}")
+
+
     if card.card_id == NADA_DE_BARBACOAS:
         status = WS_STATUS_NOTHING_BARBECUE
     elif card.card_id == AQUI_ESTOY_BIEN:
@@ -276,6 +282,7 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
         raise Exception("Defense card not found")
 
     discard_card_of_player(card.id, match_id, player_main_id)
+    
     return status, list_card
 
 def play_aterrador(player_main_id):
@@ -304,6 +311,7 @@ def play_no_gracias(player_main_id):
         player_main.hand.add(player_main.card_exchange)
         player_main.card_exchange = None
         flush()
+        
     return status
 
 def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
