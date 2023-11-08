@@ -177,7 +177,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             player_target.id,
             player_main.id,
             input.match_id,
-            input.card_main_id,
+            input.card_target_id,
         )
 
         await send_message_card_played(
