@@ -330,14 +330,6 @@ def create_card_exchange_message(card_id):
     card = get_card_by_id(card_id)
     card_image = get_card_image(card.image)
 
-    card_ws = {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
-
-    response = {"status": WS_CARD, "card": card_ws}
-
-def create_card_exchange_message(card_id):
-    card = get_card_by_id(card_id)
-    card_image = get_card_image(card.image)
-
     card_ws = {
         "id" : card.id ,
         "name" : card.name,
