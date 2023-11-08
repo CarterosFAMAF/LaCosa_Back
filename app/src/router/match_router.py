@@ -187,8 +187,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             player_out_id=input.player_target_id,
             card_name=card_main.name,
             list_cards=[],
-    """_summary_
-    """        )
+        )
 
     else:
         status, list_card = play_card_defense(
