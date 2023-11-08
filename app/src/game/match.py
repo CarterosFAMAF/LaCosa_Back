@@ -232,7 +232,7 @@ def deal_cards(match_id: int):
     players_list = select(p for p in match.players)[:]
 
     for player in players_list:
-        cards = select(c for c in match.deck).random(4)
+        cards = select(c for c in match.deck if c.type != TYPE_PANIC).random(4)
         player.hand.add(cards)
         match.deck.remove(cards)
 
@@ -337,48 +337,95 @@ def delete_match(match_id):
         match.delete()
         flush()
 
-
 def check_match_end(match_id):
     """
     Check if match has ended
-    Iterate over players and check if there is only one human player alive
+    Iterate over players and check if the thing is alive or if all the humans are infected 
 
     Args:
         match_id (int)
 
     Returns:
-        ended (bool)
+        msg (str)
     """
     with db_session:
         match = MatchDB.get(id=match_id)
         players = select(p for p in match.players)[:]
         humans_alive = 0
+        the_thing_is_alive = False
+        infeteds_alive = 0
+        dead_players = 0
         ended = False
 
         for player in players:
-            if player.role == PLAYER_ROLE_HUMAN or player.role == PLAYER_ROLE_THE_THING:
+            if player.role == PLAYER_ROLE_DEAD:
+                dead_players += 1
+            if player.role == PLAYER_ROLE_HUMAN:
                 humans_alive += 1
+            if player.role == PLAYER_ROLE_INFECTED:
+                infeteds_alive += 1
+            if player.role == PLAYER_ROLE_THE_THING:
+                the_thing_is_alive = True
 
-        if humans_alive == 1:
-            ended = True
-
-        return ended
+        if not the_thing_is_alive:
+            msg = WS_STATUS_HUMANS_WIN
+        elif the_thing_is_alive and infeteds_alive ==  match.number_players -1:
+            msg = WS_STATUS_THE_THING_WIN
+        elif the_thing_is_alive and humans_alive == 0:
+            msg = WS_STATUS_INFECTEDS_WIN
+        else:
+            msg = MATCH_CONTINUES
+        return msg
     
-def declare_end(match_id):
-    status = None
-    human = 0
-    end_match(match_id)
+def end_match(match_id):
+    """
+    Set match to finalized in db, remove from live matches
+
+    Args:
+        match_id (int)
+
+    Returns:
+        None
+    """
     with db_session:
-        match = get_match_by_id(match_id)
+        match = MatchDB.get(id=match_id)
+        match.finalized = True
+        flush()
+    MATCHES.remove(get_live_match_by_id(match_id))    
+
+def set_winners(match_id, result):
+    """
+    Set the winners for the diferent results
+
+    Args:
+        match_id (int)
+    
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
         players = select(p for p in match.players)[:]
         
         for player in players:
-            if player.role == PLAYER_ROLE_HUMAN:
-                human += 1
-                status = WS_HUMANS_WIN
-                break
-        if human == 0:
-            status = WS_INFECTEDS_WIN
+            if result == WS_STATUS_HUMANS_WIN and player.role == PLAYER_ROLE_HUMAN :
+                player.winner = True
+            elif result == WS_STATUS_THE_THING_WIN and player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+            elif result == WS_STATUS_INFECTEDS_WIN and player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+            else:
+                player.winner = False
+        flush()
+
+def declare_end(match_id):
+    status = check_match_end(match_id)
+    end_match(match_id)
+    
+    if status == WS_STATUS_THE_THING_WIN or status == WS_STATUS_INFECTEDS_WIN:
+        set_winners(match_id,status)
+    else:
+        status = WS_STATUS_HUMANS_WIN
 
     return status
 

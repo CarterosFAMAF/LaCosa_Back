@@ -233,11 +233,11 @@ def get_ws_message_with_status(
         message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
     elif status == WS_STATUS_INFECTED:
         message = f"{player_name} te ha infectado"
-    elif status == WS_HUMANS_WIN :
+    elif status == WS_STATUS_HUMANS_WIN :
         message = "Ganan los humanos"
-    elif status == WS_INFECTEDS_WIN:
+    elif status == WS_STATUS_INFECTEDS_WIN:
         message = "Gana La Cosa junto a los infectados"
-    elif status == WS_THE_THING_WIN:
+    elif status == WS_STATUS_THE_THING_WIN:
         message = "Gana La cosa"
 
     # Accion
@@ -272,11 +272,12 @@ def get_ws_message_with_status(
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
     
     # Panico
-    elif status == WS_STATUS_UPS:
-        message = f"Ups! a {player_name} se le han caido sus cartas"
     elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
         message = f"{player_name} le esta susurrando a {player_target_name}"
-    
+    elif status == WS_STATUS_UPS:
+        message = f"Ups! a {player_name} se le han caido sus cartas"
+    elif status == WS_STATUS_BLIND_DATE:
+        message = f"a {player_name} le apetece tener una cita a ciegas"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message
