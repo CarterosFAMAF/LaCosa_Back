@@ -222,7 +222,7 @@ def get_ws_message_with_status(
     """
 
     message = ""
-
+    # Lobby
     if status == WS_STATUS_PLAYER_JOINED:
         message = f"{player_name} se unio a la partida"
     elif status == WS_STATUS_PLAYER_LEFT:
@@ -233,20 +233,26 @@ def get_ws_message_with_status(
         message = "La partida finalizo"
     elif status == WS_STATUS_PLAYER_WELCOME:
         message = f"Bienvenido a la partida {player_name}"
+
+    # Partida
     elif status == WS_STATUS_NEW_TURN:
         message = f"Turno nuevo de {player_name}"
+    elif status == WS_STATUS_DISCARD:
+        message = f"{player_name} ha descartado una carta"
+    elif status == WS_STATUS_EXCHANGE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
+    elif status == WS_STATUS_INFECTED:
+        message = f"{player_name} te ha infectado"
+
+    # Accion
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
     elif status == WS_STATUS_CHANGED_OF_PLACES:
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
         message = f"se han inviertido todas las posiciones"
-    elif status == WS_STATUS_DISCARD:
-        message = f"{player_name} ha descartado una carta"
-    elif status == WS_STATUS_SUSPECT:
-        message = (
-            f"{player_name} ha jugado una carta sospecha sobre {player_target_name}"
-        )
     elif status == WS_STATUS_CARD_DISCOVER:
         message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
@@ -255,26 +261,23 @@ def get_ws_message_with_status(
         message = f"{player_name} ha analizado las cartas de {player_target_name}"
     elif status == WS_STATUS_WHISKY:
         message = f"{player_name} ha mostrado todas sus cartas"
-    elif status == WS_STATUS_NOTHING_BARBECUE:
-        message = (
-            f"{player_name} se ha salvado de ser calzinado por {player_target_name}"
-        )
-    elif status == WS_STATUS_SCARY:
-        message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
-    elif status == WS_STATUS_HERE_IM_FINE:
-        message = f"{player_name} se siente seguro en donde esta"
-    elif status == WS_STATUS_NOPE_THANKS:
-        message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SEDUCCION:
         message = (
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
-    elif status == WS_STATUS_EXCHANGE:
-        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
-    elif status == WS_STATUS_EXCHANGE_REQUEST:
-        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
-    elif status == WS_STATUS_INFECTED:
-        message = f"{player_name} te ha infectado"
+
+    # Defensa
+    elif status == WS_STATUS_HERE_IM_FINE:
+        message = f"{player_name} se siente seguro en donde esta"
+    elif status == WS_STATUS_NOTHING_BARBECUE:
+        message = (
+            f"{player_name} se ha salvado de ser calzinado por {player_target_name}"
+        )
+    elif status == WS_STATUS_NOPE_THANKS:
+        message = f"{player_name} dice que no al intercambio pero igual lo agradece"
+    elif status == WS_STATUS_SCARY:
+        message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message
