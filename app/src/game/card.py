@@ -238,14 +238,19 @@ def can_defend(player_target, card):
 
     return can_defend
 
+def create_card_exchange_message(card_id):
+    card = get_card_by_id(card_id)
+    card_image = get_card_image(card.image)
 
-def effect_defense(player_main, player_target, card_main, card_target, match):
-    if card_target.card_id == NADA_DE_BARBACOA:
-        discard_card_of_player(card_main.id, match.id, player_main.id)
-        discard_card_of_player(card_target.id, match.id, player_target.id)
-        # broadcasteamos "{player_target} evito ser calzinado por {player_main}"
-
-    if card_target.card_id == AQUI_ESTOY_BIEN:
-        discard_card_of_player(card_main.id, match.id, player_main.id)
-        discard_card_of_player(card_target.id, match.id, player_target.id)
-        # broadcasteamos ""
+    card_ws = {
+        "id" : card.id ,
+        "name" : card.name,
+        "image" : card_image
+    }
+    
+    response = {
+        "status" : WS_CARD,
+        "card" : card_ws
+    }
+    
+    return response
