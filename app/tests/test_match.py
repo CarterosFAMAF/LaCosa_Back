@@ -151,7 +151,7 @@ def test_list_matches_not_empty():
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 12
+    assert len(response.json()) == 11
 
 
 def test_list_matches_not_empty_2():
@@ -170,4 +170,4 @@ def test_list_matches_not_empty_2():
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 24
+    assert len(response.json()) == 23

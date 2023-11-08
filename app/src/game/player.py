@@ -3,6 +3,9 @@ from app.src.models.base import Match as MatchDB
 from app.src.models.base import Player as PlayerDB
 from app.src.models.base import Match as MatchDB
 from app.src.models.base import Card as CardDB
+
+from app.src.game.constants import *
+
 from app.src.models.schemas import *
 from pony.orm import *
 import base64
@@ -154,3 +157,101 @@ def delete_player(player_id: int, match_id: int):
     match.players.remove(player)
     match.number_players -= 1
     flush()
+
+
+def is_player_main_turn(match, player):
+    """
+    Returns True if is the player turn
+
+    Args:
+        match (Match)
+        player (Player)
+
+    Returns:
+        bool
+    """
+
+    return match.turn == player.position
+
+
+def get_next_player(match) -> PlayerDB:
+    """
+    Find the next player by turn in the match
+
+    Args:
+        match (Match)
+
+    Returns:
+        player (PlayerDB)
+    """
+
+    player = None
+
+    turn = match.turn
+
+    with db_session:
+        while True:
+            if match.clockwise:
+                turn = (turn + 1) % match.number_players
+            else:
+                turn = (turn - 1) % match.number_players
+
+            player = select(p for p in match.players if p.position == turn).first()
+            # if it is not dead, break the loop, else, continue
+            if player.role != PLAYER_ROLE_DEAD:
+                break
+    return player
+
+
+def prepare_exchange_card(player_main_id, card_id):
+    """
+    Discard card of main player and add it to the target player hand
+
+    Args:
+        player_main (Player)
+        player_target (Player)
+        card_main (Card)
+
+    Returns:
+        None
+    """
+    with db_session:
+        player_main = PlayerDB.get(id=player_main_id)
+        card = CardDB.get(id=card_id)
+        
+        player_main.card_exchange = card
+        player_main.hand.remove(card)
+
+        flush()
+
+def apply_exchange(player_main_id,player_target_id):
+  
+    with db_session:
+        player_main = get_player_by_id(player_main_id)
+        player_target = get_player_by_id(player_target_id)
+        card_main_id = player_main.card_exchange.id
+        card_target_id = player_target.card_exchange.id
+        player_main.hand.add(player_target.card_exchange)
+        player_target.hand.add(player_main.card_exchange)
+        player_main.card_exchange = None
+        player_target.card_exchange = None
+        flush()
+    
+    return card_main_id,card_target_id
+
+def apply_effect_infeccion(player_target_id):
+    """
+    Change player role to infected
+
+    Args:
+        player_target_id (int)
+
+    Return:
+        None
+    """
+    with db_session:
+        player_target = get_player_by_id(player_target_id)
+        if player_target.role != PLAYER_ROLE_THE_THING:
+            player_target = get_player_by_id(player_target_id)
+            player_target.role = PLAYER_ROLE_INFECTED
+            flush()

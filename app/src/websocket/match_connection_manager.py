@@ -3,6 +3,7 @@ import json
 from fastapi import WebSocket
 from pony.orm import *
 
+from app.src.game.card import get_card_by_id,get_card_image
 from app.src.models.base import Match as MatchDB
 from app.src.websocket.constants import *
 
@@ -98,6 +99,23 @@ class MatchConnectionManager:
                     self.active_connections.remove(conn)
 
 
+def create_card_exchange_message(card_id):
+    card = get_card_by_id(card_id)
+    card_image = get_card_image(card.image)
+
+    card_ws = {
+        "id" : card.id ,
+        "name" : card.name,
+        "image" : card_image
+    }
+    
+    response = {
+        "status" : WS_CARD,
+        "card" : card_ws
+    }
+    
+    return response
+
 def create_ws_message(
     match_id: int,
     status: int,
@@ -148,7 +166,9 @@ def create_ws_message(
             )
         # sort players by turn
         players.sort(key=lambda x: x["turn"])
-        msg = get_ws_message_with_status(status, player_name, player_target_name,card_name)
+        msg = get_ws_message_with_status(
+            status, player_name, player_target_name, card_name
+        )
 
         match_ws = {
             "player_id": player_id,
@@ -217,6 +237,17 @@ def get_ws_message_with_status(
         message = f"{player_name} ha analizado las cartas de {player_target_name}"
     elif status == WS_STATUS_WHISKY:
         message = f"{player_name} ha mostrado todas sus cartas"
+    elif status == WS_STATUS_SEDUCCION:
+        message = (
+            f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
+        )
+
+    elif status == WS_STATUS_EXCHANGE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
+    elif status == WS_STATUS_INFECTED:
+        message = f"{player_name} te ha infectado"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

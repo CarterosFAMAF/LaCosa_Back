@@ -6,6 +6,7 @@ from pony.orm import *
 from app.src.game.player import *
 from app.src.game.match import *
 from app.src.game.constants import *
+from app.src.websocket.constants import *
 
 
 class Card:
@@ -31,12 +32,14 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
 
     if card.card_id == LANZALLAMAS:
         status = play_lanzallamas(player_out.id, match_id)
-    if card.card_id == MAS_VALE_QUE_CORRAS:
+    elif card.card_id == MAS_VALE_QUE_CORRAS:
         status = play_mas_vale_que_corras(player_in.id, player_out.id, match_id)
-    if card.card_id == VIGILA_TUS_ESPALDAS:
+    elif card.card_id == VIGILA_TUS_ESPALDAS:
         status = play_vigila_tus_espaldas(match_id)
-    if card.card_id == CAMBIO_DE_LUGAR:
+    elif card.card_id == CAMBIO_DE_LUGAR:
         status = play_cambio_de_lugar(player_in.id, player_out.id, match_id)
+    elif card.card_id == SEDUCCION:
+        status = play_seduccion()
     else:
         pass
 
@@ -121,6 +124,11 @@ def play_vigila_tus_espaldas(match_id):
         match.clockwise = not match.clockwise
         flush()
     status = WS_STATUS_REVERSE_POSITION
+    return status
+
+
+def play_seduccion():
+    status = WS_STATUS_SEDUCCION
     return status
 
 
@@ -209,6 +217,10 @@ def create_status_investigation(card):
 
 def need_broadcast_message(match, player_main, player_target, list_card, card):
     return card.card_id == WHISKY
+
+
+def is_card_infected(card):
+    return card.card_id == INFECCION
 
 
 def can_defend(player_target, card):

@@ -84,7 +84,7 @@ async def join_match_endpoint(input: JoinMatchIn):
     response_model=List[CardModel],
     status_code=status.HTTP_200_OK,
 )
-async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
+async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id):
     # convert all the fields to int
     match_id = int(match_id)
     player_in_id = int(player_in_id)
@@ -92,42 +92,9 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     card_id = int(card_id)
 
     # check if match exists and if it is not finalized
-    match = get_match_by_id(match_id)
-    if match == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Match not found",
-        )
-    elif match.started == False:
-        raise HTTPException(
-            status_code=status.HTTP_412_PRECONDITION_FAILED,
-            detail="Match has not started",
-        )
-
-    # check if player in exists
-    player_in = get_player_by_id(player_in_id)
-    if player_in == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Player not found",
-        )
-
-    # check if player out exists
-    player_out = None
-    if player_out_id != 0:
-        player_out = get_player_by_id(player_out_id)
-        if player_out == None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Player not found",
-            )
-
-    card = get_card_by_id(card_id)
-    if card == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Card not found",
-        )
+    match, player_in, player_out, card, card_target = validate_match_players_and_cards(
+        match_id, player_in_id, player_out_id, card_id, 0
+    )
 
     live_match = get_live_match_by_id(match.id)
     list_card = []
@@ -153,11 +120,6 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_in_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    # NEXT TURN MSG
-    next_turn(match.id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player_in_id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
-
     # FINALIZE MATCH MSG
     match_status = check_match_end(match_id)
     if  match_status != MATCH_CONTINUES:
@@ -169,47 +131,20 @@ async def play_card_endpoint(match_id, player_in_id, player_out_id, card_id):
     return list_card
 
 
+
 @router.put(
     "/matches/{match_id}/players/{player_id}/{card_id}/discard",
 )
 async def discard(match_id, player_id, card_id):
-    match = get_match_by_id(match_id)
-    if match == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Match not found",
-        )
-    elif match.started == False:
-        raise HTTPException(
-            status_code=status.HTTP_412_PRECONDITION_FAILED,
-            detail="Match has not started",
-        )
-
-    # check if player in exists
-    player = get_player_by_id(player_id)
-    if player == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Player not found",
-        )
-
-    card = get_card_by_id(card_id)
-    if card == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Card not found",
-        )
+    match, player, player_target, card, card_target = validate_match_players_and_cards(
+        match_id, player_id, 0, card_id, 0
+    )
 
     live_match = get_live_match_by_id(match.id)
-    print(live_match)
 
     discard_card_of_player(card_id, match_id, player_id)
     msg_ws = create_ws_message(match.id, WS_STATUS_DISCARD, player.id)
     await live_match._match_connection_manager.broadcast_json(msg_ws)
-
-    next_turn(match_id)
-    ws_msg = create_ws_message(match_id, WS_STATUS_NEW_TURN, player.id)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return {"message": "Card discard"}
 
@@ -220,24 +155,10 @@ async def discard(match_id, player_id, card_id):
     status_code=status.HTTP_200_OK,
 )
 async def get_card_endpoint(match_id: int, player_id: int):
-    with db_session:
-        match = MatchDB.get(id=match_id)
-        player = PlayerDB.get(id=player_id)
-        if match == None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Match not found",
-            )
-        elif player == None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Player not found",
-            )
-        elif not match.started:
-            raise HTTPException(
-                status_code=status.HTTP_412_PRECONDITION_FAILED,
-                detail="Match has not started",
-            )
+    match, player, player_target, card, card_target = validate_match_players_and_cards(
+        match_id, player_id, 0, 0, 0
+    )
+
     card = get_card(match_id, player_id)
     return CardModel(id=card["id"], name=card["name"], image=card["image"])
 
@@ -246,24 +167,9 @@ async def get_card_endpoint(match_id: int, player_id: int):
     "/matches/{match_id}/players/{player_id}/get_hand", status_code=status.HTTP_200_OK
 )
 async def get_hand(match_id: int, player_id: int):
-    with db_session:
-        match = MatchDB.get(id=match_id)
-        player = PlayerDB.get(id=player_id)
-        if match == None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Match not found",
-            )
-        elif player == None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Player not found",
-            )
-        elif not match.started:
-            raise HTTPException(
-                status_code=status.HTTP_412_PRECONDITION_FAILED,
-                detail="Match has not started",
-            )
+    match, player, player_target, card, card_target = validate_match_players_and_cards(
+        match_id, player_id, 0, 0, 0
+    )
     hand = get_player_hand(match_id, player_id)
     return hand
 
@@ -312,6 +218,57 @@ async def start_match(input: StartMatchIn):
 
     msg = {"message": "The match has been started"}
     return msg
+
+
+@router.put("/matches/{match_id}/players/{player_id}/exchange_cards")
+async def exchange_endpoint(input: ExchangeCardIn):
+    # validate match players and cards
+    match, player, player_target, card, card_target = validate_match_players_and_cards(
+        input.match_id, input.player_id, input.player_target_id, input.card_id, 0
+    )
+
+    match_live = get_live_match_by_id(match.id)
+    if is_player_main_turn(match, player):
+        
+        if input.player_target_id == 0:
+            player_target = get_next_player(match)
+
+        prepare_exchange_card(player.id, card.id)
+
+        ws_msg = create_ws_message(
+            match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
+        )
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+    else:
+
+        prepare_exchange_card(player.id, card.id)
+        card_main_id,card_target_id = apply_exchange(player.id,player_target.id)
+
+        card_msg = create_card_exchange_message(card_main_id)
+        await match_live._match_connection_manager.send_personal_json(card_msg,player_target.id)
+        card_msg = create_card_exchange_message(card_target_id)
+        await match_live._match_connection_manager.send_personal_json(card_msg,player.id)
+
+        ws_msg = create_ws_message(
+            match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
+        )
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+        if is_card_infected(card):
+            apply_effect_infeccion(player_target.id)
+            ws_msg = create_ws_message(
+                match.id,
+                WS_STATUS_INFECTED,
+                player_target.id,
+            )
+            await match_live._match_connection_manager.send_personal_json(
+                ws_msg, player.id
+            )
+
+        next_turn(match.id)
+        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
