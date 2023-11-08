@@ -270,7 +270,7 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     if card.card_id == NADA_DE_BARBACOAS:
         status = WS_STATUS_NOTHING_BARBECUE
     elif card.card_id == AQUI_ESTOY_BIEN:
-        status = play_aqui_estoy_bien()
+        status = WS_STATUS_HERE_IM_FINE
     elif card.card_id == NO_GRACIAS:
         status = play_no_gracias(player_target_id)
     elif card.card_id == ATERRADOR:
@@ -311,20 +311,6 @@ def play_no_gracias(player_main_id):
         
     return status
 
-def play_aqui_estoy_bien():
-    """
-    Change the position of two players, and change the turn of the match
-
-    Args:
-        player_main_id (int)
-        player_target_id (int)
-
-    Returns:
-        message of players that change position
-    """
-
-    status = WS_STATUS_HERE_IM_FINE
-    return status
 
 def create_card_exchange_message(card_id):
     card = get_card_by_id(card_id)

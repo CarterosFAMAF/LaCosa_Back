@@ -207,7 +207,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
             await live_match._match_connection_manager.broadcast_json(ws_msg)
             
-            create_card_exchange_message(player_target.card_exchange)
+            create_card_exchange_message(player_target.card_exchange.id)
             await live_match._match_connection_manager.send_personal_json(ws_msg,player_target.id)
         
         # DEFENSE MSG
