@@ -270,11 +270,11 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     if card.card_id == NADA_DE_BARBACOAS:
         status = WS_STATUS_NOTHING_BARBECUE
     elif card.card_id == AQUI_ESTOY_BIEN:
-        status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
+        status = play_aqui_estoy_bien()
     elif card.card_id == NO_GRACIAS:
-        status = play_no_gracias(player_main_id)
+        status = play_no_gracias(player_target_id)
     elif card.card_id == ATERRADOR:
-        status,list_card = play_aterrador(player_main_id,player_target_id,match_id)
+        status,list_card = play_aterrador(player_target_id)
     else:
         raise Exception("Defense card not found")
 
@@ -311,7 +311,7 @@ def play_no_gracias(player_main_id):
         
     return status
 
-def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
+def play_aqui_estoy_bien():
     """
     Change the position of two players, and change the turn of the match
 
@@ -322,15 +322,6 @@ def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
     Returns:
         message of players that change position
     """
-    with db_session:
-        player_main = get_player_by_id(player_main_id)
-        player_target = get_player_by_id(player_target_id)
-        pos_tmp = player_main.position
-        player_main.position = player_target.position
-        player_target.position = pos_tmp
-        match = get_match_by_id(match_id)
-        match.turn = player_main.position
-        flush()
 
     status = WS_STATUS_HERE_IM_FINE
     return status
