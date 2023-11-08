@@ -99,7 +99,6 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     live_match = get_live_match_by_id(match.id)
     list_card = []
     can_defend_bool, list_card = can_defend(player_out.id, card.card_id)
-    print ("VOLVIIIIIIIIIIIIIIIIIIIIIIIIIII DE CAN DEFENDDD")
     if (can_defend_bool):  # si el target tiene nada de barbacoas
         # deberia mandarle el id de la carta del jugador main.
         await send_message_private_defense(
@@ -151,6 +150,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     # check if card exists
     player_main = get_player_by_id(input.player_main_id)
     player_target = get_player_by_id(input.player_target_id)
+    match = get_match_by_id(input.match_id)
     
     if input.card_main_id != 0:
         card_main = get_card_by_id(input.card_main_id)
@@ -209,7 +209,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 
     # NEXT TURN MSG
     next_turn(input.match_id)
-    ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, input.player_id)
+    player_turn = get_next_player(match)
+    ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return list_card
