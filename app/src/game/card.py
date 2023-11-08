@@ -215,7 +215,8 @@ def can_defend(player_target_id, card_action):
     """
     player_target = get_player_by_id(player_target_id)
     can_defend = False
-    cards = select(c for c in player_target.hand if c.id != card.id)[:]
+    with db_session:
+        cards = select(c for c in player_target.hand if c.id != card_action.id)[:]
     list_id_cards = []
     if card_action != 0:
         if card_action.card_id == LANZALLAMAS:
@@ -223,12 +224,13 @@ def can_defend(player_target_id, card_action):
                 if card.card_id == NADA_DE_BARBACOAS:
                     can_defend = True     
                     list_id_cards.add(card.id)
-        if card.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
+        if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
             for card in cards:
                 if card.card_id == AQUI_ESTOY_BIEN:
                     can_defend = True
                     list_id_cards.add(card.id)
     else:
+        #casos para intercambio, no tenemos id de card_action
         for card in cards:
             if card.card_id == ATERRADOR:
                 can_defend = True
@@ -323,3 +325,13 @@ def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
 
     status = WS_STATUS_HERE_IM_FINE
     return status
+
+def create_card_exchange_message(card_id):
+    card = get_card_by_id(card_id)
+    card_image = get_card_image(card.image)
+
+    card_ws = {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
+
+    response = {"status": WS_CARD, "card": card_ws}
+
+    return response

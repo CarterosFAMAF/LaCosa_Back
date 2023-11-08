@@ -100,7 +100,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     list_card = []
     can_defend_bool, list_card = can_defend(player_out_id, card)
 
-    if can_defend_bool:  # si el target tiene nada de barbacoas
+    if (can_defend_bool):  # si el target tiene nada de barbacoas
         # deberia mandarle el id de la carta del jugador main.
         await send_message_private_defense(
             match_id=match.id,

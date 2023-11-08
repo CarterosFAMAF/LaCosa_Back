@@ -187,6 +187,6 @@ def validate_match_players_and_cards(
 
 
 async def discard_message(match_id, player_id):
-    live_match = get_live_match_by_id
+    live_match = get_live_match_by_id(match_id)
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
