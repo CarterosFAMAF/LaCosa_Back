@@ -272,7 +272,7 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     elif card.card_id == AQUI_ESTOY_BIEN:
         status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
     elif card.card_id == NO_GRACIAS:
-        status = play_no_gracias(player_main_id,player_target_id)
+        status = play_no_gracias(player_main_id)
     elif card.card_id == ATERRADOR:
         status,list_card = play_aterrador(player_main_id,player_target_id,match_id)
     else:
