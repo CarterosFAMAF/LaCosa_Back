@@ -419,7 +419,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
             is_card_infected(card)
             and player.role == PLAYER_ROLE_HUMAN
             and player_target.role == PLAYER_ROLE_THE_THING
-            and player_next_turn.position == player_target.position
+            and player_next_turn.position == player.position
         ):
             apply_effect_infeccion(player.id)
             ws_msg = create_ws_message(
