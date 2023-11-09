@@ -420,9 +420,9 @@ async def exchange_endpoint(input: ExchangeCardIn):
                 await match_live._match_connection_manager.send_personal_json(
                     ws_msg, player.id
                 )
-
             if (player.role == PLAYER_ROLE_THE_THING
             and player_target.role == PLAYER_ROLE_HUMAN):
+                apply_effect_infeccion(player_target.id)
                 ws_msg = create_ws_message(match.id,WS_STATUS_INFECTED,player.id,)
 
                 await match_live._match_connection_manager.send_personal_json(
