@@ -272,7 +272,7 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     elif card.card_id == AQUI_ESTOY_BIEN:
         status = WS_STATUS_HERE_IM_FINE
     elif card.card_id == NO_GRACIAS:
-        status = play_no_gracias(player_target_id)
+        status,list_card = play_no_gracias(player_target_id)
     elif card.card_id == ATERRADOR:
         status,list_card = play_aterrador(player_target_id)
     else:
@@ -301,15 +301,23 @@ def play_aterrador(player_main_id):
     return status,list_card
 
 def play_no_gracias(player_main_id):
+    card_return = []
     status = WS_STATUS_NOPE_THANKS
     with db_session:
         player_main = get_player_by_id(player_main_id)
-
         player_main.hand.add(player_main.card_exchange)
+        card_image = get_card_image(player_main.card_exchange.card.image)
+        card_return.append(
+                    {"id": player_main.card_exchange.card.id, 
+                     "name": player_main.card_exchange.card.name, 
+                     "image": card_image,
+                     "type" : player_main.card_exchange.card.type
+                     }
+                )
         player_main.card_exchange = None
         flush()
         
-    return status
+    return status,card_return
 
 
 def create_card_exchange_message(card_id):

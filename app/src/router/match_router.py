@@ -99,7 +99,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     live_match = get_live_match_by_id(match.id)
     list_card = []
     can_defend_bool, list_card = can_defend(player_out.id, card.card_id)
-    if (can_defend_bool):  # si el target tiene nada de barbacoas
+    if can_defend_bool:  # si el target tiene nada de barbacoas
         # deberia mandarle el id de la carta del jugador main.
         await send_message_private_defense(
             match_id=match.id,
@@ -151,7 +151,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     player_main = get_player_by_id(input.player_main_id)
     player_target = get_player_by_id(input.player_target_id)
     match = get_match_by_id(input.match_id)
-    
+
     if input.card_main_id != 0:
         card_main = get_card_by_id(input.card_main_id)
         if card_main == None:
@@ -188,7 +188,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             card_name=card_target.name,
             list_cards=[],
         )
-        
+
         # NEXT TURN MSG
         next_turn(input.match_id)
         player_turn = get_next_player(match)
@@ -197,19 +197,28 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 
     else:
         status, list_card = play_card_defense(
-            input.player_main_id, input.player_target_id, input.card_main_id ,input.match_id
+            input.player_main_id,
+            input.player_target_id,
+            input.card_main_id,
+            input.match_id,
         )
         await discard_message(input.match_id, input.player_main_id)
 
         if card_main.card_id == NO_GRACIAS or card_main.card_id == ATERRADOR:
+            
             next_turn(input.match_id)
             player_turn = get_next_player(match)
-            ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
+            ws_msg = create_ws_message(
+                input.match_id, WS_STATUS_NEW_TURN, player_turn.id
+            )
             await live_match._match_connection_manager.broadcast_json(ws_msg)
+
             with db_session:
-                create_card_exchange_message(player_target.card_exchange.id)
-                await live_match._match_connection_manager.send_personal_json(ws_msg,player_target.id)
-        
+                create_card_exchange_message(list_card[0].id)
+                await live_match._match_connection_manager.send_personal_json(
+                    ws_msg, player_target.id
+                )
+
         # DEFENSE MSG
         await send_message_play_defense(
             match_id=input.match_id,
