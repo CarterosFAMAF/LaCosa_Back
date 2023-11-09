@@ -144,6 +144,12 @@ def load_cards():
                 type=TYPE_DEFENSE,
             )
             Card(
+                card_id=FALLASTE,
+                name="Fallaste",
+                image="app/cards/Fallaste.png",
+                type=TYPE_DEFENSE,
+            )
+            Card(
                 card_id=ATERRADOR,
                 name="Aterrador",
                 image="app/cards/Aterrador.png",
