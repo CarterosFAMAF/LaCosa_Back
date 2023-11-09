@@ -216,6 +216,8 @@ def can_defend(player_target_id, card_action):
     player_target = get_player_by_id(player_target_id)
     can_defend = False
     list_id_cards = []
+    if player_target_id == 0:
+        return can_defend , list_id_cards
     
     with db_session:
             cards = select(c for c in player_target.hand)[:]
@@ -306,12 +308,12 @@ def play_no_gracias(player_main_id):
     with db_session:
         player_main = get_player_by_id(player_main_id)
         player_main.hand.add(player_main.card_exchange)
-        card_image = get_card_image(player_main.card_exchange.card.image)
+        card_image = get_card_image(player_main.card_exchange.image)
         card_return.append(
-                    {"id": player_main.card_exchange.card.id, 
-                     "name": player_main.card_exchange.card.name, 
+                    {"id": player_main.card_exchange.id, 
+                     "name": player_main.card_exchange.name, 
                      "image": card_image,
-                     "type" : player_main.card_exchange.card.type
+                     "type" : player_main.card_exchange.type
                      }
                 )
         player_main.card_exchange = None

@@ -91,7 +91,7 @@ def load_cards():
             )
             Card(
                 card_id = VIGILA_TUS_ESPALDAS,
-                name="Vigila_Tus_Espaldas",
+                name="Vigila_tus_espaldas",
                 image="app/cards/Vigila_tus_espaldas.png",
                 type = TYPE_ACTION
             )
