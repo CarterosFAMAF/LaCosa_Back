@@ -208,6 +208,20 @@ def get_next_player(match) -> PlayerDB:
                 break
     return player
 
+def get_next_player_by_player_turn(match_id, player_id):
+    """
+    Returns the next player from a specific player
+
+    Args:
+        match_id (int)
+        player_id (int)
+    
+    Returns:
+        player (PlayerDB)
+    """
+    player = None
+
+    
 
 def prepare_exchange_card(player_main_id, card_id):
     """

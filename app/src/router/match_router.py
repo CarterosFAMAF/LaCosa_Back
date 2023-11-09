@@ -196,6 +196,11 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
         ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
+    elif card_main.card_id == FALLASTE:
+        # broadcastear que el jugador se defendio con una fallaste
+        new_exchange_player = get_next_player(match)
+        ws_msg = create_ws_message_fallaste(player_main_id=input.player_target_id, player_fallaste_id=input.player_main_id, player_target_id=0)
+
     else:
         status, list_card = play_card_defense(
             input.player_main_id,
@@ -219,6 +224,10 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
                 input.match_id, WS_STATUS_NEW_TURN, player_turn.id
             )
             await live_match._match_connection_manager.broadcast_json(ws_msg)
+
+        
+
+
 
         # DEFENSE MSG
         await send_message_play_defense(
