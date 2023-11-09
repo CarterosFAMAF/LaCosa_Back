@@ -39,7 +39,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     elif card.card_id == CAMBIO_DE_LUGAR:
         status = play_cambio_de_lugar(player_in.id, player_out.id, match_id)
     elif card.card_id == SEDUCCION:
-        status = play_seduccion()
+        status = WS_STATUS_SEDUCCION
     else:
         pass
 
@@ -126,12 +126,6 @@ def play_vigila_tus_espaldas(match_id):
         flush()
     status = WS_STATUS_REVERSE_POSITION
     return status
-
-
-def play_seduccion():
-    status = WS_STATUS_SEDUCCION
-    return status
-
 
 def play_card_investigation(player_main, player_target, card):
     """

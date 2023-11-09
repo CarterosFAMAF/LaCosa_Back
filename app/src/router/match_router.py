@@ -415,7 +415,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
             await match_live._match_connection_manager.send_personal_json(
                 ws_msg, player.id
             )
-
+            
         next_turn(match.id)
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
