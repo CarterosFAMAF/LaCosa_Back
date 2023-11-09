@@ -204,6 +204,11 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             input.card_main_id,
             input.match_id,
         )
+
+
+        # DISCARD'S
+        discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
+        await discard_message(input.match_id, input.player_target_id)
         await discard_message(input.match_id, input.player_main_id)
 
         if card_main.card_id == NO_GRACIAS or card_main.card_id == ATERRADOR:
@@ -229,9 +234,6 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             player_out_id=input.player_target_id,
             card_name=card_main.name,
         )
-
-    # DISCARD MAIN MSG
-    await discard_message(input.match_id, input.player_target_id)
 
     return list_card
 
