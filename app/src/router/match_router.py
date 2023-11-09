@@ -198,8 +198,9 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 
     elif card_main.card_id == FALLASTE:
         # broadcastear que el jugador se defendio con una fallaste
-        new_exchange_player = get_next_player(match)
-        ws_msg = create_ws_message_fallaste(player_main_id=input.player_target_id, player_fallaste_id=input.player_main_id, player_target_id=0)
+        new_exchange_player = get_next_player_by_player_turn(input.match_id,input.player_target_id)
+        ws_msg = create_ws_message_fallaste(player_main_id=input.player_target_id, player_fallaste_id=input.player_main_id, player_target_id=new_exchange_player)
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     else:
         status, list_card = play_card_defense(
@@ -327,6 +328,9 @@ async def start_match(input: StartMatchIn):
     match = get_live_match_by_id(match.id)
     await match._match_connection_manager.broadcast_json(ws_msg)
 
+    ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+    await match._match_connection_manager.broadcast_json(ws_msg)
+    
     msg = {"message": "The match has been started"}
     return msg
 
@@ -409,11 +413,13 @@ async def exchange_endpoint(input: ExchangeCardIn):
             match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
+        player_next_turn = get_next_player(match)
 
         if (
             is_card_infected(card)
             and player.role == PLAYER_ROLE_HUMAN
             and player_target.role == PLAYER_ROLE_THE_THING
+            and player_next_turn.position == player_target.position
         ):
             apply_effect_infeccion(player.id)
             ws_msg = create_ws_message(
