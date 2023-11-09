@@ -205,11 +205,14 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             input.match_id,
         )
 
-
-        # DISCARD'S
-        discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
-        await discard_message(input.match_id, input.player_target_id)
-        await discard_message(input.match_id, input.player_main_id)
+         # DEFENSE MSG
+        await send_message_play_defense(
+            match_id=input.match_id,
+            status=status,
+            player_in_id=input.player_main_id,
+            player_out_id=input.player_target_id,
+            card_name=card_main.name,
+        )
 
         if card_main.card_id == NO_GRACIAS or card_main.card_id == ATERRADOR:
             ws_msg = create_card_exchange_message(list_card[0]["id"])
@@ -225,15 +228,12 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
                 input.match_id, WS_STATUS_NEW_TURN, player_turn.id
             )
             await live_match._match_connection_manager.broadcast_json(ws_msg)
-            
-        # DEFENSE MSG
-        await send_message_play_defense(
-            match_id=input.match_id,
-            status=status,
-            player_in_id=input.player_main_id,
-            player_out_id=input.player_target_id,
-            card_name=card_main.name,
-        )
+        else:
+            # DISCARD's
+            discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
+            await discard_message(input.match_id, input.player_target_id)
+            await discard_message(input.match_id, input.player_main_id)
+       
 
     return list_card
 
@@ -368,6 +368,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
     )
 
     match_live = get_live_match_by_id(match.id)
+
     if is_player_main_turn(match, player):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
@@ -414,7 +415,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
             is_card_infected(card)
             and player.role == PLAYER_ROLE_HUMAN
             and player_target.role == PLAYER_ROLE_THE_THING
-            and player_next_turn.position == player.position
+            and player_next_turn.position == player.position ## no se puede infectar con seduccion
         ):
             apply_effect_infeccion(player.id)
             ws_msg = create_ws_message(
