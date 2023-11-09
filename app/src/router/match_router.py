@@ -228,6 +228,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
                 input.match_id, WS_STATUS_NEW_TURN, player_turn.id
             )
             await live_match._match_connection_manager.broadcast_json(ws_msg)
+            
         else:
             # DISCARD's
             discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
@@ -410,22 +411,25 @@ async def exchange_endpoint(input: ExchangeCardIn):
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
         player_next_turn = get_next_player(match)
+        # me parece que no sirve esto, en el caso en que 
+        if (is_card_infected(card) and (not input.is_you_failed)): 
+            if (player.role == PLAYER_ROLE_HUMAN
+            and player_target.role == PLAYER_ROLE_THE_THING):
+                apply_effect_infeccion(player.id)
+                ws_msg = create_ws_message( match.id, WS_STATUS_INFECTED,player_target.id)
+                await match_live._match_connection_manager.send_personal_json(
+                    ws_msg, player.id
+                )
 
-        if (
-            is_card_infected(card)
-            and player.role == PLAYER_ROLE_HUMAN
-            and player_target.role == PLAYER_ROLE_THE_THING
-            and player_next_turn.position == player.position ## no se puede infectar con seduccion
-        ):
-            apply_effect_infeccion(player.id)
-            ws_msg = create_ws_message(
-                match.id,
-                WS_STATUS_INFECTED,
-                player_target.id,
-            )
-            await match_live._match_connection_manager.send_personal_json(
-                ws_msg, player.id
-            )
+            if (player.role == PLAYER_ROLE_THE_THING
+            and player_target.role == PLAYER_ROLE_HUMAN):
+                ws_msg = create_ws_message(match.id,WS_STATUS_INFECTED,player.id,)
+
+                await match_live._match_connection_manager.send_personal_json(
+                    ws_msg, player_target.id
+                )
+            
+                
             
         next_turn(match.id)
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
