@@ -5,6 +5,13 @@ import random
 db = Database()
 
 
+class Message(db.Entity):
+    id = PrimaryKey(int, auto=True)
+    message = Required(str)
+    match = Optional("Match", reverse="messages")
+    player = Optional("Player", reverse="messages")
+
+
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
@@ -19,6 +26,7 @@ class Match(db.Entity):
     player_owner = Required("Player", reverse="match_owner")
     deck = Set("Card", reverse="deck")
     discard_pile = Set("Card", reverse="discard_deck")
+    messages = Set("Message", reverse="match")
 
 
 class Player(db.Entity):
@@ -29,7 +37,9 @@ class Player(db.Entity):
     hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
-    card_exchange = Optional("Card",reverse = "player_card_exchange")
+    card_exchange = Optional("Card", reverse="player_card_exchange")
+    messages = Set("Message", reverse="player")
+
 
 class Card(db.Entity):
     """
@@ -44,7 +54,8 @@ class Card(db.Entity):
     player_hand = Set(Player)
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
-    player_card_exchange = Optional(Player,reverse = "card_exchange")
+    player_card_exchange = Optional(Player, reverse="card_exchange")
+
 
 def define_database_and_entities(test: bool):
     global db
@@ -69,61 +80,61 @@ def load_cards():
     try:
         exists_card = db.exists("select * from Card where name='lanzallamas'")
         if not exists_card:
-            #LA COSA
+            # LA COSA
             Card(
                 card_id=LA_COSA,
                 name="La_Cosa",
                 image="app/cards/La_Cosa.png",
-                type = TYPE_LA_COSA
+                type=TYPE_LA_COSA,
             )
             # CARTAS ACCION
             Card(
                 card_id=LANZALLAMAS,
                 name="lanzallamas",
                 image="app/cards/Lanzallamas.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=MAS_VALE_QUE_CORRAS,
                 name="Mas_Vale_Que_Corras",
                 image="app/cards/Mas_vale_que_corras.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=SOSPECHA,
                 name="Sospecha",
                 image="app/cards/Sospecha.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=VIGILA_TUS_ESPALDAS,
-                name="Vigila_Tus_Espaldas",
+                name="Vigila_tus_espaldas",
                 image="app/cards/Vigila_tus_espaldas.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=WHISKY,
                 name="Whisky",
                 image="app/cards/Whisky.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=ANALISIS,
                 name="Analisis",
                 image="app/cards/Analisis.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=CAMBIO_DE_LUGAR,
                 name="Cambio_de_lugar",
                 image="app/cards/Cambio_de_lugar.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=SEDUCCION,
                 name="Seduccion",
                 image="app/cards/Seduccion.png",
-                type = TYPE_ACTION
+                type=TYPE_ACTION,
             )
             Card(
                 card_id=DETERMINACION,
@@ -133,28 +144,28 @@ def load_cards():
             )
             #CARTAS DEFENSA
             Card(
-                card_id = AQUI_ESTOY_BIEN,
+                card_id=AQUI_ESTOY_BIEN,
                 name="Aqui_Estoy_Bien",
                 image="app/cards/Aqui_estoy_bien.png",
-                type = TYPE_DEFENSE
+                type=TYPE_DEFENSE,
             )
             Card(
-                card_id = ATERRADOR,
+                card_id=ATERRADOR,
                 name="Aterrador",
                 image="app/cards/Aterrador.png",
-                type = TYPE_DEFENSE
+                type=TYPE_DEFENSE,
             )
             Card(
-                card_id = NO_GRACIAS,
+                card_id=NO_GRACIAS,
                 name="No_gracias",
                 image="app/cards/No_gracias.png",
-                type = TYPE_DEFENSE
+                type=TYPE_DEFENSE,
             )
             Card(
-                card_id = NADA_DE_BARBACOAS,
+                card_id=NADA_DE_BARBACOAS,
                 name="Nada_de_barbacoas",
                 image="app/cards/Nada_de_barbacoas.png",
-                type = TYPE_DEFENSE
+                type=TYPE_DEFENSE,
             )
             Card(
                 card_id=UPS,
@@ -177,8 +188,8 @@ def load_cards():
             Card(
                 card_id=INFECCION,
                 name="Infeccion",
-                image= random.choice(image_infected),
-                type = TYPE_INFECTED
+                image=random.choice(image_infected),
+                type=TYPE_INFECTED,
             )
             flush()
     except:

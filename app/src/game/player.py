@@ -208,6 +208,33 @@ def get_next_player(match) -> PlayerDB:
                 break
     return player
 
+def get_next_player_by_player_turn(match_id, player_id):
+    """
+    Returns the next player from a specific player
+
+    Args:
+        match_id (int)
+        player_id (int)
+    
+    Returns:
+        player (PlayerDB)
+    """
+    player_out_turn = None
+    #deberia fijarme el jugador que le sigue a player
+    player = get_player_by_id(player_id)
+    turn = player.role
+    while True:
+        with db_session:
+            match = MatchDB.get(id=match_id)
+            if match.clockwise:
+                turn = (turn + 1) % match.number_players
+            else:
+                turn = (turn - 1) % match.number_players
+            player_out_turn = select(p for p in match.players if p.position == turn).first()
+            # if it is not dead, break the loop, else, continue
+            if player.role != PLAYER_ROLE_DEAD:
+                break
+    return player_out_turn
 
 def prepare_exchange_card(player_main_id, card_id):
     """
