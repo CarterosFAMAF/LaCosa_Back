@@ -225,11 +225,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
                 input.match_id, WS_STATUS_NEW_TURN, player_turn.id
             )
             await live_match._match_connection_manager.broadcast_json(ws_msg)
-
-        
-
-
-
+            
         # DEFENSE MSG
         await send_message_play_defense(
             match_id=input.match_id,
