@@ -321,7 +321,7 @@ async def start_match(input: StartMatchIn):
     match_live = get_live_match_by_id(input.match_id)
 
     match = get_match_by_id(input.match_id)
-    player_turn = get_next_player(match)
+    player_turn = get_player_in_turn(input.match_id)
 
     ws_msg = create_ws_message(input.match_id, WS_STATUS_MATCH_STARTED)
     await match_live._match_connection_manager.broadcast_json(ws_msg)
