@@ -318,14 +318,16 @@ async def start_match(input: StartMatchIn):
             )
 
     start_game(input.match_id)
-    match = get_live_match_by_id(input.match_id)
-    
-    ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED)
-    await match._match_connection_manager.broadcast_json(ws_msg)
+    match_live = get_live_match_by_id(input.match_id)
 
+    match = get_match_by_id(input.match_id)
     player_turn = get_next_player(match)
+
+    ws_msg = create_ws_message(input.match_id, WS_STATUS_MATCH_STARTED)
+    await match_live._match_connection_manager.broadcast_json(ws_msg)
+
     ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
-    await match._match_connection_manager.broadcast_json(ws_msg)
+    await match_live._match_connection_manager.broadcast_json(ws_msg)
     
     msg = {"message": "The match has been started"}
     return msg
