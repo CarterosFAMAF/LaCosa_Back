@@ -293,6 +293,7 @@ async def list_matches():
 
 @router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
 async def start_match(input: StartMatchIn):
+    match = get_live_match_by_id(input.match_id)
     with db_session:
         match = MatchDB.get(id=input.match_id)
         player = PlayerDB.get(id=input.player_id)
@@ -320,11 +321,10 @@ async def start_match(input: StartMatchIn):
     start_game(input.match_id)
 
     ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED)
-
-    match = get_live_match_by_id(match.id)
     await match._match_connection_manager.broadcast_json(ws_msg)
 
-    ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+    player_turn = get_next_player(match)
+    ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
     await match._match_connection_manager.broadcast_json(ws_msg)
     
     msg = {"message": "The match has been started"}
