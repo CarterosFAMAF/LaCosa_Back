@@ -395,6 +395,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     else:
         prepare_exchange_card(player.id, card.id)
+        receive_infected = receive_infected_card(input.player_target_id)
         card_main_id, card_target_id = apply_exchange(player.id, player_target.id)
 
         card_msg = create_card_exchange_message(card_main_id)
@@ -412,7 +413,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
         #esta carta no contempla el hecho de que se recibe una carta.
-        if (send_infected_card(card) or receive_infected_card(input.player_target_id)) and (not input.is_you_failed): 
+        if (send_infected_card(card) or receive_infected) and (not input.is_you_failed): 
             player_infected = None
             player_infector = None
 

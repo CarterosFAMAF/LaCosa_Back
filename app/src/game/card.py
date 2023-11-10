@@ -244,12 +244,10 @@ def send_infected_card(card):
     return card.card_id == INFECCION
 
 def receive_infected_card(player_id):
-    with db_session:
-        player = PlayerDB.get(id=player_id)
-        card = player.card_exchange
-        is_infected = card.name == "Infeccion"
-        return is_infected
-
+    player = get_player_by_id(player_id)
+    return player.card_exchange.card_id == INFECCION
+    
+    
 def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     """
     Play a card from a player to another player, changes the state of the game, and send a message to all players
