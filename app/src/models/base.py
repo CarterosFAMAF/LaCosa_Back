@@ -22,6 +22,8 @@ class Match(db.Entity):
     finalized = Optional(bool)
     turn = Optional(int)
     clockwise = Optional(bool)
+    letter_to_raise = Optional(bool)
+    extra_deck = Optional("Card")
     players = Set("Player", reverse="match")
     player_owner = Required("Player", reverse="match_owner")
     deck = Set("Card", reverse="deck")
@@ -55,6 +57,7 @@ class Card(db.Entity):
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
     player_card_exchange = Optional(Player, reverse="card_exchange")
+    extra_card = Optional(Match, reverse="extra_deck")
 
 
 def define_database_and_entities(test: bool):

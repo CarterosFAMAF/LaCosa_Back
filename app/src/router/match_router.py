@@ -257,12 +257,12 @@ async def discard(match_id, player_id, card_id):
     response_model=CardModel,
     status_code=status.HTTP_200_OK,
 )
-async def get_card_endpoint(match_id: int, player_id: int):
+async def get_card_endpoint(input:GetCardModel):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
-        match_id, player_id, 0, 0, 0
+        input.match_id, input.player_id, 0, 0, 0
     )
 
-    card = get_card(match_id, player_id)
+    card = get_card(input.match_id, input.player_id,input.not_panic)
     return CardModel(
         id=card["id"], name=card["name"], image=card["image"], type=card["type"]
     )
@@ -362,6 +362,7 @@ async def send_chat_message(match_id: int, player_id: int, message: str):
 
 @router.put("/matches/{match_id}/players/{player_id}/exchange_cards")
 async def exchange_endpoint(input: ExchangeCardIn):
+    list_card = []
     # validate match players and cards
     match, player, player_target, card, card_target = validate_match_players_and_cards(
         input.match_id, input.player_id, input.player_target_id, input.card_id, 0
@@ -370,11 +371,22 @@ async def exchange_endpoint(input: ExchangeCardIn):
     match_live = get_live_match_by_id(match.id)
 
     if is_player_main_turn(match, player):
+        
+        if input.blind_date:
+            send_card_extra_deck(player.id,card.id,match.id)
+            card = get_card(match.id,player.id)
+            list_card.add(card)
+            
+            next_turn(match.id)
+            ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+            await match_live._match_connection_manager.broadcast_json(ws_msg)
+            return list_card
+        
         if input.player_target_id == 0:
             player_target = get_next_player(match)
-
+        
         prepare_exchange_card(player.id, card.id)
-
+        
         ws_msg = create_ws_message(
             match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
         )
@@ -435,6 +447,8 @@ async def exchange_endpoint(input: ExchangeCardIn):
         next_turn(match.id)
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
+        
+    return list_card
 
 @router.put("/matches/{match_id}/player/{player_id}/declare_end")
 async def declare_end_endpoint(input : declare_endIn):

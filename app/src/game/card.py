@@ -41,7 +41,7 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     elif card.card_id == SEDUCCION:
         status = WS_STATUS_SEDUCCION
     elif card.card_id == CITA_A_CIEGAS:
-        status = play_blind_date()
+        status = WS_STATUS_BLIND_DATE
     else:
         pass
 
@@ -129,19 +129,19 @@ def play_vigila_tus_espaldas(match_id):
     status = WS_STATUS_REVERSE_POSITION
     return status
 
-def play_blind_date(player_id, card_id, match_id):
-    # debo sacar el card_id del hand de player y del deck de match e intercambiar.
+  
+def send_card_extra_deck(player_id,card_id,match_id):
+    #cuando se usa intercambio
     player = get_player_by_id(player_id)
     card = get_card_by_id(card_id)
     match = get_match_by_id(match_id)
-    status = WS_STATUS_BLIND_DATE
     with db_session:
+        match.letter_to_raise = True
+        match.extra_deck = card
         player.hand.remove(card)
-        card_deck = match.deck.get()
-        player.hand.add(card_deck)
-        match.deck.remove(card)
-        # sacar una carta del mazo
-    return status
+        flush()
+    
+
 
 
 def play_card_investigation(player_main, player_target, card,match):

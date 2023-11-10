@@ -281,6 +281,8 @@ def start_game(match_id: int):
     match.started = True
     match.clockwise = True
     match.turn = 0
+    match.letter_to_raise = False
+    match.extra_deck = None
     deal_cards(match_id)
     players = select(p for p in match.players).random(match.number_players)
     position = 0

@@ -34,7 +34,9 @@ class ExchangeCardIn(BaseModel):
     player_id: int
     player_target_id: int
     card_id: int
-    is_you_failed: bool
+    is_you_failed:bool=False
+    blind_date:bool=False
+    
 
 class ListMatchOut(BaseModel):
     match_id: int
@@ -45,7 +47,11 @@ class ListMatchOut(BaseModel):
     player_max: int
     joined_players: list
 
-
+class GetCardModel(BaseModel):
+    match_id: int
+    player_id: int
+    not_panic:bool=False
+    
 class JoinMatchIn(BaseModel):
     player_name: constr(min_length=1, max_length=100)
     match_id: int = Field(ge=1)
