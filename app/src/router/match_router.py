@@ -395,7 +395,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     else:
         prepare_exchange_card(player.id, card.id)
-        receive_infected = receive_infected_card(input.player_target_id)
+        receive_infected = receive_infected_card(input.player_target_id)    
         card_main_id, card_target_id = apply_exchange(player.id, player_target.id)
 
         card_msg = create_card_exchange_message(card_main_id)
