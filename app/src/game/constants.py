@@ -192,3 +192,11 @@ PLAYER_ROLE_THE_THING = "the_thing"
 PLAYER_ROLE_DEAD = "dead"
 PLAYER_ROLE_INFECTED = "infected"
 PLAYER_ROLE_LOBBY = "lobby"
+
+
+# Wining conditions
+#INFECTEDS_WIN = "The Infecteds win"
+#THE_THING_WIN = "The Thing win"
+#HUMANS_WIN = "The Humans win"
+
+MATCH_CONTINUES = 500
