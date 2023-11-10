@@ -90,13 +90,13 @@ def load_cards():
             # CARTAS ACCION
             Card(
                 card_id=LANZALLAMAS,
-                name="lanzallamas",
+                name="Lanzallamas",
                 image="app/cards/Lanzallamas.png",
                 type=TYPE_ACTION,
             )
             Card(
                 card_id=MAS_VALE_QUE_CORRAS,
-                name="Mas_Vale_Que_Corras",
+                name="Mas_vale_que_corras",
                 image="app/cards/Mas_vale_que_corras.png",
                 type=TYPE_ACTION,
             )
