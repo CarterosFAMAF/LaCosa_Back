@@ -327,7 +327,7 @@ def can_defend(player_target_id, card_action):
     
     return can_defend,list_id_cards
 
-def is_card_infected(card):
+def send_infected_card(card):
     return card.card_id == INFECCION
 
 
@@ -339,6 +339,9 @@ def is_card_panic(card):
         or card.card_id == CITA_A_CIEGAS
     )
 
+def receive_infected_card(player_id):
+    player = get_player_by_id(player_id)
+    return player.exchange_card.card_id == INFECCION
 
 def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     """

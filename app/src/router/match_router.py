@@ -189,11 +189,6 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             list_cards=[],
         )
 
-        # NEXT TURN MSG
-        next_turn(input.match_id)
-        player_turn = get_next_player(match)
-        ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
-        await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     elif card_main.card_id == FALLASTE:
         # broadcastear que el jugador se defendio con una fallaste
@@ -208,7 +203,15 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             input.card_main_id,
             input.match_id,
         )
-        await discard_message(input.match_id, input.player_main_id)
+
+         # DEFENSE MSG
+        await send_message_play_defense(
+            match_id=input.match_id,
+            status=status,
+            player_in_id=input.player_main_id,
+            player_out_id=input.player_target_id,
+            card_name=card_main.name,
+        )
 
         if card_main.card_id == NO_GRACIAS or card_main.card_id == ATERRADOR:
             ws_msg = create_card_exchange_message(list_card[0]["id"])
@@ -225,17 +228,12 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             )
             await live_match._match_connection_manager.broadcast_json(ws_msg)
             
-        # DEFENSE MSG
-        await send_message_play_defense(
-            match_id=input.match_id,
-            status=status,
-            player_in_id=input.player_main_id,
-            player_out_id=input.player_target_id,
-            card_name=card_main.name,
-        )
-
-    # DISCARD MAIN MSG
-    await discard_message(input.match_id, input.player_target_id)
+        else:
+            # DISCARD's
+            discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
+            await discard_message(input.match_id, input.player_target_id)
+            await discard_message(input.match_id, input.player_main_id)
+       
 
     return list_card
 
@@ -317,14 +315,16 @@ async def start_match(input: StartMatchIn):
             )
 
     start_game(input.match_id)
+    match_live = get_live_match_by_id(input.match_id)
 
-    ws_msg = create_ws_message(match.id, WS_STATUS_MATCH_STARTED)
+    match = get_match_by_id(input.match_id)
+    player_turn = get_player_in_turn(input.match_id)
 
-    match = get_live_match_by_id(match.id)
-    await match._match_connection_manager.broadcast_json(ws_msg)
+    ws_msg = create_ws_message(input.match_id, WS_STATUS_MATCH_STARTED)
+    await match_live._match_connection_manager.broadcast_json(ws_msg)
 
-    ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
-    await match._match_connection_manager.broadcast_json(ws_msg)
+    ws_msg = create_ws_message(input.match_id, WS_STATUS_NEW_TURN, player_turn.id)
+    await match_live._match_connection_manager.broadcast_json(ws_msg)
     
     msg = {"message": "The match has been started"}
     return msg
@@ -368,6 +368,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
     )
 
     match_live = get_live_match_by_id(match.id)
+
     if is_player_main_turn(match, player):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
@@ -399,6 +400,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
         await match_live._match_connection_manager.send_personal_json(
             card_msg, player_target.id
         )
+
         card_msg = create_card_exchange_message(card_target_id)
         await match_live._match_connection_manager.send_personal_json(
             card_msg, player.id
@@ -408,23 +410,27 @@ async def exchange_endpoint(input: ExchangeCardIn):
             match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
-        player_next_turn = get_next_player(match)
+        #esta carta no contempla el hecho de que se recibe una carta.
+        if (send_infected_card(card) or receive_infected_card(card)) and (not input.is_you_failed): 
+            player_infected = None
+            player_infector = None
 
-        if (
-            is_card_infected(card)
-            and player.role == PLAYER_ROLE_HUMAN
-            and player_target.role == PLAYER_ROLE_THE_THING
-            and player_next_turn.position == player.position
-        ):
-            apply_effect_infeccion(player.id)
-            ws_msg = create_ws_message(
-                match.id,
-                WS_STATUS_INFECTED,
-                player_target.id,
-            )
+            if (player.role == PLAYER_ROLE_HUMAN
+            and player_target.role == PLAYER_ROLE_THE_THING):
+                apply_effect_infeccion(player.id)
+                player_infected = player.id
+                player_infector = player_target.id
+
+            elif (player.role == PLAYER_ROLE_THE_THING
+            and player_target.role == PLAYER_ROLE_HUMAN):
+                apply_effect_infeccion(player_target.id)
+                player_infected = player_target.id
+                player_infector = player.id
+            
+            ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
             await match_live._match_connection_manager.send_personal_json(
-                ws_msg, player.id
-            )
+                    ws_msg, player_infected
+                )
             
         next_turn(match.id)
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)

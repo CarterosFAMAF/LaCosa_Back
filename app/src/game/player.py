@@ -208,6 +208,12 @@ def get_next_player(match) -> PlayerDB:
                 break
     return player
 
+def get_player_in_turn(match_id):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player_out_turn = select(p for p in match.players if p.position == 0).first()
+    return player_out_turn
+
 def get_next_player_by_player_turn(match_id, player_id):
     """
     Returns the next player from a specific player
