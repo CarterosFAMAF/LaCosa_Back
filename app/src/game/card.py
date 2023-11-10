@@ -39,11 +39,11 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
     elif card.card_id == CAMBIO_DE_LUGAR:
         status = play_cambio_de_lugar(player_in.id, player_out.id, match_id)
     elif card.card_id == SEDUCCION:
-        status = play_seduccion()
+        status = WS_STATUS_SEDUCCION
     else:
         pass
 
-    discard_card_of_player(card.id, match_id, player_in.id)
+    discard_card_of_player(card_id, match_id, player_in.id)
     return status
 
 
@@ -127,12 +127,6 @@ def play_vigila_tus_espaldas(match_id):
     status = WS_STATUS_REVERSE_POSITION
     return status
 
-
-def play_seduccion():
-    status = WS_STATUS_SEDUCCION
-    return status
-
-
 def play_card_investigation(player_main, player_target, card):
     """
     Devuelve las cartas respectivo a su tipo de carta de investigacion
@@ -215,32 +209,48 @@ def can_defend(player_target_id, card_action):
     """
     player_target = get_player_by_id(player_target_id)
     can_defend = False
-    with db_session:
-        cards = select(c for c in player_target.hand if c.id != card_action.id)[:]
     list_id_cards = []
-    if card_action != 0:
-        if card_action.card_id == LANZALLAMAS:
-            for card in cards:
-                if card.card_id == NADA_DE_BARBACOAS:
-                    can_defend = True     
-                    list_id_cards.add(card.id)
-        if card_action.card_id == CAMBIO_DE_LUGAR or MAS_VALE_QUE_CORRAS:
-            for card in cards:
-                if card.card_id == AQUI_ESTOY_BIEN:
-                    can_defend = True
-                    list_id_cards.add(card.id)
-    else:
+    if player_target_id == 0:
+        return can_defend , list_id_cards
+    
+    with db_session:
+            cards = select(c for c in player_target.hand)[:]
+            
+    if card_action == 0:
         #casos para intercambio, no tenemos id de card_action
         for card in cards:
             if card.card_id == ATERRADOR:
                 can_defend = True
-                list_id_cards.add(card.id)
+                list_id_cards.append(card.id)
+            elif card.card_id == NO_GRACIAS:
+                can_defend = True
+                list_id_cards.append(card.id)
+    else:
+        if card_action == LANZALLAMAS:
+            for card in cards:
+                if card.card_id == NADA_DE_BARBACOAS:
+                    can_defend = True     
+                    list_id_cards.append(card.id)
+                    
+        elif card_action == CAMBIO_DE_LUGAR or card_action == MAS_VALE_QUE_CORRAS:
+            for card in cards:
+                if card.card_id == AQUI_ESTOY_BIEN:
+                    can_defend = True
+                    list_id_cards.append(card.id)
     
     return can_defend,list_id_cards
 
-def is_card_infected(card):
+def send_infected_card(card):
     return card.card_id == INFECCION
 
+def receive_infected_card(player_id):
+    with db_session:
+        player = get_player_by_id(player_id)
+        card = player.card_exchange
+        is_infected = card.card_id == INFECCION
+        return is_infected
+    
+    
 def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     """
     Play a card from a player to another player, changes the state of the game, and send a message to all players
@@ -260,18 +270,20 @@ def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     assert card is not None
     status = None
 
+
     if card.card_id == NADA_DE_BARBACOAS:
         status = WS_STATUS_NOTHING_BARBECUE
     elif card.card_id == AQUI_ESTOY_BIEN:
-        status = play_aqui_estoy_bien(player_main_id, player_target_id, match_id)
+        status = WS_STATUS_HERE_IM_FINE
     elif card.card_id == NO_GRACIAS:
-        status = play_no_gracias(player_main_id,player_target_id)
+        status,list_card = play_no_gracias(player_target_id)
     elif card.card_id == ATERRADOR:
-        status,list_card = play_aterrador(player_main_id,player_target_id,match_id)
+        status,list_card = play_aterrador(player_target_id)
     else:
         raise Exception("Defense card not found")
 
     discard_card_of_player(card.id, match_id, player_main_id)
+    
     return status, list_card
 
 def play_aterrador(player_main_id):
@@ -293,38 +305,24 @@ def play_aterrador(player_main_id):
     return status,list_card
 
 def play_no_gracias(player_main_id):
+    card_return = []
     status = WS_STATUS_NOPE_THANKS
     with db_session:
         player_main = get_player_by_id(player_main_id)
-
         player_main.hand.add(player_main.card_exchange)
+        card_image = get_card_image(player_main.card_exchange.image)
+        card_return.append(
+                    {"id": player_main.card_exchange.id, 
+                     "name": player_main.card_exchange.name, 
+                     "image": card_image,
+                     "type" : player_main.card_exchange.type
+                     }
+                )
         player_main.card_exchange = None
         flush()
-    return status
+        
+    return status,card_return
 
-def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
-    """
-    Change the position of two players, and change the turn of the match
-
-    Args:
-        player_main_id (int)
-        player_target_id (int)
-
-    Returns:
-        message of players that change position
-    """
-    with db_session:
-        player_main = get_player_by_id(player_main_id)
-        player_target = get_player_by_id(player_target_id)
-        pos_tmp = player_main.position
-        player_main.position = player_target.position
-        player_target.position = pos_tmp
-        match = get_match_by_id(match_id)
-        match.turn = player_main.position
-        flush()
-
-    status = WS_STATUS_HERE_IM_FINE
-    return status
 
 def create_card_exchange_message(card_id):
     card = get_card_by_id(card_id)
@@ -333,7 +331,8 @@ def create_card_exchange_message(card_id):
     card_ws = {
         "id" : card.id ,
         "name" : card.name,
-        "image" : card_image
+        "image" : card_image,
+        "type" : card.type
     }
     
     response = {

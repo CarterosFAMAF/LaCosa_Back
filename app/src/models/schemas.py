@@ -34,7 +34,7 @@ class ExchangeCardIn(BaseModel):
     player_id: int
     player_target_id: int
     card_id: int
-
+    is_you_failed: bool
 
 class ListMatchOut(BaseModel):
     match_id: int

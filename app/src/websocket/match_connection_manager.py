@@ -129,6 +129,63 @@ def create_msg_defense(player_main_id, card_id, card_name, list_id_cards_def):
     return response
 
 
+def create_ws_chat_message(player_id: int = 0, msg: str = ""):
+    """
+    Create dictionary to then send it as a json messege to the client. Utilizes state of the match in the db
+
+    Args:
+        player_id (int)
+        msg (str)
+
+    Returns:
+        msg_ws (dict)
+    """
+
+    player = get_player_by_id(player_id)
+    player_name = player.name
+
+    msg_ws = {
+        "status": WS_STATUS_CHAT_MESSAGE,
+        "msg": {"owner": player_name, "text": msg},
+    }
+
+    return msg_ws
+
+
+def create_ws_message_fallaste(
+    player_main_id: int = 0, player_fallaste_id: int = 0, player_target_id: int = 0
+):
+    """
+    Create dictionary to then send it as a json messege to the client. Utilizes state of the match in the db
+
+    Args:
+        player_main (int)
+        player_fallaste (int)
+        player_target (int)
+
+    Returns:
+        msg_ws (dict)
+    """
+
+    player_main = get_player_by_id(player_main_id)
+    player_fallaste = get_player_by_id(player_fallaste_id)
+    player_target = get_player_by_id(player_target_id)
+
+    player_main_name = player_main.name
+    player_fallaste_name = player_fallaste.name
+    player_target_name = player_target.name
+
+    msg_ws = {
+        "status": WS_STATUS_YOU_FAILED,
+        "msg": f"{player_fallaste_name} jugo carta fallaste contra el intento de intercambio iniciado por {player_main_name}. Ahora le toca a {player_target_name}",
+        "player_main_id": player_main_id,
+        "player_fallaste": player_fallaste_id,
+        "player_target": player_target_id,
+    }
+
+    return msg_ws
+
+
 def create_ws_message(
     match_id: int,
     status: int,
