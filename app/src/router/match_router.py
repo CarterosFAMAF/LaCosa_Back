@@ -133,14 +133,6 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     # DISCARD MSG
     await discard_message(match_id, player_in_id)
 
-    # FINALIZE MATCH MSG
-    match_status = check_match_end(match_id)
-    if  match_status != MATCH_CONTINUES:
-        set_winners(match_id, match_status)
-        ws_msg = create_ws_message(match_id, match_status)
-        await live_match._match_connection_manager.broadcast_json(ws_msg)
-        end_match(match_id)
-
     return list_card
 
 
@@ -237,14 +229,6 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
             await discard_message(input.match_id, input.player_target_id)
             await discard_message(input.match_id, input.player_main_id)
-            
-    # FINALIZE MATCH MSG
-    match_status = check_match_end(input.match_id)
-    if  match_status != MATCH_CONTINUES:
-        set_winners(input.match_id, match_status)
-        ws_msg = create_ws_message(input.match_id, match_status)
-        await live_match._match_connection_manager.broadcast_json(ws_msg)
-        end_match(input.match_id)
 
     return list_card
 
@@ -451,16 +435,19 @@ async def exchange_endpoint(input: ExchangeCardIn):
 @router.put("/matches/{match_id}/players/{player_id}/declare_end")
 async def declare_end_endpoint(input : declare_endIn):
     live_match = get_live_match_by_id(input.match_id)
-    status = declare_end(input.match_id)
+
+    match_status = check_match_end(input.match_id)
+    if  match_status == MATCH_CONTINUES:
+        match_status = WS_STATUS_HUMANS_WIN
     
-    #anunciar el ganador.
-    ws_msg = create_ws_message(input.match_id,status)
+    set_winners(input.match_id, match_status)
+    ws_msg = create_ws_message(input.match_id, match_status)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
-    #Anunciar que la partida termino
-    ws_msg = create_ws_message(input.match_id, WS_STATUS_MATCH_ENDED)
-    await live_match._match_connection_manager.broadcast_json(ws_msg)
-    
+    end_match(input.match_id)
+
     return {"message" : "Match finalized"}
+
+
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")
 async def websocket_endpoint(websocket: WebSocket, match_id: int, player_id: int):

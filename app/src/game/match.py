@@ -423,17 +423,6 @@ def set_winners(match_id, result):
                 player.winner = False
         flush()
 
-def declare_end(match_id):
-    status = check_match_end(match_id)
-    end_match(match_id)
-    
-    if status == WS_STATUS_THE_THING_WIN or status == WS_STATUS_INFECTEDS_WIN:
-        set_winners(match_id,status)
-    else:
-        status = WS_STATUS_HUMANS_WIN
-
-    return status
-
 def set_winners(match_id, result):
     """
     Set the winners for the diferent results
