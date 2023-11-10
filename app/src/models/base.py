@@ -99,7 +99,7 @@ def load_cards():
             )
             Card(
                 card_id=MAS_VALE_QUE_CORRAS,
-                name="Mas_Vale_Que_Corras",
+                name="Mas_vale_que_corras",
                 image="app/cards/Mas_vale_que_corras.png",
                 type=TYPE_ACTION,
             )
@@ -148,7 +148,7 @@ def load_cards():
             #CARTAS DEFENSA
             Card(
                 card_id=AQUI_ESTOY_BIEN,
-                name="Aqui_Estoy_Bien",
+                name="Aqui_estoy_bien",
                 image="app/cards/Aqui_estoy_bien.png",
                 type=TYPE_DEFENSE,
             )

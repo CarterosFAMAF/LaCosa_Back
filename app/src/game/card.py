@@ -42,6 +42,8 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
         status = WS_STATUS_SEDUCCION
     elif card.card_id == CITA_A_CIEGAS:
         status = WS_STATUS_BLIND_DATE
+    elif card.card_id == REVELACIONES:
+        status = WS_STATUS_REVELATIONS
     else:
         pass
 
@@ -330,18 +332,18 @@ def can_defend(player_target_id, card_action):
 def send_infected_card(card):
     return card.card_id == INFECCION
 
-
-def is_card_panic(card):
-    return (
-        card.card_id == UPS
-        or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS
-        or card.card_id == REVELACIONES
-        or card.card_id == CITA_A_CIEGAS
-    )
-
 def receive_infected_card(player_id):
     player = get_player_by_id(player_id)
     return player.exchange_card.card_id == INFECCION
+
+def exist_infection(hand):
+    infected = False
+    infected_card_id = None
+    for elem in hand:
+        if elem["name"] == "Infeccion":
+            infected = True
+            infected_card_id = elem["id"]
+    return infected,infected_card_id
 
 def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     """

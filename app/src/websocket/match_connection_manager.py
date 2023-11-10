@@ -99,6 +99,15 @@ class MatchConnectionManager:
                     self.active_connections.remove(conn)
 
 
+def create_msg_revelations(hand):
+    
+    response = {
+        "status" : WS_STATUS_REVELATIONS,
+        "hand" : hand
+    }
+    
+    return response 
+
 def create_msg_defense(player_main_id, card_id, card_name, list_id_cards_def):
     # que mando en el mensaje: status,id de player que activo carta accion,card id, ids de cartas defense del objetivo
 
@@ -296,7 +305,10 @@ def get_ws_message_with_status(
         message = "Gana La Cosa junto a los infectados"
     elif status == WS_STATUS_THE_THING_WIN:
         message = "Gana La cosa"
-
+    elif status == WS_STATUS_YES:
+        message = f"{player_name} decidio mostrar sus cartas"
+    elif status == WS_STATUS_NOPE:
+        message = f"{player_name} prefiere no mostrar sus cartas"
     # Accion
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
@@ -338,6 +350,8 @@ def get_ws_message_with_status(
         message = f"Ups! a {player_name} se le han caido sus cartas"
     elif status == WS_STATUS_BLIND_DATE:
         message = f"a {player_name} le apetece tener una cita a ciegas"
+    elif status == WS_STATUS_REVELATIONS:
+        message = f"Comienza la ronda de revelaciones"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message
