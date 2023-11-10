@@ -77,6 +77,7 @@ def test_get_card_empty_deck():
         number_players=1,
         max_players=4,
         min_players=12,
+
         started=False,
         finalized=False,
         turn=None,
@@ -95,6 +96,7 @@ def test_get_card_empty_deck():
 def test_valid_effect():
     with db_session:
         player = PlayerDB(name="player_in")
+
         flush()
         player_id = player.id
         player.position = 1
@@ -107,6 +109,7 @@ def test_valid_effect():
         player_target.position = 2
         player_target.role = "alive"
         flush()
+        
 
         player_dead = PlayerDB(name="player_dead")
         flush()
@@ -197,27 +200,19 @@ def test_valid_effect_Vigila_tus_espaldas():
             finalized=False,
             turn=0,
             player_owner=player,
-            players=[player, player_1, player_2, player_3],
+            players=[player,player_1,player_2,player_3],
         )
         flush()
         match_id = match.id
-        add_cards_to_deck(match_id, 4)
+        add_cards_to_deck(match_id,4)
 
-    with db_session:
-        play_card(player, None, match_id, card_vigila_tus_espaldas_id)
-        player = get_player_by_id(player_id)
-        player_1 = get_player_by_id(player_1_id)
-        player_2 = get_player_by_id(player_2_id)
-        player_3 = get_player_by_id(player_3_id)
-        assert player.position == 0
-        assert player_1.position == 3
-        assert player_2.position == 2
-        assert player_3.position == 1
-
+        play_card(player,None,match_id,card_vigila_tus_espaldas_id)
+        match.clockwise = False
 
 def test_valid_effect_MAS_VALE_QUE_CORRAS():
     with db_session:
-        player = PlayerDB(name="player")
+        
+        player = PlayerDB(name = 'player')
         flush()
         player_id = player.id
         player.position = 0

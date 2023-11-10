@@ -286,6 +286,7 @@ def start_game(match_id: int):
     position = 0
     for player in players:
         player.position = position
+        player.winner = False
         if player.role != PLAYER_ROLE_THE_THING:
             player.role = PLAYER_ROLE_HUMAN
         position += 1
@@ -338,6 +339,24 @@ def delete_match(match_id):
         flush()
 
 
+def store_message(match_id: int, player_id: int, msg: str):
+    """
+    Save message in db
+
+    Args:
+        match_id (int)
+        player_id (int)
+        msg (str)
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        match.messages.create(player=player, message=msg)
+        flush()
+
+
 def check_match_end(match_id):
     """
     Check if match has ended
@@ -377,22 +396,7 @@ def check_match_end(match_id):
         else:
             msg = MATCH_CONTINUES
         return msg
-    
-def end_match(match_id):
-    """
-    Set match to finalized in db, remove from live matches
 
-    Args:
-        match_id (int)
-
-    Returns:
-        None
-    """
-    with db_session:
-        match = MatchDB.get(id=match_id)
-        match.finalized = True
-        flush()
-    MATCHES.remove(get_live_match_by_id(match_id))    
 
 def set_winners(match_id, result):
     """
@@ -430,4 +434,29 @@ def declare_end(match_id):
 
     return status
 
+def set_winners(match_id, result):
+    """
+    Set the winners for the diferent results
+
+    Args:
+        match_id (int)
+    
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        players = select(p for p in match.players)[:]
+        
+        for player in players:
+            if result == WS_STATUS_HUMANS_WIN and player.role == PLAYER_ROLE_HUMAN :
+                player.winner = True
+            elif result == WS_STATUS_THE_THING_WIN and player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+            elif result == WS_STATUS_INFECTEDS_WIN and player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+            else:
+                player.winner = False
+        flush()
+    
 MATCHES: List[Match] = []
