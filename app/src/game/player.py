@@ -263,7 +263,7 @@ def prepare_exchange_card(player_main_id, card_id):
     with db_session:
         player_main = PlayerDB.get(id=player_main_id)
         card = CardDB.get(id=card_id)
-
+        
         player_main.card_exchange = card
         player_main.hand.remove(card)
 
