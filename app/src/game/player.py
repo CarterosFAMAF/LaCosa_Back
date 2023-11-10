@@ -94,7 +94,7 @@ def get_card_image(path: str):
 
 
 @db_session
-def get_card(match_id: int, player_id: int,not_panic:bool=False):
+def get_card(match_id: int, player_id: int,not_panic:bool=False,blind_date:bool=False):
     """
     Get a card from the deck and add it to the player hand
 
@@ -111,8 +111,15 @@ def get_card(match_id: int, player_id: int,not_panic:bool=False):
         deck = match.discard_pile.copy()
         match.discard_pile.clear()
         match.deck.add(deck)
-        
-    if (not_panic):
+    
+    if blind_date:
+        with db_session:
+            card = match.extra_deck
+            match.extra_deck = None
+            match.letter_to_raise = False
+            flush()
+
+    elif (not_panic):
         #cuando tengo que sacar una carta del mazo que no sea del tipo panico
         card = select(c for c in match.deck if c.type != TYPE_PANIC).random(1)[0]
         if card == None:

@@ -42,6 +42,13 @@ class revelationsIn(BaseModel):
     player_id: int
     show:bool=False
     
+
+class getCardIn(BaseModel):
+    match_id: int
+    player_id:int
+    not_panic:bool=False
+    blind_date:bool=False
+
 class ListMatchOut(BaseModel):
     match_id: int
     match_name: str

@@ -170,7 +170,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             )
     live_match = get_live_match_by_id(input.match_id)
     list_card = []
-
+    #caso en el que decide no defenderse
     if input.card_main_id == 0:
         # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista en play_card.
 
@@ -190,6 +190,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             list_cards=[],
         )
 
+    #caso de fallaste , se realiza un intercambio con otro objetivo. 
+    # se tiene que hacer un intercambio con is_you_failed = True
 
     elif card_main.card_id == FALLASTE:
         # broadcastear que el jugador se defendio con una fallaste
@@ -258,12 +260,12 @@ async def discard(match_id, player_id, card_id):
     response_model=CardModel,
     status_code=status.HTTP_200_OK,
 )
-async def get_card_endpoint(match_id: int, player_id: int):
+async def get_card_endpoint(input:getCardIn):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
-        match_id, player_id, 0, 0, 0
+        input.match_id, input.player_id, 0, 0, 0
     )
 
-    card = get_card(match_id, player_id)
+    card = get_card(input.match_id, input.player_id,input.not_panic,input.blind_date)
     return CardModel(
         id=card["id"], name=card["name"], image=card["image"], type=card["type"]
     )
@@ -390,6 +392,9 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     match_live = get_live_match_by_id(match.id)
 
+    if input.blind_date:
+        send_card_extra_deck(input.player_id,input.card_id,input.match_id)
+        
     if is_player_main_turn(match, player):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
@@ -432,7 +437,6 @@ async def exchange_endpoint(input: ExchangeCardIn):
             match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
         )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
-        #esta carta no contempla el hecho de que se recibe una carta.
         if (send_infected_card(card) or receive_infected) and (not input.is_you_failed): 
             player_infected = None
             player_infector = None
