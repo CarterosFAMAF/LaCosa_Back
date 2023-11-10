@@ -289,6 +289,26 @@ async def list_matches():
     return matches
 
 
+@router.put("/matches/{match_id}/players/revelations")
+async def revelations_endpoint(input: revelationsIn):
+    live_match = get_live_match_by_id(input.match_id)
+    hand = get_hand(input.match_id,input.player_id)
+    
+    exist_infections,infected_card_id = exist_infection(hand)
+    
+    if exist_infections:
+        ws_msg = create_card_exchange_message(infected_card_id)
+        live_match._match_connection_manager.broadcast_json(ws_msg)
+        
+    elif input.show:    
+        ws_msg = create_ws_message(input.match_id,WS_STATUS_YES,input.player_id,0,"",hand)
+        live_match._match_connection_manager.broadcast_json(ws_msg)
+    else:
+        ws_msg = create_ws_message(input.match_id,WS_STATUS_NOPE,input.player_id)
+        live_match._match_connection_manager.broadcast_json(ws_msg)
+        
+    return {"msg" : "revelations"}
+
 @router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
 async def start_match(input: StartMatchIn):
     with db_session:
