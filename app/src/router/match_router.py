@@ -237,7 +237,14 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
             await discard_message(input.match_id, input.player_target_id)
             await discard_message(input.match_id, input.player_main_id)
-       
+            
+    # FINALIZE MATCH MSG
+    match_status = check_match_end(input.match_id)
+    if  match_status != MATCH_CONTINUES:
+        set_winners(input.match_id, match_status)
+        ws_msg = create_ws_message(input.match_id, match_status)
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+        end_match(input.match_id)
 
     return list_card
 
