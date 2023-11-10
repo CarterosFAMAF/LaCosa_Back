@@ -188,6 +188,7 @@ TYPE_ACTION = "Accion"
 TYPE_DEFENSE = "Defensa"
 TYPE_INFECTED = "Infectado"
 TYPE_PANIC = "Panico"
+TYPE_OBSTACLE = "Obstaculo"
 
 # Player roles
 PLAYER_ROLE_HUMAN = "human"

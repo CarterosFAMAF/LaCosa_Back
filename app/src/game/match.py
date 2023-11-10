@@ -286,6 +286,7 @@ def start_game(match_id: int):
     position = 0
     for player in players:
         player.position = position
+        player.quarantine = False
         if player.role != PLAYER_ROLE_THE_THING:
             player.role = PLAYER_ROLE_HUMAN
         position += 1
