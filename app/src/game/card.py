@@ -244,9 +244,9 @@ def send_infected_card(card):
     return card.card_id == INFECCION
 
 def receive_infected_card(player_id):
-    player = get_player_by_id(player_id)
     with db_session:
-        card = player.card_exchange.card_id
+        player = get_player_by_id(player_id)
+        card = player.card_exchange
         is_infected = card.card_id == INFECCION
         return is_infected
     
