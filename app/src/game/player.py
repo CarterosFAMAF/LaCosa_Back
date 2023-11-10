@@ -94,7 +94,7 @@ def get_card_image(path: str):
 
 
 @db_session
-def get_card(match_id: int, player_id: int,not_panic:bool=False,blind_date:bool=False):
+def get_card(match_id: int, player_id: int,not_panic:bool=False):
     """
     Get a card from the deck and add it to the player hand
 
@@ -112,9 +112,9 @@ def get_card(match_id: int, player_id: int,not_panic:bool=False,blind_date:bool=
         match.discard_pile.clear()
         match.deck.add(deck)
     
-    if blind_date:
+    if match.letter_to_raise:
         with db_session:
-            card = match.extra_deck
+            card = match.extra_deck #aca no se si lo copia pero vamo a ve
             match.extra_deck = None
             match.letter_to_raise = False
             flush()
