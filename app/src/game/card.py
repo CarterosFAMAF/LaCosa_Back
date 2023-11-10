@@ -247,8 +247,8 @@ def receive_infected_card(player_id):
     with db_session:
         player = PlayerDB.get(id=player_id)
         card = player.card_exchange
-        is_infected = card.card_id == INFECCION
-    return is_infected
+        is_infected = card.name == "Infeccion"
+        return is_infected
 
 def play_card_defense(player_main_id, player_target_id, card_id, match_id):
     """
