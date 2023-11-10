@@ -413,20 +413,23 @@ async def exchange_endpoint(input: ExchangeCardIn):
         player_next_turn = get_next_player(match)
         # me parece que no sirve esto, en el caso en que 
         if (is_card_infected(card) and (not input.is_you_failed)): 
+            player_infected = None
+            player_infector = None
             if (player.role == PLAYER_ROLE_HUMAN
             and player_target.role == PLAYER_ROLE_THE_THING):
                 apply_effect_infeccion(player.id)
-                ws_msg = create_ws_message( match.id, WS_STATUS_INFECTED,player_target.id)
-                await match_live._match_connection_manager.send_personal_json(
-                    ws_msg, player.id
-                )
+                player_infected = player.id
+                player_infector = player_target.id
+
             if (player.role == PLAYER_ROLE_THE_THING
             and player_target.role == PLAYER_ROLE_HUMAN):
                 apply_effect_infeccion(player_target.id)
-                ws_msg = create_ws_message(match.id,WS_STATUS_INFECTED,player.id,)
-
-                await match_live._match_connection_manager.send_personal_json(
-                    ws_msg, player_target.id
+                player_infected = player_target.id
+                player_infector = player.id
+            
+            ws_msg = create_ws_message( match.id, WS_STATUS_INFECTED,player_infector)
+            await match_live._match_connection_manager.send_personal_json(
+                    ws_msg, player_infected
                 )
             
                 
