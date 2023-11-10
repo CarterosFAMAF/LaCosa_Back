@@ -339,6 +339,24 @@ def delete_match(match_id):
         flush()
 
 
+def store_message(match_id: int, player_id: int, msg: str):
+    """
+    Save message in db
+
+    Args:
+        match_id (int)
+        player_id (int)
+        msg (str)
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        match.messages.create(player=player, message=msg)
+        flush()
+
+
 def check_match_end(match_id):
     """
     Check if match has ended

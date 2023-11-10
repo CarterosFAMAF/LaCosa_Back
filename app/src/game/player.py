@@ -113,7 +113,7 @@ def get_card(match_id: int, player_id: int):
     card_image = get_card_image(card.image)
     player.hand.add(card)
     match.deck.remove(card)
-    return {"id": card.id, "name": card.name, "image": card_image}
+    return {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
 
 
 @db_session
@@ -135,7 +135,9 @@ def get_player_hand(match_id: int, player_id: int):
     cards = select(c for c in player.hand)[:]
     for card in cards:
         card_image = get_card_image(card.image)
-        hand.append({"id": card.id, "name": card.name, "image": card_image})
+        hand.append(
+            {"id": card.id, "name": card.name, "image": card_image, "type": card.type}
+        )
     return hand
 
 
@@ -202,6 +204,39 @@ def get_next_player(match) -> PlayerDB:
                 break
     return player
 
+def get_player_in_turn(match_id):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player_out_turn = select(p for p in match.players if p.position == 0).first()
+    return player_out_turn
+
+def get_next_player_by_player_turn(match_id, player_id):
+    """
+    Returns the next player from a specific player
+
+    Args:
+        match_id (int)
+        player_id (int)
+    
+    Returns:
+        player (PlayerDB)
+    """
+    player_out_turn = None
+    #deberia fijarme el jugador que le sigue a player
+    player = get_player_by_id(player_id)
+    turn = player.role
+    while True:
+        with db_session:
+            match = MatchDB.get(id=match_id)
+            if match.clockwise:
+                turn = (turn + 1) % match.number_players
+            else:
+                turn = (turn - 1) % match.number_players
+            player_out_turn = select(p for p in match.players if p.position == turn).first()
+            # if it is not dead, break the loop, else, continue
+            if player.role != PLAYER_ROLE_DEAD:
+                break
+    return player_out_turn
 
 def prepare_exchange_card(player_main_id, card_id):
     """
@@ -224,8 +259,8 @@ def prepare_exchange_card(player_main_id, card_id):
 
         flush()
 
-def apply_exchange(player_main_id,player_target_id):
-  
+
+def apply_exchange(player_main_id, player_target_id):
     with db_session:
         player_main = get_player_by_id(player_main_id)
         player_target = get_player_by_id(player_target_id)
@@ -236,8 +271,9 @@ def apply_exchange(player_main_id,player_target_id):
         player_main.card_exchange = None
         player_target.card_exchange = None
         flush()
-    
-    return card_main_id,card_target_id
+
+    return card_main_id, card_target_id
+
 
 def apply_effect_infeccion(player_target_id):
     """

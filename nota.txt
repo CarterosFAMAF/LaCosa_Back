@@ -1,0 +1,6 @@
+Fallaste:
+
+main inicia intercambio (con el jugador next turn)
+target broadcastea con mensaje fallaste especial que tiene id del que inicio el intercambio,id del que uso fallate e id del nuevo target(/play_card_defense)
+se le avisa del intercambio (al nuevo target del intercambio)
+En la vuelta del intercambio debo fijarme de alguna forma que se esta recibiendo una carta desde fallaste y no aplicar efecto de infeccion 

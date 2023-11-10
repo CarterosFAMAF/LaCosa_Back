@@ -34,7 +34,7 @@ class ExchangeCardIn(BaseModel):
     player_id: int
     player_target_id: int
     card_id: int
-
+    is_you_failed: bool
 
 class ListMatchOut(BaseModel):
     match_id: int
@@ -60,6 +60,7 @@ class CardModel(BaseModel):
     id: int = 0
     name: str = ""
     image: str = ""
+    type: str = ""
 
 
 class PlayCardModel(BaseModel):
@@ -78,3 +79,11 @@ class DiscardIn(BaseModel):
     card_id: int
     player_id: int
     match_id: int
+
+
+class PlayCardDefenseIn(BaseModel):
+    player_main_id: int
+    match_id: int
+    card_main_id: int
+    card_target_id: int
+    player_target_id: int
