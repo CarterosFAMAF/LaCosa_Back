@@ -36,6 +36,11 @@ class ExchangeCardIn(BaseModel):
     card_id: int
     is_you_failed: bool
 
+class SendMesaggeIn(BaseModel):
+    match_id: int 
+    owner_id: int 
+    text: str
+    
 class ListMatchOut(BaseModel):
     match_id: int
     match_name: str

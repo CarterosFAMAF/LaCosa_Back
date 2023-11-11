@@ -349,10 +349,10 @@ async def next_player(match_id: int):
     "/matches/{match_id}/players/{player_id}/send_chat_message",
     status_code=status.HTTP_200_OK,
 )
-async def send_chat_message(match_id: int, player_id: int, message: str):
+async def send_chat_message(input : SendMesaggeIn):
     with db_session:
-        match = MatchDB.get(id=match_id)
-        player = PlayerDB.get(id=player_id)
+        match = MatchDB.get(id=input.match_id)
+        player = PlayerDB.get(id=input.owner_id)
         if match == None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -364,11 +364,11 @@ async def send_chat_message(match_id: int, player_id: int, message: str):
                 detail="Player not found",
             )
 
-    store_message(match_id, player_id, message)
+    store_message(input.match_id, input.owner_id, input.text)
 
-    live_match = get_live_match_by_id(match_id)
+    live_match = get_live_match_by_id(input.match_id)
 
-    ws_msg = create_ws_chat_message(player_id=player_id, msg=message)
+    ws_msg = create_ws_chat_message(player_id=input.owner_id, msg=input.text)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     return {"message": "Message sent"}
