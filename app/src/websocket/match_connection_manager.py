@@ -288,7 +288,6 @@ def get_ws_message_with_status(
         message = "La partida finalizo"
     elif status == WS_STATUS_PLAYER_WELCOME:
         message = f"Bienvenido a la partida {player_name}"
-
     # Partida
     elif status == WS_STATUS_NEW_TURN:
         message = f"Turno nuevo de {player_name}"
@@ -337,7 +336,6 @@ def get_ws_message_with_status(
         )
     elif status == WS_STATUS_DETERMINATION:
         message = f"{player_name} esta determinado a sobrevivir"
-        
     # Defensa
     elif status == WS_STATUS_HERE_IM_FINE:
         message = f"{player_name} se siente seguro en donde esta"
@@ -349,7 +347,6 @@ def get_ws_message_with_status(
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SCARY:
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
-    
     # Panico
     elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
         message = f"{player_name} le esta susurrando a {player_target_name}"

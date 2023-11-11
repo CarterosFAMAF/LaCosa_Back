@@ -186,7 +186,6 @@ def play_card_investigation(player_main, player_target, card,match):
         cards_returns = cards_in_hand_player(player_main, card_id)
     elif card.card_id == DETERMINACION:
         cards_returns = play_determination(player_main, match)
-
     return cards_returns
 
 
@@ -200,7 +199,7 @@ def play_determination(player_main, match):
             player_main.hand.add(card)
             match.deck.remove(card)
             match.discard_pile.add(card)
-
+            flush()
     return cards_random
 
 
