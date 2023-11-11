@@ -341,6 +341,23 @@ async def start_match(input: StartMatchIn):
     return msg
 
 
+@router.get(
+    "/matches/{match_id}/next_player",
+    status_code=status.HTTP_200_OK,
+)
+async def next_player(match_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+
+        next_player = get_next_player(match)
+
+        return {"next_player_id": next_player.id}
+
 # chat message endpoint
 @router.post(
     "/matches/{match_id}/players/{player_id}/send_chat_message",
