@@ -325,6 +325,23 @@ async def start_match(input: StartMatchIn):
     return msg
 
 
+@router.get(
+    "/matches/{match_id}/next_player",
+    status_code=status.HTTP_200_OK,
+)
+async def next_player(match_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+
+        next_player = get_next_player(match)
+
+        return {"next_player_id": next_player.id}
+
 # chat message endpoint
 @router.post(
     "/matches/{match_id}/players/{player_id}/send_chat_message",
@@ -417,19 +434,25 @@ async def exchange_endpoint(input: ExchangeCardIn):
                 player_infected = player.id
                 player_infector = player_target.id
 
+                ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
+                await match_live._match_connection_manager.send_personal_json(
+                    ws_msg, player_infected
+                )
+ 
             elif (player.role == PLAYER_ROLE_THE_THING
             and player_target.role == PLAYER_ROLE_HUMAN):
                 apply_effect_infeccion(player_target.id)
                 player_infected = player_target.id
                 player_infector = player.id
             
-            ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
-            await match_live._match_connection_manager.send_personal_json(
-                    ws_msg, player_infected
-                )
-            
+                ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
+                await match_live._match_connection_manager.send_personal_json(
+                        ws_msg, player_infected
+                    )
+        
+        next_player = get_next_player(match)     
         next_turn(match.id)
-        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
 @router.put("/matches/{match_id}/players/{player_id}/declare_end")
