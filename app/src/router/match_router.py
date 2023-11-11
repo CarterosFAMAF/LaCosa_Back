@@ -188,8 +188,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 
     elif card_main.card_id == FALLASTE:
         # broadcastear que el jugador se defendio con una fallaste
-        new_exchange_player = get_next_player_by_player_turn(input.match_id,input.player_target_id)
-        ws_msg = create_ws_message_fallaste(player_main_id=input.player_target_id, player_fallaste_id=input.player_main_id, player_target_id=new_exchange_player)
+        new_exchange_player = get_next_player_by_player_turn(input.match_id,input.player_main_id)
+        ws_msg = create_ws_message_fallaste(player_main_id=input.player_target_id, player_fallaste_id=input.player_main_id, player_target_id=new_exchange_player.id)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
     else:
