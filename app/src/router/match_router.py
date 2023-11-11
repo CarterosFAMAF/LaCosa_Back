@@ -255,7 +255,7 @@ async def discard(match_id, player_id, card_id):
     status_code=status.HTTP_200_OK,
 )
 async def get_card_endpoint(match_id,player_id,panic):
-    card = get_card(match_id, player_id,panic)
+    card = get_card(match_id,player_id,panic)
     return CardModel(
         id=card["id"], name=card["name"], image=card["image"], type=card["type"]
     )

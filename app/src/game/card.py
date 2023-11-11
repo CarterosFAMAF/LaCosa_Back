@@ -144,8 +144,6 @@ def send_card_extra_deck(player_id,card_id,match_id):
         flush()
     
 
-
-
 def play_card_investigation(player_main, player_target, card,match):
     """
     Devuelve las cartas respectivo a su tipo de carta de investigacion
