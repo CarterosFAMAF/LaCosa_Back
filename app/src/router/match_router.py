@@ -129,6 +129,8 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
         card_name=card.name,
         list_cards=list_card,
     )
+    if card.card_id == WHISKY:
+        list_card = []
 
     # DISCARD MSG
     await discard_message(match_id, player_in_id)
