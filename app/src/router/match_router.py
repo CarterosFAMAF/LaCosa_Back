@@ -250,16 +250,12 @@ async def discard(match_id, player_id, card_id):
 
 
 @router.get(
-    "/matches/{match_id}/players/{player_id}/get_card",
+    "/matches/{match_id}/players/{player_id}/{panic}/get_card",
     response_model=CardModel,
     status_code=status.HTTP_200_OK,
 )
-async def get_card_endpoint(input:getCardIn):
-    match, player, player_target, card, card_target = validate_match_players_and_cards(
-        input.match_id, input.player_id, 0, 0, 0
-    )
-
-    card = get_card(input.match_id, input.player_id,input.not_panic,input.blind_date)
+async def get_card_endpoint(match_id,player_id,panic):
+    card = get_card(match_id, player_id,panic)
     return CardModel(
         id=card["id"], name=card["name"], image=card["image"], type=card["type"]
     )
