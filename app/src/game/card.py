@@ -387,15 +387,14 @@ def play_aterrador(player_main_id):
     status = WS_STATUS_SCARY
     with db_session:
         player_main = get_player_by_id(player_main_id)
-        card_image = get_card_image(player_main.card_exchange.card.image)
+        card_image = get_card_image(player_main.card_exchange.image)
         list_card.append(
-            {
-                "id": player_main.card_exchange.card.id,
-                "name": player_main.card_exchange.card.name,
-                "image": card_image,
-                "type": player_main.card_exchange.card.type,
-            }
-        )
+                    {"id": player_main.card_exchange.id, 
+                     "name": player_main.card_exchange.name, 
+                     "image": card_image,
+                     "type" : player_main.card_exchange.type
+                     }
+                )
         player_main.hand.add(player_main.card_exchange)
         player_main.card_exchange = None
         flush()

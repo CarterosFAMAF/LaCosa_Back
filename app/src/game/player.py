@@ -75,7 +75,6 @@ def discard_card_of_player(card_id, match_id, player_id):
         match.discard_pile.add(card)
         flush()
 
-
 """
 def get_card_image(path: str):
     with open(path, "rb") as f:
@@ -84,12 +83,9 @@ def get_card_image(path: str):
     return card_img
 """
 
-
 def get_card_image(path: str):
     with open(path, "rb") as f:
-        card_img = base64.b64encode(f.read()).decode(
-            "utf-8"
-        )  # Convertir a cadena de texto
+        card_img = base64.b64encode(f.read()).decode('utf-8')  # Convertir a cadena de texto
     return card_img
 
 
@@ -243,7 +239,7 @@ def get_next_player_by_player_turn(match_id, player_id):
     player_out_turn = None
     #deberia fijarme el jugador que le sigue a player
     player = get_player_by_id(player_id)
-    turn = player.role
+    turn = player.position
     while True:
         with db_session:
             match = MatchDB.get(id=match_id)
@@ -253,7 +249,7 @@ def get_next_player_by_player_turn(match_id, player_id):
                 turn = (turn - 1) % match.number_players
             player_out_turn = select(p for p in match.players if p.position == turn).first()
             # if it is not dead, break the loop, else, continue
-            if player.role != PLAYER_ROLE_DEAD:
+            if player_out_turn.role != PLAYER_ROLE_DEAD:
                 break
     return player_out_turn
 
