@@ -413,11 +413,11 @@ def set_winners(match_id, result):
         players = select(p for p in match.players)[:]
         
         for player in players:
-            if result == WS_STATUS_HUMANS_WIN and player.role == PLAYER_ROLE_HUMAN :
+            if result == WS_STATUS_HUMANS_WIN and player.role == PLAYER_ROLE_HUMAN:
                 player.winner = True
             elif result == WS_STATUS_THE_THING_WIN and player.role == PLAYER_ROLE_THE_THING:
                 player.winner = True
-            elif result == WS_STATUS_INFECTEDS_WIN and player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING:
+            elif result == WS_STATUS_INFECTEDS_WIN and (player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING):
                 player.winner = True
             else:
                 player.winner = False

@@ -317,7 +317,6 @@ def get_ws_message_with_status(
         message = (
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
-
     # Defensa
     elif status == WS_STATUS_HERE_IM_FINE:
         message = f"{player_name} se siente seguro en donde esta"

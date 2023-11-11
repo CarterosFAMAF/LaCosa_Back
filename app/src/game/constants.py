@@ -14,6 +14,9 @@ ANALISIS = 4
 LANZALLAMAS = 3
 INFECCION = 2
 LA_COSA = 1
+CUARENTENA = 18
+PUERTA_ATRANCADA = 19
+HACHA = 5
 
 DECK = [
     # WITH 4 PLAYERS
@@ -185,6 +188,7 @@ TYPE_ACTION = "Accion"
 TYPE_DEFENSE = "Defensa"
 TYPE_INFECTED = "Infectado"
 TYPE_PANIC = "Panico"
+TYPE_OBSTACLE = "Obstaculo"
 
 # Player roles
 PLAYER_ROLE_HUMAN = "human"
@@ -192,11 +196,5 @@ PLAYER_ROLE_THE_THING = "the_thing"
 PLAYER_ROLE_DEAD = "dead"
 PLAYER_ROLE_INFECTED = "infected"
 PLAYER_ROLE_LOBBY = "lobby"
-
-
-# Wining conditions
-#INFECTEDS_WIN = "The Infecteds win"
-#THE_THING_WIN = "The Thing win"
-#HUMANS_WIN = "The Humans win"
 
 MATCH_CONTINUES = 500
