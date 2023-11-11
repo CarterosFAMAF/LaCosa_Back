@@ -224,7 +224,7 @@ def get_next_player_by_player_turn(match_id, player_id):
     player_out_turn = None
     #deberia fijarme el jugador que le sigue a player
     player = get_player_by_id(player_id)
-    turn = player.role
+    turn = player.position
     while True:
         with db_session:
             match = MatchDB.get(id=match_id)
