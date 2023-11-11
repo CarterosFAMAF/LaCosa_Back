@@ -450,17 +450,22 @@ async def exchange_endpoint(input: ExchangeCardIn):
                 player_infected = player.id
                 player_infector = player_target.id
 
+                ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
+                await match_live._match_connection_manager.send_personal_json(
+                    ws_msg, player_infected
+                )
+ 
             elif (player.role == PLAYER_ROLE_THE_THING
             and player_target.role == PLAYER_ROLE_HUMAN):
                 apply_effect_infeccion(player_target.id)
                 player_infected = player_target.id
                 player_infector = player.id
             
-            ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
-            await match_live._match_connection_manager.send_personal_json(
-                    ws_msg, player_infected
-                )
-            
+                ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
+                await match_live._match_connection_manager.send_personal_json(
+                        ws_msg, player_infected
+                    )
+                
         next_turn(match.id)
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
