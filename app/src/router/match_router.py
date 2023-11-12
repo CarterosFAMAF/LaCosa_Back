@@ -261,7 +261,7 @@ async def discard(match_id: int, player_id: int, card_id: int):
     response_model=CardModel,
     status_code=status.HTTP_200_OK,
 )
-async def get_card_endpoint(match_id,player_id,panic):
+async def get_card_endpoint(match_id:int,player_id:int,panic:bool):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
         match_id, player_id, 0, 0, 0
     )
