@@ -33,6 +33,7 @@ class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
     position = Optional(int, default=-1)
+    winner= Optional(bool)
     role = Optional(str)
     quarantine = Optional(bool)
     hand = Set("Card")

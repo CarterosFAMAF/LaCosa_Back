@@ -133,13 +133,8 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     # DISCARD MSG
     await discard_message(match_id, player_in_id)
 
-    # FINALIZE MATCH MSG
-    if check_match_end(match_id):
-        end_match(match_id)
-        ws_msg = create_ws_message(match_id, WS_STATUS_MATCH_ENDED)
-        await live_match._match_connection_manager.broadcast_json(ws_msg)
-
     return list_card
+
 
 
 @router.put(
@@ -234,7 +229,6 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
             await discard_message(input.match_id, input.player_target_id)
             await discard_message(input.match_id, input.player_main_id)
-       
 
     return list_card
 
@@ -331,6 +325,23 @@ async def start_match(input: StartMatchIn):
     return msg
 
 
+@router.get(
+    "/matches/{match_id}/next_player",
+    status_code=status.HTTP_200_OK,
+)
+async def next_player(match_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+
+        next_player = get_next_player(match)
+
+        return {"next_player_id": next_player.id}
+
 # chat message endpoint
 @router.post(
     "/matches/{match_id}/players/{player_id}/send_chat_message",
@@ -423,20 +434,42 @@ async def exchange_endpoint(input: ExchangeCardIn):
                 player_infected = player.id
                 player_infector = player_target.id
 
+                ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
+                await match_live._match_connection_manager.send_personal_json(
+                    ws_msg, player_infected
+                )
+ 
             elif (player.role == PLAYER_ROLE_THE_THING
             and player_target.role == PLAYER_ROLE_HUMAN):
                 apply_effect_infeccion(player_target.id)
                 player_infected = player_target.id
                 player_infector = player.id
             
-            ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
-            await match_live._match_connection_manager.send_personal_json(
-                    ws_msg, player_infected
-                )
-            
+                ws_msg = create_ws_message(match.id, WS_STATUS_INFECTED,player_infector)
+                await match_live._match_connection_manager.send_personal_json(
+                        ws_msg, player_infected
+                    )
+        
+        next_player = get_next_player(match)     
         next_turn(match.id)
-        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, player.id)
+        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+@router.put("/matches/{match_id}/players/{player_id}/declare_end")
+async def declare_end_endpoint(input : declare_endIn):
+    live_match = get_live_match_by_id(input.match_id)
+
+    match_status = check_match_end(input.match_id)
+    if  match_status == MATCH_CONTINUES:
+        match_status = WS_STATUS_HUMANS_WIN
+    
+    set_winners(input.match_id, match_status)
+    ws_msg = create_ws_message(input.match_id, match_status)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
+    end_match(input.match_id)
+
+    return {"message" : "Match finalized"}
+
 
 
 @router.websocket("/ws/matches/{match_id}/{player_id}")

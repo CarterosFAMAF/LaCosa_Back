@@ -228,6 +228,7 @@ def create_ws_message(
                     "name": player.name,
                     "turn": player.position,
                     "alive": True if player.role != "dead" else False,
+                    "winner": player.winner,
                     "revealed_cards": list_revealed_card
                     if player.id == player_id
                     else [],
@@ -294,6 +295,12 @@ def get_ws_message_with_status(
     # Accion
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
+    elif status == WS_STATUS_HUMANS_WIN:
+        message = "Los Humanos ganan"
+    elif status == WS_STATUS_INFECTEDS_WIN:
+        message = "Los Infectados ganan"
+    elif status == WS_STATUS_THE_THING_WIN:
+        message = "La cosa gana"
     elif status == WS_STATUS_CHANGED_OF_PLACES:
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
@@ -310,7 +317,6 @@ def get_ws_message_with_status(
         message = (
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
-
     # Defensa
     elif status == WS_STATUS_HERE_IM_FINE:
         message = f"{player_name} se siente seguro en donde esta"
