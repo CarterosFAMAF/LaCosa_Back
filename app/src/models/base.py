@@ -138,6 +138,12 @@ def load_cards():
                 image="app/cards/Seduccion.png",
                 type=TYPE_ACTION,
             )
+            Card(
+                card_id = HACHA,
+                name="Hacha",
+                image="app/cards/Hacha.png",
+                type=TYPE_ACTION
+            )
             # CARTAS DEFENSA
             Card(
                 card_id=AQUI_ESTOY_BIEN,
@@ -175,6 +181,7 @@ def load_cards():
                 image=random.choice(image_infected),
                 type=TYPE_INFECTED,
             )
+            #OBSTACULO
             Card(
                 card_id = CUARENTENA,
                 name="Cuarentena",
@@ -185,12 +192,6 @@ def load_cards():
                 card_id = PUERTA_ATRANCADA,
                 name="Puerta Atrancada",
                 image="app/cards/Puerta_atrancada.png",
-                type=TYPE_OBSTACLE
-            )
-            Card(
-                card_id = HACHA,
-                name="Hacha",
-                image="app/cards/Hacha.png",
                 type=TYPE_OBSTACLE
             )
             flush()
