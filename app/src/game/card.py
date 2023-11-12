@@ -134,10 +134,10 @@ def play_vigila_tus_espaldas(match_id):
   
 def send_card_extra_deck(player_id,card_id,match_id):
     #cuando se usa intercambio
-    player = get_player_by_id(player_id)
-    card = get_card_by_id(card_id)
-    match = get_match_by_id(match_id)
     with db_session:
+        player = get_player_by_id(player_id)
+        card = get_card_by_id(card_id)
+        match = get_match_by_id(match_id)
         match.letter_to_raise = True
         match.extra_deck = card
         player.hand.remove(card)
