@@ -226,4 +226,4 @@ async def discard_message(match_id, player_id):
 async def broadcast_of_card_played(player_id,card_id,match_id):
     live_match = get_live_match_by_id(match_id)
     ws_msg = create_ws_message_play_card(player_id,card_id)
-    await live_match._match_connection_manager(ws_msg)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
