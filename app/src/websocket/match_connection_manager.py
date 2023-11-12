@@ -318,6 +318,8 @@ def get_ws_message_with_status(
         message = (
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
+    elif status == WS_STATUS_AXE:
+        message = f"{player_name} rompio la cuarentena de {player_target_name}"
     # Defensa
     elif status == WS_STATUS_HERE_IM_FINE:
         message = f"{player_name} se siente seguro en donde esta"
@@ -332,9 +334,7 @@ def get_ws_message_with_status(
     # Obstaculo
     elif status == WS_STATUS_QUARANTINE:
         message = f"{player_name} puso en cuarentena a {player_target_name}"
-    elif status == WS_STATUS_AXE:
-        message = f"{player_name} rompio la cuarentena de {player_target_name}"
-
+    
     # Cuarentena
     elif status == WS_STATUS_DRAW:
         message = f"{player_name} robo la carta {card_name}"
