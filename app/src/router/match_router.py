@@ -406,6 +406,12 @@ async def exchange_endpoint(input: ExchangeCardIn):
         ws_msg = create_card_exchange_message(card.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
         
+        next_player = get_next_player(match)     
+        next_turn(match.id)
+        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
+        
+        
     elif is_player_main_turn(match, player):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
