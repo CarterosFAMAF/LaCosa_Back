@@ -41,6 +41,7 @@ async def send_message_card_played(
         or status == WS_STATUS_ANALYSIS  # analisis no se va a mostrar nunca.
         or status == WS_STATUS_DETERMINATION
         or status == WS_STATUS_SEDUCCION
+        or status == WS_STATUS_BLIND_DATE
     ):
         ws_msg = create_ws_message(
             match_id=match_id,
