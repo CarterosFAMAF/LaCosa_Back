@@ -303,12 +303,12 @@ async def revelations_endpoint(input: revelationsIn):
     hand = get_hand(input.match_id,input.player_id)
     
     exist_infections,infected_card_id = exist_infection(hand)
-    
-    if exist_infections:
-        ws_msg = create_card_exchange_message(infected_card_id)
-        live_match._match_connection_manager.broadcast_json(ws_msg)
         
-    elif input.show:    
+    if input.show:
+        if exist_infections:
+            ws_msg = create_card_exchange_message(infected_card_id)
+            live_match._match_connection_manager.broadcast_json(ws_msg) 
+            return {"msg" : "revelations"} 
         ws_msg = create_ws_message(input.match_id,WS_STATUS_YES,input.player_id,0,"",hand)
         live_match._match_connection_manager.broadcast_json(ws_msg)
     else:
