@@ -87,7 +87,7 @@ async def send_message_card_played(
             ws_msg, player_out_id
         )
         """
-        
+
 
     elif status == WS_STATUS_SUSPECT:
         # send private msg to notice card seen
