@@ -238,18 +238,18 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 @router.put(
     "/matches/{match_id}/players/{player_id}/{card_id}/discard",
 )
-async def discard(match_id, player_id, card_id):
+async def discard(match_id: int, player_id: int, card_id: int):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
         match_id, player_id, 0, card_id, 0
     )
 
-    discard_card_of_player(card.id, match.id, player.id)
     if player.quarantine > 0:
         live_match = get_live_match_by_id(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD_QUARANTINE, player_id, 0, card.name)
         await live_match._match_connection_manager.broadcast_json(ws_msg)
     else:
         await discard_message(match.id, player.id)
+    discard_card_of_player(card.id, match.id, player.id)
 
     return {"message": "Card discard"}
 
@@ -399,8 +399,8 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
         prepare_exchange_card(player.id, card.id)
         if player.quarantine > 0:
-                ws_msg = create_ws_message(
-                match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id, card.name 
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_REQUEST_QUARANTINE, player.id, player_target.id, card.name 
             )
         else: 
             ws_msg = create_ws_message(
@@ -436,9 +436,8 @@ async def exchange_endpoint(input: ExchangeCardIn):
         )
         
         if player.quarantine > 0:
-            card = get_card_by_id(card_main_id)
             ws_msg = create_ws_message(
-                match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id, card.name 
+                match.id, WS_STATUS_EXCHANGE_QUARANTINE, player.id, player_target.id, card.name 
             )
         else: 
             ws_msg = create_ws_message(
