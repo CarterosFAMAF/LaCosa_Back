@@ -329,11 +329,21 @@ def get_ws_message_with_status(
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SCARY:
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+    # Obstaculo
     elif status == WS_STATUS_QUARANTINE:
         message = f"{player_name} puso en cuarentena a {player_target_name}"
     elif status == WS_STATUS_AXE:
         message = f"{player_name} rompio la cuarentena de {player_target_name}"
 
+    # Cuarentena
+    elif status == WS_STATUS_DRAW:
+        message = f"{player_name} robo la carta {card_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST_QUARANTINE:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name} con la carta {card_name}"
+    elif status == WS_STATUS_EXCHANGE_QUARANTINE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name} la carta {card_name}"
+    elif status == WS_STATUS_DISCARD_QUARANTINE:
+        message = f"{player_name} ha descartado la carta {card_name}"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message
