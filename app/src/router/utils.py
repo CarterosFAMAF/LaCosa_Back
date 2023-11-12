@@ -76,7 +76,7 @@ async def send_message_card_played(
 
         ws_msg = create_ws_message(
             match_id=match_id,
-            status=status,
+            status=WS_STATUS_SHOWS,
             player_id=player_in_id,
             player_target_id=player_out_id,
             card_name="",

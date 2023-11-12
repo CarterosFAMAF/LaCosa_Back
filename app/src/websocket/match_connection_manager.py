@@ -347,6 +347,7 @@ def get_ws_message_with_status(
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SCARY:
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+    
     # Panico
     elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
         message = f"{player_name} le esta susurrando a {player_target_name}"
@@ -354,6 +355,8 @@ def get_ws_message_with_status(
         message = f"Ups! a {player_name} se le han caido sus cartas"
     elif status == WS_STATUS_BLIND_DATE:
         message = f"a {player_name} le apetece tener una cita a ciegas"
+    elif status == WS_STATUS_SHOWS:
+        message = f"Estas viendo la mano de {player_name}"
     elif status == WS_STATUS_REVELATIONS:
         message = f"Comienza la ronda de revelaciones"
 
