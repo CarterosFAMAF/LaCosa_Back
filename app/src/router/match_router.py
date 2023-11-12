@@ -131,7 +131,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     )
     if card.card_id == WHISKY:
         list_card = []
-
+    
     # DISCARD MSG
     await discard_message(match_id, player_in_id)
 
@@ -244,7 +244,12 @@ async def discard(match_id, player_id, card_id):
     )
 
     discard_card_of_player(card.id, match.id, player.id)
-    await discard_message(match.id, player.id)
+    if player.quarantine > 0:
+        live_match = get_live_match_by_id(match_id)
+        ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD_QUARANTINE, player_id, 0, card.name)
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+    else:
+        await discard_message(match.id, player.id)
 
     return {"message": "Card discard"}
 
@@ -260,6 +265,11 @@ async def get_card_endpoint(match_id: int, player_id: int):
     )
 
     card = get_card(match_id, player_id)
+    if player.quarantine > 0:
+        live_match = get_live_match_by_id(match_id)
+        ws_msg = create_ws_message(match_id, WS_STATUS_DRAW, player_id, 0, card["name"])
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+
     return CardModel(
         id=card["id"], name=card["name"], image=card["image"], type=card["type"]
     )

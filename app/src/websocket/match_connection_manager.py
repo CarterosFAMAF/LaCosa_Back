@@ -228,7 +228,7 @@ def create_ws_message(
                     "name": player.name,
                     "turn": player.position,
                     "alive": True if player.role != "dead" else False,
-                    "quarantine": True if player.quarantine > 0 else False,
+                    "quarantine": player.quarantine,
                     "winner": player.winner,
                     "revealed_cards": list_revealed_card
                     if player.id == player_id
