@@ -117,13 +117,13 @@ def get_card(match_id: int, player_id: int,panic:bool=True):
 
     elif (panic):
         #cuando tengo que sacar una carta del mazo que no sea del tipo panico
-        card = select(c for c in match.deck if c.type != TYPE_PANIC).random(1)[0]
+        card = select(c for c in match.deck).random(1)[0]
         if card == None:
             #falta eliminar la carta de discard_pile
-            card = select(c for c in match.discard_pile if c.type != TYPE_PANIC).random(1)[0]
+            card = select(c for c in match.discard_pile).random(1)[0]
             match.discard_pile.remove(card)
     else:
-        card = select(c for c in match.deck).random(1)[0]
+        card = select(c for c in match.deck if c.type != TYPE_PANIC).random(1)[0]
         
     card_image = get_card_image(card.image)
     player.hand.add(card)
