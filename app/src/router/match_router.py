@@ -467,6 +467,25 @@ async def exchange_endpoint(input: ExchangeCardIn):
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
+@router.put("/matches/{match_id}/next_turn",
+    status_code=status.HTTP_200_OK,
+)
+async def next_turn_endpoint(match_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+    match_live = get_live_match_by_id(match.id)
+    next_player = get_next_player(match)     
+    next_turn(match.id)
+    ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
+    await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+
+
 @router.put("/matches/{match_id}/players/{player_id}/declare_end")
 async def declare_end_endpoint(input : declare_endIn):
     live_match = get_live_match_by_id(input.match_id)
