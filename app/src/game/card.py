@@ -465,6 +465,25 @@ def create_card_exchange_message(card_id):
     
     return response
 
+def create_ws_message_play_card(player_id,card_id):
+
+    player = get_player_by_id(player_id)
+    card = get_card_by_id(card_id)
+    player_name = player.name
+    card_name = card.card_id
+
+    if card_name == LANZALLAMAS:
+        ws_msg = f"{player_name} ha utilizado lanzallamas"
+    elif card_name == CAMBIO_DE_LUGAR:
+        ws_msg = f"{player_name} ha utilizado cambio de lugar"
+    elif card_name == MAS_VALE_QUE_CORRAS:
+        ws_msg = f"{player_name} ha utilizado mas vale que corras"
+    
+    response = {
+        "status" : WS_STATUS_EVENTS_CARDS,
+        "message" : ws_msg
+    }
+
 # OBSTACULO
 
 def play_hacha(player_id, match_id):

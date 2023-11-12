@@ -3,7 +3,7 @@ from app.src.websocket.match_connection_manager import create_ws_message
 from app.src.game.match import get_live_match_by_id
 from app.src.websocket.match_connection_manager import *
 from app.src.game.match import *
-
+from app.src.game.card import *
 # sospecha: manda un mensaje privado, 1 carta random del player target por el endpoint
 # analisis: lista de cartas del player target por el endpoint
 # whiskey: broadcastear a todos lista cartas player main
@@ -221,3 +221,9 @@ async def discard_message(match_id, player_id):
     live_match = get_live_match_by_id(match_id)
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_id)
     await live_match._match_connection_manager.broadcast_json(ws_msg)
+
+
+async def broadcast_of_card_played(player_id,card_id,match_id):
+    live_match = get_live_match_by_id(match_id)
+    ws_msg = create_ws_message_play_card(player_id,card_id)
+    await live_match._match_connection_manager(ws_msg)

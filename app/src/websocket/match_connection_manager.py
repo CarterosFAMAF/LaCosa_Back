@@ -194,14 +194,7 @@ def create_ws_message_fallaste(
 
     return msg_ws
 
-def create_ws_message_play_card(player_id,card_id):
-    
-    #que carta utiliza cada jugador
-    
-    response = {
-        "status" : WS_STATUS_EVENTS_CARDS,
-        "message" : ws_msg
-    }
+
     
     return response
 
