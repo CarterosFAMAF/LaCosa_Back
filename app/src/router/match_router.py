@@ -401,9 +401,12 @@ async def exchange_endpoint(input: ExchangeCardIn):
     match_live = get_live_match_by_id(match.id)
 
     if input.blind_date:
+        card = get_card(match.id,player.id,False)
         send_card_extra_deck(input.player_id,input.card_id,input.match_id)
+        ws_msg = create_card_exchange_message(card.id)
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
         
-    if is_player_main_turn(match, player):
+    elif is_player_main_turn(match, player):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
 
