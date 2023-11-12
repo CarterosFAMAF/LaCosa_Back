@@ -223,10 +223,7 @@ def can_defend(player_target_id, card_action):
     if card_action == 0:
         #casos para intercambio, no tenemos id de card_action
         for card in cards:
-            if card.card_id == ATERRADOR:
-                can_defend = True
-                list_id_cards.append(card.id)
-            elif card.card_id == NO_GRACIAS:
+            if card.card_id == ATERRADOR or card.card_id == NO_GRACIAS or card.card_id == FALLASTE:
                 can_defend = True
                 list_id_cards.append(card.id)
     else:

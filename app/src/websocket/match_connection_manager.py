@@ -177,7 +177,7 @@ def create_ws_message_fallaste(
 
     msg_ws = {
         "status": WS_STATUS_YOU_FAILED,
-        "msg": f"{player_fallaste_name} jugo carta fallaste contra el intento de intercambio iniciado por {player_main_name}. Ahora le toca a {player_target_name}",
+        "message": f"{player_fallaste_name} jugo carta fallaste contra el intento de intercambio iniciado por {player_main_name}. Ahora le toca a {player_target_name}",
         "player_main_id": player_main_id,
         "player_fallaste": player_fallaste_id,
         "player_target": player_target_id,
