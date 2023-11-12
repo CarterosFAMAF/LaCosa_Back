@@ -398,10 +398,14 @@ async def exchange_endpoint(input: ExchangeCardIn):
             player_target = get_next_player(match)
 
         prepare_exchange_card(player.id, card.id)
-
-        ws_msg = create_ws_message(
-            match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
-        )
+        if player.quarantine > 0:
+                ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id, card.name 
+            )
+        else: 
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
+            )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
         can_defense_bool, list_card = can_defend(player_target.id, 0)
@@ -418,7 +422,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     else:
         prepare_exchange_card(player.id, card.id)
-        receive_infected = receive_infected_card(input.player_target_id)    
+        receive_infected = receive_infected_card(input.player_target_id)
         card_main_id, card_target_id = apply_exchange(player.id, player_target.id)
 
         card_msg = create_card_exchange_message(card_main_id)
@@ -430,10 +434,17 @@ async def exchange_endpoint(input: ExchangeCardIn):
         await match_live._match_connection_manager.send_personal_json(
             card_msg, player.id
         )
-
-        ws_msg = create_ws_message(
-            match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
-        )
+        
+        if player.quarantine > 0:
+            card = get_card_by_id(card_main_id)
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id, card.name 
+            )
+        else: 
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
+            )
+        
         await match_live._match_connection_manager.broadcast_json(ws_msg)
         #esta carta no contempla el hecho de que se recibe una carta.
         if (send_infected_card(card) or receive_infected) and (not input.is_you_failed): 
