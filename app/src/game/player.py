@@ -147,7 +147,7 @@ def get_player_hand(match_id: int, player_id: int):
     player = PlayerDB.get(id=player_id)
     hand = []
 
-    cards = select(c for c in player.hand)[:]
+    cards = select(c for c in player.hand if c.type != TYPE_PANIC)[:]
     for card in cards:
         card_image = get_card_image(card.image)
         hand.append(
