@@ -404,7 +404,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
         card = get_card(match.id,player.id,False)
         send_card_extra_deck(input.player_id,input.card_id,input.match_id)
         ws_msg = create_card_exchange_message(card.id)
-        await match_live._match_connection_manager.broadcast_json(ws_msg)
+        await match_live._match_connection_manager.send_personal_json(ws_msg,player.id)
         
         next_player = get_next_player(match)     
         next_turn(match.id)
