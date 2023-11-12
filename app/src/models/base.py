@@ -35,7 +35,7 @@ class Player(db.Entity):
     position = Optional(int, default=-1)
     winner= Optional(bool)
     role = Optional(str)
-    quarantine = Optional(bool)
+    quarantine = Optional(int, default=0)
     hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")

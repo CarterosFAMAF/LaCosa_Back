@@ -350,7 +350,7 @@ def play_hacha(player_id, match_id):
     with db_session:
         player = get_player_by_id(player_id)
         match = get_match_by_id(match_id)
-        player.quarantine = False
+        player.quarantine = 0
     
     status = WS_STATUS_AXE
     return status
@@ -358,7 +358,7 @@ def play_hacha(player_id, match_id):
 def play_cuarentena(player_id):
     with db_session:
         player = get_player_by_id(player_id)
-        player.quarantine = True
+        player.quarantine = 3
     
     status = WS_STATUS_QUARANTINE
     return status

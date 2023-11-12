@@ -228,6 +228,7 @@ def create_ws_message(
                     "name": player.name,
                     "turn": player.position,
                     "alive": True if player.role != "dead" else False,
+                    "quarantine": True if player.quarantine > 0 else False,
                     "winner": player.winner,
                     "revealed_cards": list_revealed_card
                     if player.id == player_id
@@ -328,6 +329,10 @@ def get_ws_message_with_status(
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SCARY:
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+    elif status == WS_STATUS_QUARANTINE:
+        message = f"{player_name} puso en cuarentena a {player_target_name}"
+    elif status == WS_STATUS_AXE:
+        message = f"{player_name} rompio la cuarentena de {player_target_name}"
 
     else:
         message = "Status desconocido"  # Handle unknown status values
