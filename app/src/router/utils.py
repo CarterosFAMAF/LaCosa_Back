@@ -40,6 +40,8 @@ async def send_message_card_played(
         or status == WS_STATUS_REVERSE_POSITION
         or status == WS_STATUS_ANALYSIS
         or status == WS_STATUS_SEDUCCION
+        or status == WS_STATUS_QUARANTINE
+        or status == WS_STATUS_AXE
     ):
         ws_msg = create_ws_message(
             match_id=match_id,
