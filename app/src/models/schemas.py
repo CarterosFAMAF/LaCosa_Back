@@ -48,6 +48,11 @@ class getCardIn(BaseModel):
     player_id:int
     not_panic:bool=False
 
+class SendMesaggeIn(BaseModel):
+    match_id: int 
+    owner_id: int 
+    text: str
+    
 class ListMatchOut(BaseModel):
     match_id: int
     match_name: str
