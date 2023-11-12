@@ -231,8 +231,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
         else:
             # DISCARD's
             discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
-            await discard_message(input.match_id, input.player_target_id)
-            await discard_message(input.match_id, input.player_main_id)
+            #await discard_message(input.match_id, input.player_target_id)
+            #await discard_message(input.match_id, input.player_main_id)
 
     return list_card
 
