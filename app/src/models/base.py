@@ -37,6 +37,7 @@ class Player(db.Entity):
     position = Optional(int, default=-1)
     winner= Optional(bool)
     role = Optional(str)
+    quarantine = Optional(int, default=0)
     hand = Set("Card")
     match = Optional(Match, reverse="players")
     match_owner = Optional(Match, reverse="player_owner")
@@ -147,6 +148,13 @@ def load_cards():
                 type = TYPE_ACTION
             )
             #CARTAS DEFENSA
+            Card(   
+                card_id = HACHA,
+                name="Hacha",
+                image="app/cards/Hacha.png",
+                type=TYPE_ACTION
+            )
+            # CARTAS DEFENSA
             Card(
                 card_id=AQUI_ESTOY_BIEN,
                 name="Aqui_estoy_bien",
@@ -200,6 +208,19 @@ def load_cards():
                 name="Infeccion",
                 image=random.choice(image_infected),
                 type=TYPE_INFECTED,
+            )
+            #OBSTACULO
+            Card(
+                card_id = CUARENTENA,
+                name="Cuarentena",
+                image="app/cards/Cuarentena.png",
+                type=TYPE_OBSTACLE
+            )
+            Card(
+                card_id = PUERTA_ATRANCADA,
+                name="Puerta Atrancada",
+                image="app/cards/Puerta_atrancada.png",
+                type=TYPE_OBSTACLE
             )
             flush()
     except:

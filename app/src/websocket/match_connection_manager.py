@@ -237,6 +237,7 @@ def create_ws_message(
                     "name": player.name,
                     "turn": player.position,
                     "alive": True if player.role != "dead" else False,
+                    "quarantine": player.quarantine,
                     "winner": player.winner,
                     "revealed_cards": list_revealed_card
                     if player.id == player_id
@@ -336,6 +337,8 @@ def get_ws_message_with_status(
         )
     elif status == WS_STATUS_DETERMINATION:
         message = f"{player_name} esta determinado a sobrevivir"
+    elif status == WS_STATUS_AXE:
+        message = f"{player_name} rompio la cuarentena de {player_target_name}"
     # Defensa
     elif status == WS_STATUS_HERE_IM_FINE:
         message = f"{player_name} se siente seguro en donde esta"
@@ -360,6 +363,19 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_REVELATIONS:
         message = f"Comienza la ronda de revelaciones"
 
+    # Obstaculo
+    elif status == WS_STATUS_QUARANTINE:
+        message = f"{player_name} puso en cuarentena a {player_target_name}"
+    
+    # Cuarentena
+    elif status == WS_STATUS_DRAW:
+        message = f"{player_name} robo la carta {card_name}"
+    elif status == WS_STATUS_EXCHANGE_REQUEST_QUARANTINE:
+        message = f"{player_name} ha solicitado un intercambio a {player_target_name} con la carta {card_name}"
+    elif status == WS_STATUS_EXCHANGE_QUARANTINE:
+        message = f"{player_name} ha realizado un intercambio con {player_target_name} la carta {card_name}"
+    elif status == WS_STATUS_DISCARD_QUARANTINE:
+        message = f"{player_name} ha descartado la carta {card_name}"
     else:
         message = "Status desconocido"  # Handle unknown status values
     return message

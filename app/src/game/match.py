@@ -213,6 +213,7 @@ def next_turn(match_id: int):
             ).first()
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
+                player.quarantine -=1
                 break
 
 
@@ -288,6 +289,7 @@ def start_game(match_id: int):
     position = 0
     for player in players:
         player.position = position
+        player.quarantine = 0
         player.winner = False
         if player.role != PLAYER_ROLE_THE_THING:
             player.role = PLAYER_ROLE_HUMAN

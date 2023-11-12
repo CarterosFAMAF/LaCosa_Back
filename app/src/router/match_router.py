@@ -131,6 +131,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     )
     if card.card_id == WHISKY or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS or card.card_id == UPS:
         list_card = []
+    
     # DISCARD MSG
     await discard_message(match_id, player_in_id)
 
@@ -239,13 +240,18 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
 @router.put(
     "/matches/{match_id}/players/{player_id}/{card_id}/discard",
 )
-async def discard(match_id, player_id, card_id):
+async def discard(match_id: int, player_id: int, card_id: int):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
         match_id, player_id, 0, card_id, 0
     )
 
+    if player.quarantine > 0:
+        live_match = get_live_match_by_id(match_id)
+        ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD_QUARANTINE, player_id, 0, card.name)
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+    else:
+        await discard_message(match.id, player.id)
     discard_card_of_player(card.id, match.id, player.id)
-    await discard_message(match.id, player.id)
 
     return {"message": "Card discard"}
 
@@ -256,7 +262,16 @@ async def discard(match_id, player_id, card_id):
     status_code=status.HTTP_200_OK,
 )
 async def get_card_endpoint(match_id,player_id,panic):
+    match, player, player_target, card, card_target = validate_match_players_and_cards(
+        match_id, player_id, 0, 0, 0
+    )
     card = get_card(match_id,player_id,panic)
+    
+    if player.quarantine > 0:
+        live_match = get_live_match_by_id(match_id)
+        ws_msg = create_ws_message(match_id, WS_STATUS_DRAW, player_id, 0, card["name"])
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+
     return CardModel(
         id=card["id"], name=card["name"], image=card["image"], type=card["type"]
     )
@@ -417,10 +432,14 @@ async def exchange_endpoint(input: ExchangeCardIn):
             player_target = get_next_player(match)
 
         prepare_exchange_card(player.id, card.id)
-
-        ws_msg = create_ws_message(
-            match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
-        )
+        if player.quarantine > 0:
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_REQUEST_QUARANTINE, player.id, player_target.id, card.name 
+            )
+        else: 
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_REQUEST, player.id, player_target.id
+            )
         await match_live._match_connection_manager.broadcast_json(ws_msg)
 
         can_defense_bool, list_card = can_defend(player_target.id, 0)
@@ -437,7 +456,7 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     else:
         prepare_exchange_card(player.id, card.id)
-        receive_infected = receive_infected_card(input.player_target_id)    
+        receive_infected = receive_infected_card(input.player_target_id)
         card_main_id, card_target_id = apply_exchange(player.id, player_target.id)
 
         card_msg = create_card_exchange_message(card_main_id)
@@ -449,10 +468,16 @@ async def exchange_endpoint(input: ExchangeCardIn):
         await match_live._match_connection_manager.send_personal_json(
             card_msg, player.id
         )
-
-        ws_msg = create_ws_message(
-            match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
-        )
+        
+        if player.quarantine > 0:
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE_QUARANTINE, player.id, player_target.id, card.name 
+            )
+        else: 
+            ws_msg = create_ws_message(
+                match.id, WS_STATUS_EXCHANGE, player.id, player_target.id
+            )
+        
         await match_live._match_connection_manager.broadcast_json(ws_msg)
         if (send_infected_card(card) or receive_infected) and (not input.is_you_failed): 
             player_infected = None
@@ -484,6 +509,25 @@ async def exchange_endpoint(input: ExchangeCardIn):
         next_turn(match.id)
         ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
         await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+@router.put("/matches/{match_id}/next_turn",
+    status_code=status.HTTP_200_OK,
+)
+async def next_turn_endpoint(match_id: int):
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        if match == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Match not found",
+            )
+    match_live = get_live_match_by_id(match.id)
+    next_player = get_next_player(match)     
+    next_turn(match.id)
+    ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
+    await match_live._match_connection_manager.broadcast_json(ws_msg)
+
+
 
 @router.put("/matches/{match_id}/players/{player_id}/declare_end")
 async def declare_end_endpoint(input : declare_endIn):

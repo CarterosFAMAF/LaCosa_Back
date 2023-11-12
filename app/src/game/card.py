@@ -44,6 +44,10 @@ def play_card(player_in, player_out, match_id: int, card_id: int):
         status = WS_STATUS_BLIND_DATE
     elif card.card_id == REVELACIONES:
         status = WS_STATUS_REVELATIONS
+    elif card.card_id == HACHA:
+        status = play_hacha(player_out.id, match_id)
+    elif card.card_id == CUARENTENA:
+        status = play_cuarentena(player_out.id)
     else:
         pass
 
@@ -460,3 +464,22 @@ def create_card_exchange_message(card_id):
     }
     
     return response
+
+# OBSTACULO
+
+def play_hacha(player_id, match_id):
+    with db_session:
+        player = get_player_by_id(player_id)
+        match = get_match_by_id(match_id)
+        player.quarantine = 0
+    
+    status = WS_STATUS_AXE
+    return status
+
+def play_cuarentena(player_id):
+    with db_session:
+        player = get_player_by_id(player_id)
+        player.quarantine = 3
+    
+    status = WS_STATUS_QUARANTINE
+    return status
