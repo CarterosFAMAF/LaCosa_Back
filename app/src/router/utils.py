@@ -70,10 +70,11 @@ async def send_message_card_played(
             player_id=player_in_id,
             player_target_id=player_out_id,
             card_name="",
-            list_revealed_card=[],
+            list_revealed_card=list_cards,
         )
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
+        """ 
         ws_msg = create_ws_message(
             match_id=match_id,
             status=WS_STATUS_SHOWS,
@@ -85,6 +86,8 @@ async def send_message_card_played(
         await live_match._match_connection_manager.send_personal_json(
             ws_msg, player_out_id
         )
+        """
+        
 
     elif status == WS_STATUS_SUSPECT:
         # send private msg to notice card seen
