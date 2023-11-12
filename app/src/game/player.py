@@ -109,7 +109,7 @@ def get_card(match_id: int, player_id: int,panic:bool=True):
         match.deck.add(deck)
     
     if match.letter_to_raise:
-        with db_session:
+        with db_session:   
             card = match.extra_deck #aca no se si lo copia pero vamo a ve
             match.extra_deck = None
             match.letter_to_raise = False
