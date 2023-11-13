@@ -26,7 +26,7 @@ def create_deck(player_amount: int):
     elif player_amount == 12:
         deck = DECK[:108]
     else:
-        pass
+        deck = []
     return deck
 
 

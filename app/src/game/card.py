@@ -9,10 +9,6 @@ from app.src.game.constants import *
 from app.src.websocket.constants import *
 
 
-class Card:
-    name: str
-
-
 def play_card(player_in, player_out, match_id: int, card_id: int):
     """
     Play a card from a player to another player, changes the state of the game, and send a message to all players
