@@ -16,3 +16,9 @@ uvicorn app.main:app --reload
 ~~~
 pytest
 ~~~
+
+## Para ver el coverage
+~~~
+coverage run -m pytest
+coverage report
+~~~

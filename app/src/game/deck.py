@@ -26,7 +26,7 @@ def create_deck(player_amount: int):
     elif player_amount == 12:
         deck = DECK[:108]
     else:
-        pass
+        deck = []
     return deck
 
 
@@ -39,7 +39,10 @@ def add_cards_to_deck(match_id: int, player_amount: int):
         for id in deck:
             card = select(c for c in CardDB if c.card_id == id)[:]
             card_copy = CardDB(
-                card_id=card[0].card_id, name=card[0].name, image=card[0].image
+                card_id=card[0].card_id,
+                name=card[0].name,
+                image=card[0].image,
+                type=card[0].type,
             )
             match.deck.add(card_copy)
         flush()

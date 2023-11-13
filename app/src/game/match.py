@@ -213,6 +213,7 @@ def next_turn(match_id: int):
             ).first()
             # if it is not dead, break the loop, else, continue
             if player.role != PLAYER_ROLE_DEAD:
+                player.quarantine -=1
                 break
 
 
@@ -232,7 +233,7 @@ def deal_cards(match_id: int):
     players_list = select(p for p in match.players)[:]
 
     for player in players_list:
-        cards = select(c for c in match.deck).random(4)
+        cards = select(c for c in match.deck if c.type != TYPE_PANIC).random(4)
         player.hand.add(cards)
         match.deck.remove(cards)
 
@@ -281,11 +282,15 @@ def start_game(match_id: int):
     match.started = True
     match.clockwise = True
     match.turn = 0
+    match.letter_to_raise = False
+    match.extra_deck = None
     deal_cards(match_id)
     players = select(p for p in match.players).random(match.number_players)
     position = 0
     for player in players:
         player.position = position
+        player.quarantine = 0
+        player.winner = False
         if player.role != PLAYER_ROLE_THE_THING:
             player.role = PLAYER_ROLE_HUMAN
         position += 1
@@ -338,31 +343,88 @@ def delete_match(match_id):
         flush()
 
 
+def store_message(match_id: int, player_id: int, msg: str):
+    """
+    Save message in db
+
+    Args:
+        match_id (int)
+        player_id (int)
+        msg (str)
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        player = PlayerDB.get(id=player_id)
+        match.messages.create(player=player, message=msg)
+        flush()
+
+
 def check_match_end(match_id):
     """
     Check if match has ended
-    Iterate over players and check if there is only one human player alive
+    Iterate over players and check if the thing is alive or if all the humans are infected 
 
     Args:
         match_id (int)
 
     Returns:
-        ended (bool)
+        msg (str)
     """
     with db_session:
         match = MatchDB.get(id=match_id)
         players = select(p for p in match.players)[:]
         humans_alive = 0
+        the_thing_is_alive = False
+        infeteds_alive = 0
+        dead_players = 0
         ended = False
 
         for player in players:
-            if player.role == PLAYER_ROLE_HUMAN or player.role == PLAYER_ROLE_THE_THING:
+            if player.role == PLAYER_ROLE_DEAD:
+                dead_players += 1
+            if player.role == PLAYER_ROLE_HUMAN:
                 humans_alive += 1
+            if player.role == PLAYER_ROLE_INFECTED:
+                infeteds_alive += 1
+            if player.role == PLAYER_ROLE_THE_THING:
+                the_thing_is_alive = True
 
-        if humans_alive == 1:
-            ended = True
+        if not the_thing_is_alive:
+            msg = WS_STATUS_HUMANS_WIN
+        elif the_thing_is_alive and infeteds_alive ==  match.number_players -1:
+            msg = WS_STATUS_THE_THING_WIN
+        elif the_thing_is_alive and humans_alive == 0:
+            msg = WS_STATUS_INFECTEDS_WIN
+        else:
+            msg = MATCH_CONTINUES
+        return msg
 
-        return ended
 
+def set_winners(match_id, result):
+    """
+    Set the winners for the diferent results
 
+    Args:
+        match_id (int)
+    
+    Returns:
+        None
+    """
+    with db_session:
+        match = MatchDB.get(id=match_id)
+        players = select(p for p in match.players)[:]
+        
+        for player in players:
+            if result == WS_STATUS_HUMANS_WIN and player.role == PLAYER_ROLE_HUMAN:
+                player.winner = True
+            elif result == WS_STATUS_THE_THING_WIN and player.role == PLAYER_ROLE_THE_THING:
+                player.winner = True
+            elif result == WS_STATUS_INFECTEDS_WIN and (player.role == PLAYER_ROLE_INFECTED or player.role == PLAYER_ROLE_THE_THING):
+                player.winner = True
+            else:
+                player.winner = False
+        flush()
+    
 MATCHES: List[Match] = []
