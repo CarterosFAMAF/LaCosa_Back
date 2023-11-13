@@ -192,6 +192,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
     # se tiene que hacer un intercambio con is_you_failed = True
 
     elif card_main.card_id == FALLASTE:
+        discard_card_of_player(input.card_main_id,input.match_id,input.player_main_id)
         # broadcastear que el jugador se defendio con una fallaste
         new_exchange_player = get_next_player_by_player_turn(input.match_id,input.player_main_id)
         ws_msg = create_ws_message_fallaste(player_main_id=input.player_target_id, player_fallaste_id=input.player_main_id, player_target_id=new_exchange_player.id)
@@ -227,14 +228,10 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             ws_msg = create_ws_message(
                 input.match_id, WS_STATUS_NEW_TURN, player_turn.id
             )
-            await live_match._match_connection_manager.broadcast_json(ws_msg)
-            
-        else:
-            # DISCARD's
-            discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
-            #await discard_message(input.match_id, input.player_target_id)
-            #await discard_message(input.match_id, input.player_main_id)
+            await live_match._match_connection_manager.broadcast_json(ws_msg)       
 
+        discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
+    
     return list_card
 
 
