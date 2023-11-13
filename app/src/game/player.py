@@ -75,13 +75,6 @@ def discard_card_of_player(card_id, match_id, player_id):
         match.discard_pile.add(card)
         flush()
 
-"""
-def get_card_image(path: str):
-    with open(path, "rb") as f:
-        card_img = base64.b64encode(f.read())
-        f.close()
-    return card_img
-"""
 
 def get_card_image(path: str):
     with open(path, "rb") as f:
