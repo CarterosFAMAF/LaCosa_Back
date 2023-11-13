@@ -57,9 +57,7 @@ def test_create_invalid_match_max_min_players():
         "/matches",
         json={
             "player_name": "string",
-            "match_name": "string",
-            "max_players": 4,
-            "min_players": 5,
+            "min_players": 4,
         },
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

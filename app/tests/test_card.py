@@ -394,11 +394,11 @@ def test_play_car_investigation():
         player_target.hand.add(lanzallamas)
         print(len(player_target.hand))
 
-        cards = play_card_investigation(player,player_target,sospecha)
+        cards = play_card_investigation(player,player_target,sospecha,match)
         assert len(cards) == 1
-        cards = play_card_investigation(player,player_target,analisis)
+        cards = play_card_investigation(player,player_target,analisis,match)
         assert len(cards) == 2
-        cards = play_card_investigation(player,player_target,whisky)
+        cards = play_card_investigation(player,player_target,whisky,match)
         assert len(cards) == 4
         assert is_investigation_card(whisky)
         assert is_investigation_card(analisis)
