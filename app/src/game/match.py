@@ -233,7 +233,7 @@ def deal_cards(match_id: int):
     players_list = select(p for p in match.players)[:]
 
     for player in players_list:
-        cards = select(c for c in match.deck).random(4)
+        cards = select(c for c in match.deck if c.type != TYPE_PANIC).random(4)
         player.hand.add(cards)
         match.deck.remove(cards)
 
@@ -282,6 +282,8 @@ def start_game(match_id: int):
     match.started = True
     match.clockwise = True
     match.turn = 0
+    match.letter_to_raise = False
+    match.extra_deck = None
     deal_cards(match_id)
     players = select(p for p in match.players).random(match.number_players)
     position = 0

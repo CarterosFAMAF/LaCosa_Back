@@ -83,7 +83,7 @@ def get_card_image(path: str):
 
 
 @db_session
-def get_card(match_id: int, player_id: int):
+def get_card(match_id: int, player_id: int,panic:bool=True):
     """
     Get a card from the deck and add it to the player hand
 
@@ -96,13 +96,34 @@ def get_card(match_id: int, player_id: int):
     """
     match = MatchDB.get(id=match_id)
     player = PlayerDB.get(id=player_id)
+    
     if match.deck == [] and match.discard_pile != []:
         deck = match.discard_pile.copy()
         match.discard_pile.clear()
         match.deck.add(deck)
+    
+    if match.letter_to_raise:
+        with db_session:   
+            card = match.extra_deck #aca no se si lo copia pero vamo a ve
+            match.extra_deck = None
+            match.letter_to_raise = False
+            flush()
 
-    # se puede reutilizar para sospecha.
-    card = select(c for c in match.deck).random(1)[0]
+    elif (panic):
+        #cuando tengo que sacar una carta del mazo que no sea del tipo panico
+        card = select(c for c in match.deck).random(1)[0]
+        if card == None:
+            #falta eliminar la carta de discard_pile
+            card = select(c for c in match.discard_pile).random(1)[0]
+            match.discard_pile.remove(card)
+    else:
+        card = select(c for c in match.deck if c.type != TYPE_PANIC).random(1)[0]
+        if card == []:
+            deck = match.discard_pile.copy()
+            match.discard_pile.clear()
+            match.deck.add(deck)
+            card = select(c for c in match.deck if c.type != TYPE_PANIC).random(1)[0]
+        
     card_image = get_card_image(card.image)
     player.hand.add(card)
     match.deck.remove(card)
@@ -125,7 +146,7 @@ def get_player_hand(match_id: int, player_id: int):
     player = PlayerDB.get(id=player_id)
     hand = []
 
-    cards = select(c for c in player.hand)[:]
+    cards = select(c for c in player.hand if c.type != TYPE_PANIC)[:]
     for card in cards:
         card_image = get_card_image(card.image)
         hand.append(

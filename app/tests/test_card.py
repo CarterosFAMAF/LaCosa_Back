@@ -352,7 +352,7 @@ def test_create_status():
     with db_session:
         sospecha = select(p for p in CardDB if p.card_id == SOSPECHA).random(1)[0]
         analisis  = select(p for p in CardDB if p.card_id == ANALISIS).random(1)[0]
-        whisky = select(p for p in CardDB if p.card_id == WHISKY).random(1)[0]  
+        whisky = select(p for p in CardDB if p.card_id == WHISKY).random(1)[0]
         assert WS_STATUS_SUSPECT == create_status_investigation(sospecha)
         assert WS_STATUS_ANALYSIS == create_status_investigation(analisis)
         assert WS_STATUS_WHISKY == create_status_investigation(whisky)

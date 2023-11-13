@@ -99,6 +99,9 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
     live_match = get_live_match_by_id(match.id)
     list_card = []
 
+    if card.card_id == LANZALLAMAS or card.card_id == CAMBIO_DE_LUGAR or card.card_id == MAS_VALE_QUE_CORRAS:
+        await broadcast_of_card_played(player_in.id,card.id,match.id)
+    
     can_defend_bool, list_card = can_defend(player_out_id, card.card_id)
     if can_defend_bool:  # si el target tiene nada de barbacoas
         # deberia mandarle el id de la carta del jugador main.
@@ -113,7 +116,7 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
         return []
 
     elif is_investigation_card(card):  # sospecha, whiskey, analisis
-        list_card = play_card_investigation(player_in, player_out, card)
+        list_card = play_card_investigation(player_in, player_out, card,match)
         status = create_status_investigation(card)
         discard_card_of_player(card.id, match.id, player_in.id)
 
@@ -129,11 +132,9 @@ async def play_card_endpoint(match_id: int, player_in_id, player_out_id, card_id
         card_name=card.name,
         list_cards=list_card,
     )
-    if card.card_id == WHISKY:
+    if card.card_id == WHISKY or card.card_id == QUE_QUEDE_ENTRE_NOSOTROS or card.card_id == UPS:
         list_card = []
     
-    # DISCARD MSG
-    await discard_message(match_id, player_in_id)
 
     return list_card
 
@@ -167,7 +168,7 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             )
     live_match = get_live_match_by_id(input.match_id)
     list_card = []
-
+    #caso en el que decide no defenderse
     if input.card_main_id == 0:
         # Como no hay defensa para cartas de "investigacion" nunca devolveremos una lista en play_card.
 
@@ -187,6 +188,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
             list_cards=[],
         )
 
+    #caso de fallaste , se realiza un intercambio con otro objetivo. 
+    # se tiene que hacer un intercambio con is_you_failed = True
 
     elif card_main.card_id == FALLASTE:
         # broadcastear que el jugador se defendio con una fallaste
@@ -229,8 +232,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
         else:
             # DISCARD's
             discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
-            await discard_message(input.match_id, input.player_target_id)
-            await discard_message(input.match_id, input.player_main_id)
+            #await discard_message(input.match_id, input.player_target_id)
+            #await discard_message(input.match_id, input.player_main_id)
 
     return list_card
 
@@ -255,16 +258,16 @@ async def discard(match_id: int, player_id: int, card_id: int):
 
 
 @router.get(
-    "/matches/{match_id}/players/{player_id}/get_card",
+    "/matches/{match_id}/players/{player_id}/{panic}/get_card",
     response_model=CardModel,
     status_code=status.HTTP_200_OK,
 )
-async def get_card_endpoint(match_id: int, player_id: int):
+async def get_card_endpoint(match_id:int,player_id:int,panic:bool):
     match, player, player_target, card, card_target = validate_match_players_and_cards(
         match_id, player_id, 0, 0, 0
     )
-
-    card = get_card(match_id, player_id)
+    card = get_card(match_id,player_id,panic)
+    
     if player.quarantine > 0:
         live_match = get_live_match_by_id(match_id)
         ws_msg = create_ws_message(match_id, WS_STATUS_DRAW, player_id, 0, card["name"])
@@ -294,6 +297,26 @@ async def list_matches():
     matches = list_not_started_matches()
     return matches
 
+
+@router.put("/matches/{match_id}/players/revelations")
+async def revelations_endpoint(input: revelationsIn):
+    live_match = get_live_match_by_id(input.match_id)
+    hand = get_hand(input.match_id,input.player_id)
+    
+    exist_infections,infected_card_id = exist_infection(hand)
+        
+    if input.show:
+        if exist_infections:
+            ws_msg = create_card_exchange_message(infected_card_id)
+            live_match._match_connection_manager.broadcast_json(ws_msg) 
+            return {"msg" : "revelations"} 
+        ws_msg = create_ws_message(input.match_id,WS_STATUS_YES,input.player_id,0,"",hand)
+        live_match._match_connection_manager.broadcast_json(ws_msg)
+    else:
+        ws_msg = create_ws_message(input.match_id,WS_STATUS_NOPE,input.player_id)
+        live_match._match_connection_manager.broadcast_json(ws_msg)
+        
+    return {"msg" : "revelations"}
 
 @router.put("/matches/{match_id}/start_game", status_code=status.HTTP_200_OK)
 async def start_match(input: StartMatchIn):
@@ -393,7 +416,19 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     match_live = get_live_match_by_id(match.id)
 
-    if is_player_main_turn(match, player):
+    if input.blind_date:
+        card = get_card(match.id,player.id,False)
+        send_card_extra_deck(input.player_id,input.card_id,input.match_id)
+        ws_msg = create_card_exchange_message(card["id"])
+        await match_live._match_connection_manager.send_personal_json(ws_msg,player.id)
+        
+        next_player = get_next_player(match)     
+        next_turn(match.id)
+        ws_msg = create_ws_message(match.id, WS_STATUS_NEW_TURN, next_player.id)
+        await match_live._match_connection_manager.broadcast_json(ws_msg)
+        
+        
+    elif is_player_main_turn(match, player):
         if input.player_target_id == 0:
             player_target = get_next_player(match)
 
@@ -445,7 +480,6 @@ async def exchange_endpoint(input: ExchangeCardIn):
             )
         
         await match_live._match_connection_manager.broadcast_json(ws_msg)
-        #esta carta no contempla el hecho de que se recibe una carta.
         if (send_infected_card(card) or receive_infected) and (not input.is_you_failed): 
             player_infected = None
             player_infector = None

@@ -99,6 +99,15 @@ class MatchConnectionManager:
                     self.active_connections.remove(conn)
 
 
+def create_msg_revelations(hand):
+    
+    response = {
+        "status" : WS_STATUS_REVELATIONS,
+        "hand" : hand
+    }
+    
+    return response 
+
 def create_msg_defense(player_main_id, card_id, card_name, list_id_cards_def):
     # que mando en el mensaje: status,id de player que activo carta accion,card id, ids de cartas defense del objetivo
 
@@ -185,6 +194,9 @@ def create_ws_message_fallaste(
 
     return msg_ws
 
+
+    
+    return response
 
 def create_ws_message(
     match_id: int,
@@ -280,7 +292,6 @@ def get_ws_message_with_status(
         message = "La partida finalizo"
     elif status == WS_STATUS_PLAYER_WELCOME:
         message = f"Bienvenido a la partida {player_name}"
-
     # Partida
     elif status == WS_STATUS_NEW_TURN:
         message = f"Turno nuevo de {player_name}"
@@ -292,7 +303,16 @@ def get_ws_message_with_status(
         message = f"{player_name} ha solicitado un intercambio a {player_target_name}"
     elif status == WS_STATUS_INFECTED:
         message = f"{player_name} te ha infectado"
-
+    elif status == WS_STATUS_HUMANS_WIN :
+        message = "Ganan los humanos"
+    elif status == WS_STATUS_INFECTEDS_WIN:
+        message = "Gana La Cosa junto a los infectados"
+    elif status == WS_STATUS_THE_THING_WIN:
+        message = "Gana La cosa"
+    elif status == WS_STATUS_YES:
+        message = f"{player_name} decidio mostrar sus cartas"
+    elif status == WS_STATUS_NOPE:
+        message = f"{player_name} prefiere no mostrar sus cartas"
     # Accion
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
@@ -305,7 +325,7 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_CHANGED_OF_PLACES:
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
-        message = f"se han inviertido todas las posiciones"
+        message = f"Ha cambiado el sentido de la ronda"
     elif status == WS_STATUS_CARD_DISCOVER:
         message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
@@ -318,6 +338,8 @@ def get_ws_message_with_status(
         message = (
             f"{player_name} ha seducido a {player_target_name} para intercambiar cartas"
         )
+    elif status == WS_STATUS_DETERMINATION:
+        message = f"{player_name} esta determinado a sobrevivir"
     elif status == WS_STATUS_AXE:
         message = f"{player_name} rompio la cuarentena de {player_target_name}"
     # Defensa
@@ -331,6 +353,19 @@ def get_ws_message_with_status(
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SCARY:
         message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+    
+    # Panico
+    elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
+        message = f"{player_name} le esta susurrando a {player_target_name}"
+    elif status == WS_STATUS_UPS:
+        message = f"Ups! a {player_name} se le han caido sus cartas"
+    elif status == WS_STATUS_BLIND_DATE:
+        message = f"a {player_name} le apetece tener una cita a ciegas"
+    elif status == WS_STATUS_SHOWS:
+        message = f"Estas viendo la mano de {player_name}"
+    elif status == WS_STATUS_REVELATIONS:
+        message = f"Comienza la ronda de revelaciones"
+
     # Obstaculo
     elif status == WS_STATUS_QUARANTINE:
         message = f"{player_name} puso en cuarentena a {player_target_name}"
