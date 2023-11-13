@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from pydantic import BaseModel, Field, model_validator, constr
+from pydantic import BaseModel, Field, validator, constr
 
 
 class MatchIn(BaseModel):
@@ -9,18 +9,18 @@ class MatchIn(BaseModel):
     min_players: int = Field(ge=4, le=12)
     max_players: int = Field(ge=4, le=12)
 
-    @model_validator(mode="after")
-    def check_min_max_players(self) -> "MatchIn":
-        min_players = self.min_players
-        max_players = self.max_players
-        if min_players > max_players:
+    @validator("min_players", "max_players", pre=True, always=True)
+    def check_min_max_players(cls, value, values):
+        min_players = values.get("min_players")
+        max_players = values.get("max_players")
+        if min_players is not None and max_players is not None and min_players > max_players:
             raise HTTPException(
                 {
                     "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
                     "detail": "min_players must be less than max_players",
                 }
             )
-        return self
+        return value
 
 
 class MatchOut(BaseModel):
@@ -34,7 +34,19 @@ class ExchangeCardIn(BaseModel):
     player_id: int
     player_target_id: int
     card_id: int
-    is_you_failed: bool
+    is_you_failed:bool=False
+    blind_date:bool=False
+    
+class revelationsIn(BaseModel):
+    match_id: int
+    player_id: int
+    show:bool=False
+    
+
+class getCardIn(BaseModel):
+    match_id: int
+    player_id:int
+    not_panic:bool=False
 
 class SendMesaggeIn(BaseModel):
     match_id: int 
@@ -50,7 +62,11 @@ class ListMatchOut(BaseModel):
     player_max: int
     joined_players: list
 
-
+class GetCardModel(BaseModel):
+    match_id: int
+    player_id: int
+    not_panic:bool=False
+    
 class JoinMatchIn(BaseModel):
     player_name: constr(min_length=1, max_length=100)
     match_id: int = Field(ge=1)

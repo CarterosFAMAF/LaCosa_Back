@@ -1,4 +1,8 @@
 # fijarse de meter las otras cartas.
+UPS = 31
+CITA_A_CIEGAS = 30
+QUE_QUEDE_ENTRE_NOSOTROS = 27
+REVELACIONES = 20
 NADA_DE_BARBACOAS = 17
 FALLASTE = 16
 NO_GRACIAS = 15
@@ -9,6 +13,7 @@ SEDUCCION = 11
 VIGILA_TUS_ESPALDAS = 10
 CAMBIO_DE_LUGAR = 9
 WHISKY = 8
+DETERMINACION = 7
 SOSPECHA = 6
 ANALISIS = 4
 LANZALLAMAS = 3
@@ -21,28 +26,28 @@ HACHA = 5
 DECK = [
     # WITH 4 PLAYERS
     INFECCION,  # ACA ESTARIA LA COSA
-    CUARENTENA ,
-    CUARENTENA ,
-    CUARENTENA ,
-    CUARENTENA,
-    CUARENTENA,
-    CUARENTENA,
-    CUARENTENA,
-    CUARENTENA,
-    CUARENTENA,
-    CUARENTENA,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    INFECCION,
+    LANZALLAMAS,
+    LANZALLAMAS,
     SOSPECHA,  # ACA ESTARIA HACHA
-    HACHA,
-    HACHA,
-    HACHA,
+    SOSPECHA,
+    SOSPECHA,
+    SOSPECHA,
     SOSPECHA,
     WHISKY,  # ACA ESTARIA DETERMINACION
     WHISKY,  # ACA ESTARIA DETERMINACION
-    HACHA,
-    HACHA,
+    WHISKY,
+    CAMBIO_DE_LUGAR,
     CAMBIO_DE_LUGAR,
     VIGILA_TUS_ESPALDAS,
-    HACHA,
+    SEDUCCION,
     SEDUCCION,
     MAS_VALE_QUE_CORRAS,
     MAS_VALE_QUE_CORRAS,
@@ -168,7 +173,7 @@ DECK = [
     Nada de Barbacoa         = 17
     Cuarentena               = 18
     Puerta Atrancada         = 19
-    Revelacion               = 20
+    Revelaciones             = 20
     Cuerdas Podridas         = 21
     Sal de Aqui              = 22
     Olvidadizo               = 23

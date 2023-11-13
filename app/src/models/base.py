@@ -22,6 +22,8 @@ class Match(db.Entity):
     finalized = Optional(bool)
     turn = Optional(int)
     clockwise = Optional(bool)
+    letter_to_raise = Optional(bool)
+    extra_deck = Optional("Card")
     players = Set("Player", reverse="match")
     player_owner = Required("Player", reverse="match_owner")
     deck = Set("Card", reverse="deck")
@@ -57,6 +59,7 @@ class Card(db.Entity):
     deck = Set(Match, reverse="deck")
     discard_deck = Set(Match, reverse="discard_pile")
     player_card_exchange = Optional(Player, reverse="card_exchange")
+    extra_card = Optional(Match, reverse="extra_deck")
 
 
 def define_database_and_entities(test: bool):
@@ -98,7 +101,7 @@ def load_cards():
             )
             Card(
                 card_id=MAS_VALE_QUE_CORRAS,
-                name="Mas_Vale_Que_Corras",
+                name="Mas_vale_que_corras",
                 image="app/cards/Mas_vale_que_corras.png",
                 type=TYPE_ACTION,
             )
@@ -139,6 +142,13 @@ def load_cards():
                 type=TYPE_ACTION,
             )
             Card(
+                card_id=DETERMINACION,
+                name="Determinacion",
+                image="app/cards/Determinacion.png",
+                type = TYPE_ACTION
+            )
+            #CARTAS DEFENSA
+            Card(   
                 card_id = HACHA,
                 name="Hacha",
                 image="app/cards/Hacha.png",
@@ -147,7 +157,7 @@ def load_cards():
             # CARTAS DEFENSA
             Card(
                 card_id=AQUI_ESTOY_BIEN,
-                name="Aqui_Estoy_Bien",
+                name="Aqui_estoy_bien",
                 image="app/cards/Aqui_estoy_bien.png",
                 type=TYPE_DEFENSE,
             )
@@ -174,6 +184,24 @@ def load_cards():
                 name="Nada_de_barbacoas",
                 image="app/cards/Nada_de_barbacoas.png",
                 type=TYPE_DEFENSE,
+            )
+            Card(
+                card_id=UPS,
+                name="Ups!",
+                image="app/cards/Ups!.png",
+                type = TYPE_PANIC
+            )
+            Card(
+                card_id=CITA_A_CIEGAS,
+                name="Cita_a_ciegas",
+                image="app/cards/Cita_a_ciegas.png",
+                type = TYPE_PANIC
+            )
+            Card(
+                card_id=QUE_QUEDE_ENTRE_NOSOTROS,
+                name="Que_quede_entre_nosotros",
+                image="app/cards/Que_quede_entre_nosotros.png",
+                type = TYPE_PANIC
             )
             Card(
                 card_id=INFECCION,

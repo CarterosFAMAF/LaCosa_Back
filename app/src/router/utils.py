@@ -3,7 +3,7 @@ from app.src.websocket.match_connection_manager import create_ws_message
 from app.src.game.match import get_live_match_by_id
 from app.src.websocket.match_connection_manager import *
 from app.src.game.match import *
-
+from app.src.game.card import *
 # sospecha: manda un mensaje privado, 1 carta random del player target por el endpoint
 # analisis: lista de cartas del player target por el endpoint
 # whiskey: broadcastear a todos lista cartas player main
@@ -38,8 +38,10 @@ async def send_message_card_played(
         status == WS_STATUS_PLAYER_BURNED
         or status == WS_STATUS_CHANGED_OF_PLACES
         or status == WS_STATUS_REVERSE_POSITION
-        or status == WS_STATUS_ANALYSIS
+        or status == WS_STATUS_ANALYSIS  # analisis no se va a mostrar nunca.
+        or status == WS_STATUS_DETERMINATION
         or status == WS_STATUS_SEDUCCION
+        or status == WS_STATUS_BLIND_DATE
         or status == WS_STATUS_QUARANTINE
         or status == WS_STATUS_AXE
     ):
@@ -53,7 +55,7 @@ async def send_message_card_played(
         )
         await live_match._match_connection_manager.broadcast_json(ws_msg)
 
-    elif status == WS_STATUS_WHISKY:
+    elif status == WS_STATUS_WHISKY or status == WS_STATUS_UPS:
         ws_msg = create_ws_message(
             match_id=match_id,
             status=status,
@@ -63,6 +65,32 @@ async def send_message_card_played(
             list_revealed_card=list_cards,
         )
         await live_match._match_connection_manager.broadcast_json(ws_msg)
+
+    elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
+        ws_msg = create_ws_message(
+            match_id=match_id,
+            status=status,
+            player_id=player_in_id,
+            player_target_id=player_out_id,
+            card_name="",
+            list_revealed_card=list_cards,
+        )
+        await live_match._match_connection_manager.broadcast_json(ws_msg)
+
+        """ 
+        ws_msg = create_ws_message(
+            match_id=match_id,
+            status=WS_STATUS_SHOWS,
+            player_id=player_in_id,
+            player_target_id=player_out_id,
+            card_name="",
+            list_revealed_card=list_cards,
+        )
+        await live_match._match_connection_manager.send_personal_json(
+            ws_msg, player_out_id
+        )
+        """
+
 
     elif status == WS_STATUS_SUSPECT:
         # send private msg to notice card seen
@@ -192,4 +220,11 @@ def validate_match_players_and_cards(
 async def discard_message(match_id, player_id):
     live_match = get_live_match_by_id(match_id)
     ws_msg = create_ws_message(match_id, WS_STATUS_DISCARD, player_id)
+    await live_match._match_connection_manager.broadcast_json(ws_msg)
+
+
+async def broadcast_of_card_played(player_id,card_id,match_id):
+    live_match = get_live_match_by_id(match_id)
+    ws_msg = create_ws_message_play_card(player_id,card_id)
+
     await live_match._match_connection_manager.broadcast_json(ws_msg)
