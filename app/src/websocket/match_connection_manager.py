@@ -314,6 +314,8 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_NOPE:
         message = f"{player_name} prefiere no mostrar sus cartas"
     # Accion
+    elif status == WS_STATUS_SUSPECT:
+        message = f"{player_name} sospecha de {player_target_name}"
     elif status == WS_STATUS_PLAYER_BURNED:
         message = f"{player_name} calzino {player_target_name}"
     elif status == WS_STATUS_HUMANS_WIN:
