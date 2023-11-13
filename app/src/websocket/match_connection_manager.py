@@ -325,7 +325,7 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_CHANGED_OF_PLACES:
         message = f"{player_name} intercambio lugar con {player_target_name}"
     elif status == WS_STATUS_REVERSE_POSITION:
-        message = f"se han inviertido todas las posiciones"
+        message = f"Ha cambiado el sentido de la ronda"
     elif status == WS_STATUS_CARD_DISCOVER:
         message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:

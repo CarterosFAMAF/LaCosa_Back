@@ -479,8 +479,12 @@ def create_ws_message_play_card(player_id,card_id):
     elif card_name == MAS_VALE_QUE_CORRAS:
         ws_msg = f"{player_name} ha utilizado mas vale que corras"
     
-    return ws_msg
-
+    response = {
+        "status" : WS_STATUS_EVENTS_CARDS,
+        "message" : ws_msg
+    }
+    
+    return response
 # OBSTACULO
 
 def play_hacha(player_id, match_id):
