@@ -229,8 +229,8 @@ async def play_card_defense_endpoint(input: PlayCardDefenseIn):
                 input.match_id, WS_STATUS_NEW_TURN, player_turn.id
             )
             await live_match._match_connection_manager.broadcast_json(ws_msg)       
-
-        discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
+        else:
+            discard_card_of_player(input.card_target_id,input.match_id,input.player_target_id)
     
     return list_card
 
