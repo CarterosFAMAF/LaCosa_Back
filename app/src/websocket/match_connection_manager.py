@@ -186,7 +186,7 @@ def create_ws_message_fallaste(
 
     msg_ws = {
         "status": WS_STATUS_YOU_FAILED,
-        "message": f"{player_fallaste_name} jugo carta fallaste contra el intento de intercambio iniciado por {player_main_name}. Ahora le toca a {player_target_name}",
+        "message": f"{player_fallaste_name} hizo fallar el intercambio de {player_main_name}. Ahora le toca a {player_target_name}",
         "player_main_id": player_main_id,
         "player_fallaste": player_fallaste_id,
         "player_target": player_target_id,
@@ -329,9 +329,9 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_REVERSE_POSITION:
         message = f"Ha cambiado el sentido de la ronda"
     elif status == WS_STATUS_CARD_DISCOVER:
-        message = f"se descubrio que {player_target_name} tenia una carta {card_name}"
+        message = f"Se descubrio que {player_target_name} tenia una carta {card_name}"
     elif status == WS_STATUS_CARD_SHOWN:
-        message = f"tu carta {card_name} ha sido vista por {player_name}"
+        message = f"Tu carta {card_name} ha sido vista por {player_name}"
     elif status == WS_STATUS_ANALYSIS:
         message = f"{player_name} ha analizado las cartas de {player_target_name}"
     elif status == WS_STATUS_WHISKY:
@@ -354,7 +354,7 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_NOPE_THANKS:
         message = f"{player_name} dice que no al intercambio pero igual lo agradece"
     elif status == WS_STATUS_SCARY:
-        message = f"a {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
+        message = f"A {player_name} le resulto aterrador el intercambio con {player_target_name}, asi que prefiere evitarlo"
     
     # Panico
     elif status == WS_STATUS_LET_IT_REMAIN_BETWEEN_US:
@@ -362,7 +362,7 @@ def get_ws_message_with_status(
     elif status == WS_STATUS_UPS:
         message = f"Ups! a {player_name} se le han caido sus cartas"
     elif status == WS_STATUS_BLIND_DATE:
-        message = f"a {player_name} le apetece tener una cita a ciegas"
+        message = f"A {player_name} le apetece tener una cita a ciegas"
     elif status == WS_STATUS_SHOWS:
         message = f"Estas viendo la mano de {player_name}"
     elif status == WS_STATUS_REVELATIONS:
