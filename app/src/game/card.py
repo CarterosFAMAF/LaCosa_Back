@@ -146,6 +146,13 @@ def send_card_extra_deck(player_id,card_id,match_id):
         match.extra_deck = card
         player.hand.remove(card)
         flush()
+        
+def return_card_exchange(player_id):
+        player = get_player_by_id(player_id)
+        card_id = player.card_exchange.id
+        player.card_exchange = None
+        flush()
+        return card_id
     
 
 def play_card_investigation(player_main, player_target, card,match):
@@ -446,6 +453,7 @@ def play_aqui_estoy_bien(player_main_id, player_target_id, match_id):
     status = WS_STATUS_HERE_IM_FINE
     return status
 
+    
 
 def create_card_exchange_message(card_id):
     card = get_card_by_id(card_id)

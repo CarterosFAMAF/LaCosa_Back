@@ -416,7 +416,12 @@ async def exchange_endpoint(input: ExchangeCardIn):
 
     match_live = get_live_match_by_id(match.id)
 
-    if input.blind_date:
+    if input.player_target_id == input.player_id:
+        card_id = return_card_exchange(player_target)
+        ws_msg = create_card_exchange_message(card_id)
+        await match_live._match_connection_manager.send_personal_json(ws_msg,player.id)
+    
+    elif input.blind_date:
         card = get_card(match.id,player.id,False)
         send_card_extra_deck(input.player_id,input.card_id,input.match_id)
         ws_msg = create_card_exchange_message(card["id"])
