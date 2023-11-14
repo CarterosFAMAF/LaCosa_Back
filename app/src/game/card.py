@@ -148,12 +148,13 @@ def send_card_extra_deck(player_id,card_id,match_id):
         flush()
         
 def return_card_exchange(player_id):
+    with db_session:
         player = get_player_by_id(player_id)
         card_id = player.card_exchange.id
         player.hand.add(player.card_exchange)
         player.card_exchange = None
         flush()
-        return card_id
+    return card_id
     
 
 def play_card_investigation(player_main, player_target, card,match):
